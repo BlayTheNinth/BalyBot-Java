@@ -1,6 +1,5 @@
 package net.blay09.balybot.command;
 
-import net.blay09.balybot.BalyBot;
 import net.blay09.balybot.UserLevel;
 import net.blay09.balybot.irc.IRCChannel;
 import net.blay09.balybot.irc.IRCUser;
@@ -12,7 +11,7 @@ import java.util.regex.PatternSyntaxException;
 public class SetRegexBotCommand extends BotCommand {
 
     public SetRegexBotCommand() {
-        super("setrgx", "^!setrgx\\s(.+)", UserLevel.MODERATOR);
+        super("setrgx", "^!setrgx\\s?(.*)", UserLevel.MODERATOR);
     }
 
     @Override

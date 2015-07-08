@@ -1,19 +1,14 @@
 package net.blay09.balybot.command;
 
-import net.blay09.balybot.BalyBot;
 import net.blay09.balybot.Regulars;
 import net.blay09.balybot.UserLevel;
 import net.blay09.balybot.irc.IRCChannel;
 import net.blay09.balybot.irc.IRCUser;
 
-import java.util.Arrays;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
-
 public class RegularBotCommand extends BotCommand {
 
     public RegularBotCommand() {
-        super("reg", "^!reg\\s(.+)", UserLevel.MODERATOR);
+        super("reg", "^!reg\\s?(.*)", UserLevel.MODERATOR);
     }
 
     @Override

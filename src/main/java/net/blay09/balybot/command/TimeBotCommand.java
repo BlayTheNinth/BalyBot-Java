@@ -13,7 +13,7 @@ import java.util.TimeZone;
 public class TimeBotCommand extends BotCommand {
 
     public TimeBotCommand() {
-        super("time", "^!time\\s(.+)", UserLevel.ALL);
+        super("time", "^!time\\s?(.*)", UserLevel.ALL);
     }
 
     @Override

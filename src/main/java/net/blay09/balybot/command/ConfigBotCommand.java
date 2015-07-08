@@ -10,7 +10,7 @@ import java.util.Arrays;
 public class ConfigBotCommand extends BotCommand {
 
     public ConfigBotCommand() {
-        super("cfg", "^!cfg\\s(.+)", UserLevel.BROADCASTER);
+        super("cfg", "^!cfg\\s?(.*)", UserLevel.BROADCASTER);
     }
 
     @Override

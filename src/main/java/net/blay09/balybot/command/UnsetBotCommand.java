@@ -7,7 +7,7 @@ import net.blay09.balybot.irc.IRCUser;
 public class UnsetBotCommand extends BotCommand {
 
     public UnsetBotCommand() {
-        super("unset", "^!unset\\s(.+)", UserLevel.MODERATOR);
+        super("unset", "^!unset\\s?(.*)", UserLevel.MODERATOR);
     }
 
     @Override
