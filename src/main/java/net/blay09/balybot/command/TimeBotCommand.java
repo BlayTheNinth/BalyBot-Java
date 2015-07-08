@@ -31,7 +31,7 @@ public class TimeBotCommand extends BotCommand {
         String[] availableIDs = TimeZone.getAvailableIDs();
         for(String s : availableIDs) {
             if(timeZoneID.startsWith(s + "+") || timeZoneID.startsWith(s + "-")) {
-                TimeZone timeZone = TimeZone.getTimeZone(args[0]);
+                TimeZone timeZone = TimeZone.getTimeZone(timeZoneID);
                 DateFormat dateFormat = new SimpleDateFormat("h:m a (H:m)");
                 dateFormat.setTimeZone(timeZone);
                 channel.message("The time in " + timeZone.getDisplayName(Locale.ENGLISH) + " is currently " + dateFormat.format(new Date(System.currentTimeMillis())) + ".");

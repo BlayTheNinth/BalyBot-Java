@@ -49,6 +49,7 @@ public class CommandHandler {
     }
 
     @Subscribe
+    @SuppressWarnings("unused")
     public void onChannelChat(IRCChannelChatEvent event) {
         if(!checkCommandList(event, commands.get("*"))) {
             checkCommandList(event, commands.get(event.channel.getName()));
@@ -67,7 +68,13 @@ public class CommandHandler {
                 matcher.usePattern(command.pattern);
             }
             if(matcher.find()) {
-                command.execute(event.channel, event.sender, matcher.groupCount() > 0 ? matcher.group(1).split(" ") : new String[0]);
+                String[] args;
+                if(matcher.groupCount() > 0 && matcher.group(1).trim().length() > 0) {
+                    args = matcher.group(1).split(" ");
+                } else {
+                    args = new String[0];
+                }
+                command.execute(event.channel, event.sender, args);
                 return true;
             }
         }
