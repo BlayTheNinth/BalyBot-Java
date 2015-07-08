@@ -1,7 +1,5 @@
 package net.blay09.balybot;
 
-import net.blay09.balybot.irc.IRCChannel;
-
 import java.sql.*;
 
 public class Database {
@@ -12,6 +10,8 @@ public class Database {
     public PreparedStatement stmtRegisterRegular;
     public PreparedStatement stmtUnregisterRegular;
     private PreparedStatement stmtSetConfigOption;
+    private PreparedStatement stmtAddToChannel;
+    private PreparedStatement stmtRemoveFromChannel;
 
     public Database(String databasePath) {
         try {
@@ -34,7 +34,11 @@ public class Database {
         stmt.close();
 
         stmt = connection.createStatement();
-        stmt.executeUpdate("CREATE TABLE IF NOT EXISTS config (channel_name VARCHAR(64)  PRIMARY KEY NOT NULL, config_name VARCHAR(32)  PRIMARY KEY NOT NULL, config_value VARCHAR(64)  PRIMARY KEY NOT NULL)");
+        stmt.executeUpdate("CREATE TABLE IF NOT EXISTS config (channel_name VARCHAR(64) PRIMARY KEY NOT NULL, config_name VARCHAR(32)  PRIMARY KEY NOT NULL, config_value VARCHAR(64)  PRIMARY KEY NOT NULL)");
+        stmt.close();
+
+        stmt = connection.createStatement();
+        stmt.executeUpdate("CREATE TABLE IF NOT EXISTS channels (channel_name VARCHAR(64) PRIMARY KEY NOT NULL)");
         stmt.close();
     }
 
@@ -46,18 +50,39 @@ public class Database {
         stmtUnregisterRegular = connection.prepareStatement("DELETE FROM regulars WHERE channel_name = ? AND username = ?");
 
         stmtSetConfigOption = connection.prepareStatement("INSERT OR REPLACE INTO config (channel_name, config_name, config_value) VALUES (?, ?, ?)");
+
+        stmtAddToChannel = connection.prepareStatement("INSERT OR REPLACE INTO channels (channel_name) VALUES (?)");
+        stmtRemoveFromChannel = connection.prepareStatement("DELETE FROM channels WHERE channel_name = ?");
     }
 
     public Statement createStatement() throws SQLException {
         return connection.createStatement();
     }
 
-    public void setConfigOption(IRCChannel channel, String name, String value) {
+    public void setConfigOption(String channel, String name, String value) {
         try {
-            stmtSetConfigOption.setString(1, channel != null ? channel.getName() : "*");
+            stmtSetConfigOption.setString(1, channel);
             stmtSetConfigOption.setString(2, name);
             stmtSetConfigOption.setString(3, value);
             stmtSetConfigOption.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void addToChannel(String channelName) {
+        try {
+            stmtAddToChannel.setString(1, channelName);
+            stmtAddToChannel.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void removeFromChannel(String channelName) {
+        try {
+            stmtRemoveFromChannel.setString(1, channelName);
+            stmtRemoveFromChannel.execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }

@@ -1,6 +1,5 @@
 package net.blay09.balybot.command;
 
-import net.blay09.balybot.BalyBot;
 import net.blay09.balybot.UserLevel;
 import net.blay09.balybot.irc.IRCChannel;
 import net.blay09.balybot.irc.IRCUser;
@@ -19,15 +18,15 @@ public class UnsetBotCommand extends BotCommand {
         }
 
         String name = args[0];
-        for(BotCommand botCommand : BalyBot.instance.getCommandHandler().getGlobalCommands()) {
+        for(BotCommand botCommand : CommandHandler.getGlobalCommands()) {
             if (botCommand.name.equals(name)) {
                 channel.message("Command '" + botCommand.name + "' can not be removed.");
                 return;
             }
         }
-        for(BotCommand botCommand : BalyBot.instance.getCommandHandler().getChannelCommands(channel)) {
+        for(BotCommand botCommand : CommandHandler.getChannelCommands(channel)) {
             if(botCommand.name.equals(name)) {
-                if(BalyBot.instance.getCommandHandler().unregisterCommand(channel, botCommand)) {
+                if(CommandHandler.unregisterCommand(channel, botCommand)) {
                     channel.message("Command successfully removed: " + name);
                 } else {
                     channel.message("Unexpected error, could not remove command!");

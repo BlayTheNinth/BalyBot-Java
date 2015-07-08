@@ -26,7 +26,7 @@ public class SongBotCommand extends BotCommand {
     @Override
     public void execute(IRCChannel channel, IRCUser sender, String[] args) {
         try {
-            channel.message(Files.readFirstLine(new File(Config.getValue(channel, "song_file", "playing.txt")), Charsets.UTF_8));
+            channel.message(Files.readFirstLine(new File(Config.getValue(channel.getName(), "song_file", "playing.txt")), Charsets.UTF_8));
         } catch (IOException e) {
             channel.message("Failed to grab song information, sorry :3");
             e.printStackTrace();

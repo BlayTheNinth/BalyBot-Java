@@ -1,15 +1,25 @@
 package net.blay09.balybot;
 
 import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 import net.blay09.balybot.irc.IRCConfig;
 import net.blay09.balybot.irc.IRCConnection;
 import net.blay09.balybot.command.CommandHandler;
+import net.blay09.balybot.irc.event.IRCConnectEvent;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 public class BalyBot {
+
+    private static final String VERSION = "0.1.0";
+    private static final Logger logger = LogManager.getLogger();
 
     public static BalyBot instance;
 
@@ -24,50 +34,53 @@ public class BalyBot {
                         instance.connection.disconnect("Bot stopped.");
                         break;
                     } else if (s.startsWith("/join ")) {
-                        instance.connection.join(s.substring(6), null);
+                        String channelName = s.substring(6);
+                        instance.connection.join(channelName, null);
+                        instance.database.addToChannel(channelName);
                     } else if(s.startsWith("/part ")) {
-                        instance.connection.part(s.substring(6));
+                        String channelName = s.substring(6);
+                        instance.connection.part(channelName);
+                        instance.database.removeFromChannel(channelName);
                     } else if(s.startsWith("/quote ")) {
                         instance.connection.irc(s.substring(7));
                     }
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.error(e);
             }
         }
     }
 
     private final Database database;
     private final EventBus eventBus;
-    private final CommandHandler commandHandler;
     private IRCConnection connection;
 
-
     public BalyBot() {
+        logger.info("Loading BalyBot {0}...", VERSION);
         database = new Database("balybot.db");
         eventBus = new EventBus();
 
-        commandHandler = new CommandHandler(database);
-        eventBus.register(commandHandler);
+        CommandHandler.load(database, eventBus);
+        eventBus.register(this);
 
         load();
 
-        if(Config.hasOption(null, "username") && Config.hasOption(null, "oauth")) {
+        if(Config.hasOption("*", "username") && Config.hasOption("*", "oauth")) {
             start();
         } else {
             BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
             try {
-                System.out.println("Initial BalyBot setup...");
+                logger.info("BalyBot is not configured yet, but no worries, it's simple!");
 
                 String username = null;
                 while(username == null || username.isEmpty()) {
-                    System.out.print("Enter username: ");
+                    System.out.print("Enter Twitch username: ");
                     username = reader.readLine().trim();
                 }
 
                 String oauth = null;
                 while(oauth == null || oauth.isEmpty()) {
-                    System.out.print("Enter oauth token: ");
+                    System.out.print("Enter Twitch oauth token (see http://twitchapps.com/tmi/): ");
                     oauth = reader.readLine();
                     if(!oauth.startsWith("oauth:")) {
                         System.out.println("Invalid oauth token. It should start with 'oauth:'.");
@@ -75,11 +88,11 @@ public class BalyBot {
                     }
                 }
 
-                database.setConfigOption(null, "username", username);
-                database.setConfigOption(null, "oauth", oauth);
+                database.setConfigOption("*", "username", username);
+                database.setConfigOption("*", "oauth", oauth);
                 Config.load(database);
 
-                System.out.println("Setup complete! Use /join <channel> to join a channel.");
+                logger.info("Setup complete! Use /join <channel> to join a channel.");
 
                 start();
             } catch (IOException e) {
@@ -93,13 +106,29 @@ public class BalyBot {
         Regulars.load(database);
     }
 
+    @Subscribe
+    @SuppressWarnings("unused")
+    public void onConnected(IRCConnectEvent event) {
+        try {
+            Statement stmt = database.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT * FROM channels");
+            while(rs.next()) {
+                event.connection.join(rs.getString("channel_name"), null);
+            }
+            rs.close();
+            stmt.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void start() {
         IRCConfig config = new IRCConfig();
         config.host = "irc.twitch.tv";
-        config.ident = Config.getValue(null, "username");
-        config.realName = "BalyBot v0.1.0";
-        config.serverPassword = Config.getValue(null, "oauth");
-        connection = new IRCConnection(config, Config.getValue(null, "username"), eventBus);
+        config.ident = Config.getValue("*", "username");
+        config.realName = "BalyBot v" + VERSION;
+        config.serverPassword = Config.getValue("*", "oauth");
+        connection = new IRCConnection(config, Config.getValue("*", "username"), eventBus);
         connection.start();
     }
 
@@ -110,10 +139,5 @@ public class BalyBot {
     public IRCConnection getConnection() {
         return connection;
     }
-
-    public CommandHandler getCommandHandler() {
-        return commandHandler;
-    }
-
 
 }

@@ -22,15 +22,15 @@ public class SetBotCommand extends BotCommand {
 
         boolean overwrite = false;
         String name = args[0];
-        for(BotCommand botCommand : BalyBot.instance.getCommandHandler().getGlobalCommands()) {
+        for(BotCommand botCommand : CommandHandler.getGlobalCommands()) {
             if (botCommand.name.equals(name)) {
                 channel.message("Command '" + botCommand.name + "' can not be edited.");
                 return;
             }
         }
-        for(BotCommand botCommand : BalyBot.instance.getCommandHandler().getChannelCommands(channel)) {
+        for(BotCommand botCommand : CommandHandler.getChannelCommands(channel)) {
             if(botCommand.name.equals(name)) {
-                if(!BalyBot.instance.getCommandHandler().unregisterCommand(channel, botCommand)) {
+                if(!CommandHandler.unregisterCommand(channel, botCommand)) {
                     channel.message("Unexpected error, could not edit command!");
                     return;
                 }
@@ -46,7 +46,7 @@ public class SetBotCommand extends BotCommand {
         }
 
         String message = String.join(" ", Arrays.copyOfRange(args, 2, args.length));
-        if(BalyBot.instance.getCommandHandler().registerMessageCommand(channel, new SimpleMessageBotCommand(name, message, userLevel))) {
+        if(CommandHandler.registerMessageCommand(channel, new SimpleMessageBotCommand(name, message, userLevel))) {
             channel.message("Command successfully " + (overwrite ? "edited" : "registered") + ": " + name);
         } else {
             channel.message("Unexpected error, could not save command!");

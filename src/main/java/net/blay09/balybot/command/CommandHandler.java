@@ -2,6 +2,7 @@ package net.blay09.balybot.command;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import net.blay09.balybot.BalyBot;
 import net.blay09.balybot.Database;
@@ -20,15 +21,17 @@ import java.util.regex.Matcher;
 
 public class CommandHandler {
 
-    private final Multimap<String, BotCommand> commands = ArrayListMultimap.create();
+    public static final CommandHandler instance = new CommandHandler();
+    private static final Multimap<String, BotCommand> commands = ArrayListMultimap.create();
 
-    public CommandHandler(Database database) {
+    public static void load(Database database, EventBus eventBus) {
         commands.put("*", new SetBotCommand());
         commands.put("*", new SetRegexBotCommand());
         commands.put("*", new UnsetBotCommand());
         commands.put("*", new TimeBotCommand());
         commands.put("*", new RegularBotCommand());
         commands.put("*", new SongBotCommand());
+        commands.put("*", new ConfigBotCommand());
 
         try {
             Statement stmt = database.createStatement();
@@ -41,6 +44,8 @@ public class CommandHandler {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+        eventBus.register(instance);
     }
 
     @Subscribe
@@ -50,7 +55,7 @@ public class CommandHandler {
         }
     }
 
-    private boolean checkCommandList(IRCChannelChatEvent event, Collection<BotCommand> commands) {
+    private static boolean checkCommandList(IRCChannelChatEvent event, Collection<BotCommand> commands) {
         Matcher matcher = null;
         for(BotCommand command : commands) {
             if(!passesUserLevel(event.sender, event.channel, command.minUserLevel)) {
@@ -69,7 +74,7 @@ public class CommandHandler {
         return false;
     }
 
-    public boolean registerMessageCommand(IRCChannel channel, MessageBotCommand botCommand) {
+    public static boolean registerMessageCommand(IRCChannel channel, MessageBotCommand botCommand) {
         try {
             PreparedStatement stmtRegisterCommand = BalyBot.instance.getDatabase().stmtRegisterCommand;
             stmtRegisterCommand.setString(1, channel.getName());
@@ -85,7 +90,7 @@ public class CommandHandler {
         }
     }
 
-    public boolean unregisterCommand(IRCChannel channel, BotCommand botCommand) {
+    public static boolean unregisterCommand(IRCChannel channel, BotCommand botCommand) {
         try {
             PreparedStatement stmtUnregisterCommand = BalyBot.instance.getDatabase().stmtUnregisterCommand;
             stmtUnregisterCommand.setString(1, channel.getName());
@@ -98,7 +103,7 @@ public class CommandHandler {
         }
     }
 
-    public boolean passesUserLevel(IRCUser user, IRCChannel channel, UserLevel level) {
+    public static boolean passesUserLevel(IRCUser user, IRCChannel channel, UserLevel level) {
         if(user.getName().equalsIgnoreCase(BalyBot.instance.getConnection().getNick())) {
             return true;
         } else if(level == UserLevel.OWNER) {
@@ -132,11 +137,11 @@ public class CommandHandler {
         return true;
     }
 
-    public Collection<BotCommand> getGlobalCommands() {
+    public static Collection<BotCommand> getGlobalCommands() {
         return commands.get("*");
     }
 
-    public Collection<BotCommand> getChannelCommands(IRCChannel channel) {
+    public static Collection<BotCommand> getChannelCommands(IRCChannel channel) {
         return commands.get(channel.getName());
     }
 }

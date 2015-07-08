@@ -2,7 +2,6 @@ package net.blay09.balybot;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
-import net.blay09.balybot.irc.IRCChannel;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -27,22 +26,27 @@ public class Config {
         }
     }
 
-    public static String getValue(IRCChannel channel, String name) {
-        if(!config.contains(channel != null ? channel.getName() : "*", name)) {
+    public static String getValue(String channel, String name) {
+        if(!config.contains(channel, name)) {
             throw new RuntimeException("Required config option " + name + " but it's missing and has no default value.");
         }
-        return config.get(channel != null ? channel.getName() : "*", name);
+        return config.get(channel, name);
     }
 
-    public static String getValue(IRCChannel channel, String name, String defaultVal) {
-        String value = config.get(channel != null ? channel.getName() : "*", name);
+    public static String getValue(String channel, String name, String defaultVal) {
+        String value = config.get(channel, name);
         if(value == null) {
             return defaultVal;
         }
         return value;
     }
 
-    public static boolean hasOption(IRCChannel channel, String name) {
-        return config.contains(channel != null ? channel.getName() : "*", name);
+    public static boolean hasOption(String channel, String name) {
+        return config.contains(channel, name);
+    }
+
+    public static void setConfigOption(String channelName, String option, String value) {
+        config.put(channelName, option, value);
+        BalyBot.instance.getDatabase().setConfigOption(channelName, option, value);
     }
 }
