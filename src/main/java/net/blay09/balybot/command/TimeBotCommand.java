@@ -1,5 +1,6 @@
 package net.blay09.balybot.command;
 
+import net.blay09.balybot.Config;
 import net.blay09.balybot.UserLevel;
 import net.blay09.balybot.irc.IRCChannel;
 import net.blay09.balybot.irc.IRCUser;
@@ -18,11 +19,15 @@ public class TimeBotCommand extends BotCommand {
 
     @Override
     public void execute(IRCChannel channel, IRCUser sender, String[] args) {
-        if(args.length < 1) {
+        String timeZoneID;
+        if(args.length > 0) {
+            timeZoneID = String.join(" ", args);
+        } else if(Config.hasOption(channel.getName(), "timezone")){
+            timeZoneID = Config.getValue(channel.getName(), "timezone");
+        } else {
             channel.message("Not enough parameters for time command. Syntax: !time <timezone>");
             return;
         }
-        String timeZoneID = String.join(" ", args);
         String[] availableIDs = TimeZone.getAvailableIDs();
         for(String s : availableIDs) {
             if(timeZoneID.startsWith(s + "+") || timeZoneID.startsWith(s + "-")) {
