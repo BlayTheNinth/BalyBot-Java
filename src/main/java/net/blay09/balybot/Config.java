@@ -1,14 +1,16 @@
 package net.blay09.balybot;
 
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
+import net.blay09.balybot.irc.IRCChannel;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Config {
 
-    private static final Map<String, String> config = new HashMap<>();
+    private static final Table<String, String, String> config = HashBasedTable.create();
 
     public static void load(Database database) {
         config.clear();
@@ -16,7 +18,7 @@ public class Config {
             Statement stmt = database.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT * FROM config");
             while(rs.next()) {
-                config.put(rs.getString("config_name"), rs.getString("config_value"));
+                config.put(rs.getString("channel_name"), rs.getString("config_name"), rs.getString("config_value"));
             }
             rs.close();
             stmt.close();
@@ -25,22 +27,22 @@ public class Config {
         }
     }
 
-    public static String getValue(String name) {
-        if(!config.containsKey(name)) {
+    public static String getValue(IRCChannel channel, String name) {
+        if(!config.contains(channel != null ? channel.getName() : "*", name)) {
             throw new RuntimeException("Required config option " + name + " but it's missing and has no default value.");
         }
-        return config.get(name);
+        return config.get(channel != null ? channel.getName() : "*", name);
     }
 
-    public static String getValue(String name, String defaultVal) {
-        String value = config.get(name);
+    public static String getValue(IRCChannel channel, String name, String defaultVal) {
+        String value = config.get(channel != null ? channel.getName() : "*", name);
         if(value == null) {
             return defaultVal;
         }
         return value;
     }
 
-    public static boolean hasOption(String name) {
-        return config.containsKey(name);
+    public static boolean hasOption(IRCChannel channel, String name) {
+        return config.contains(channel != null ? channel.getName() : "*", name);
     }
 }
