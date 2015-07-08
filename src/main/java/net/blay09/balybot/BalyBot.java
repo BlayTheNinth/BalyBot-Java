@@ -52,7 +52,7 @@ public class BalyBot {
 
         load();
 
-        if(Config.hasOption("username") && Config.hasOption("oauth")) {
+        if(Config.hasOption(null, "username") && Config.hasOption(null, "oauth")) {
             start();
         } else {
             BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
@@ -96,10 +96,10 @@ public class BalyBot {
     public void start() {
         IRCConfig config = new IRCConfig();
         config.host = "irc.twitch.tv";
-        config.ident = Config.getValue("username");
+        config.ident = Config.getValue(null, "username");
         config.realName = "BalyBot v0.1.0";
-        config.serverPassword = Config.getValue("oauth");
-        connection = new IRCConnection(config, Config.getValue("username"), eventBus);
+        config.serverPassword = Config.getValue(null, "oauth");
+        connection = new IRCConnection(config, Config.getValue(null, "username"), eventBus);
         connection.start();
     }
 
