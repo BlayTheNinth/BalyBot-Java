@@ -61,6 +61,7 @@ public class BalyBot {
         eventBus = new EventBus();
 
         CommandHandler.load(database, eventBus);
+        LinkFilter.load(database, eventBus);
         eventBus.register(this);
 
         load();

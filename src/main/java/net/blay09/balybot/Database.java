@@ -34,7 +34,7 @@ public class Database {
         stmt.close();
 
         stmt = connection.createStatement();
-        stmt.executeUpdate("CREATE TABLE IF NOT EXISTS config (channel_name VARCHAR(64) PRIMARY KEY NOT NULL, config_name VARCHAR(32)  PRIMARY KEY NOT NULL, config_value VARCHAR(64)  PRIMARY KEY NOT NULL)");
+        stmt.executeUpdate("CREATE TABLE IF NOT EXISTS config (channel_name VARCHAR(64) PRIMARY KEY NOT NULL, config_name VARCHAR(32)  PRIMARY KEY NOT NULL, config_value TEXT NOT NULL)");
         stmt.close();
 
         stmt = connection.createStatement();

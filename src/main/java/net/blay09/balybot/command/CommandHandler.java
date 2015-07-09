@@ -32,6 +32,7 @@ public class CommandHandler {
         commands.put("*", new RegularBotCommand());
         commands.put("*", new SongBotCommand());
         commands.put("*", new ConfigBotCommand());
+        commands.put("*", new PermitBotCommand());
 
         try {
             Statement stmt = database.createStatement();
