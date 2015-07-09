@@ -17,7 +17,7 @@ public class HostNotifier {
     public void onStartHosting(TwitchHostStartEvent event) {
         if(Config.getValue(event.channel.getName(), "host_notifier", "false").equals("true")) {
             if(event.viewerCount >= Integer.parseInt(Config.getValue(event.channel.getName(), "host_notifier_minviewers", "2"))) {
-                String message = Config.getValue(event.channel.getName(), "host_notifier_message");
+                String message = Config.getValue(event.channel.getName(), "host_notifier_message", "Guys, guys!! {HOSTNAME} is hosting us! Quick, hug them!");
                 message = message.replace("{HOSTCHANNEL}", event.hostingChannel);
                 message = message.replace("{HOSTVIEWERS}", String.valueOf(event.viewerCount));
                 event.channel.message(message);
