@@ -13,6 +13,7 @@ import net.blay09.balybot.irc.event.IRCChannelChatEvent;
 import net.blay09.balybot.module.linkfilter.PermitBotCommand;
 import net.blay09.balybot.module.song.SongBotCommand;
 import net.blay09.balybot.module.time.TimeBotCommand;
+import net.blay09.balybot.module.uptime.UptimeBotCommand;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -35,6 +36,7 @@ public class CommandHandler {
         commands.put("*", new SongBotCommand());
         commands.put("*", new ConfigBotCommand());
         commands.put("*", new PermitBotCommand());
+        commands.put("*", new UptimeBotCommand());
 
         try {
             Statement stmt = database.createStatement();

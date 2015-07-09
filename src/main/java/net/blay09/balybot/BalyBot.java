@@ -111,6 +111,9 @@ public class BalyBot {
     @Subscribe
     @SuppressWarnings("unused")
     public void onConnected(IRCConnectEvent event) {
+        event.connection.irc("CAP REQ :twitch.tv/tags");
+        event.connection.irc("CAP REQ :twitch.tv/commands");
+
         try {
             Statement stmt = database.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT * FROM channels");

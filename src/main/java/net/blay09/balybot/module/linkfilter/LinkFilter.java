@@ -30,9 +30,9 @@ public class LinkFilter {
 
     @Subscribe
     public void onChannelChat(IRCChannelChatEvent event) {
-        UserLevel userLevel = UserLevel.fromName(Config.getValue(event.channel.getName(), "link_filter_userlevel", "reg"));
+        UserLevel userLevel = UserLevel.fromName(Config.getValue(event.channel.getName(), "linkfilter_userlevel", "reg"));
         if(!CommandHandler.passesUserLevel(event.sender, event.channel, userLevel)) {
-            if (Config.getValue(event.channel.getName(), "link_filter", "false").equals("true")) {
+            if (Config.getValue(event.channel.getName(), "linkfilter", "false").equals("true")) {
                 linkMatcher.reset(event.message);
                 ipMatcher.reset(event.message);
                 if (linkMatcher.find() || ipMatcher.find()) {
@@ -40,8 +40,8 @@ public class LinkFilter {
                         permissions.remove(event.channel.getName(), event.sender.getName());
                     } else {
                         event.channel.message("/timeout " + event.sender.getName() + " 1");
-                        if (Config.getValue(event.channel.getName(), "link_filter_message_show", "true").equals("true")) {
-                            event.channel.message(Config.getValue(event.channel.getName(), "link_filter_message", "Nooo! " + event.sender.getName() + ", stop posting links and IPs without permission, please!!"));
+                        if (Config.getValue(event.channel.getName(), "linkfilter_message_show", "true").equals("true")) {
+                            event.channel.message(Config.getValue(event.channel.getName(), "linkfilter_message", "Nooo! " + event.sender.getName() + ", stop posting links and IPs without permission, please!!"));
                         }
                     }
                 }

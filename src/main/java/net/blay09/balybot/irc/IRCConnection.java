@@ -230,8 +230,6 @@ public class IRCConnection implements Runnable {
 			}
 			writer.write("NICK " + nick + "\r\n");
 			writer.write("USER " + config.ident + " \"\" \"\" :" + config.realName + "\r\n");
-			writer.write("CAP REQ :twitch.tv/tags");
-			writer.write("CAP REQ :twitch.tv/commands");
 			writer.flush();
 		} catch (IOException e) {
 			e.printStackTrace();
