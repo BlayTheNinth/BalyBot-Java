@@ -230,6 +230,8 @@ public class IRCConnection implements Runnable {
 			}
 			writer.write("NICK " + nick + "\r\n");
 			writer.write("USER " + config.ident + " \"\" \"\" :" + config.realName + "\r\n");
+			writer.write("CAP REQ :twitch.tv/tags");
+			writer.write("CAP REQ :twitch.tv/commands");
 			writer.flush();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -363,7 +365,23 @@ public class IRCConnection implements Runnable {
 				isEmote = true;
 			}
 			if(channelTypes.indexOf(target.charAt(0)) != -1) {
-				eventBus.post(new IRCChannelChatEvent(this, getChannel(target), user, msg, message, isEmote, false));
+				IRCChannel channel = getChannel(target);
+				if(user != null) {
+					user.setNameColor(msg.getTagByKey("color"));
+					user.setDisplayName(msg.getTagByKey("display-name"));
+					user.setTwitchSubscriber(msg.getTagByKey("subscriber").equals("1"));
+					user.setTwitchTurbo(msg.getTagByKey("turbo").equals("1"));
+					String userType = msg.getTagByKey("user-type");
+					switch(userType) {
+						case "mod":
+						case "global_mod":
+							user.setChannelUserMode(channel, IRCChannelUserMode.OPER);
+							break;
+						default:
+							user.setChannelUserMode(channel, null);
+					}
+				}
+				eventBus.post(new IRCChannelChatEvent(this, channel, user, msg, message, isEmote, false));
 			} else if(target.equals(this.nick)) {
 				eventBus.post(new IRCPrivateChatEvent(this, user, msg, message, isEmote, false));
 			}
@@ -378,6 +396,22 @@ public class IRCConnection implements Runnable {
 				eventBus.post(new IRCChannelChatEvent(this, getChannel(target), user, msg, message, false, true));
 			} else if(target.equals(this.nick) || target.equals("*")) {
 				eventBus.post(new IRCPrivateChatEvent(this, user, msg, message, false, true));
+			}
+		} else if(cmd.equals("HOSTTARGET")) {
+			String source = msg.arg(0);
+			String target = msg.arg(1);
+			if(target.startsWith("-")) {
+				eventBus.post(new TwitchHostStopEvent(this, source));
+			} else {
+				int viewerCount = 0;
+				int lastSpace = target.lastIndexOf(' ');
+				if(lastSpace != -1) {
+					try {
+						viewerCount = Integer.parseInt(target.substring(lastSpace + 1));
+						target = target.substring(0, lastSpace);
+					} catch (NumberFormatException ignored) {}
+				}
+				eventBus.post(new TwitchHostStartEvent(this, getChannel(target), source, viewerCount));
 			}
 		} else if(cmd.equals("JOIN")) {
 			IRCUser user = getOrCreateUser(msg.getNick());

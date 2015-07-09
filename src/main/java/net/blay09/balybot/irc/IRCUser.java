@@ -15,6 +15,7 @@ public class IRCUser {
 	private boolean isTwitchSubscriber;
 	private boolean isTwitchTurbo;
 	private String accountName;
+	private String displayName;
 
 	public IRCUser(IRCConnection connection, String name) {
 		this.connection = connection;
@@ -134,5 +135,13 @@ public class IRCUser {
 
 	public String getAccountName() {
 		return accountName;
+	}
+
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
+	}
+
+	public String getDisplayName() {
+		return displayName;
 	}
 }

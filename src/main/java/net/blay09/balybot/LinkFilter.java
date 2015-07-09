@@ -10,6 +10,7 @@ import net.blay09.balybot.irc.event.IRCChannelChatEvent;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+// TODO move into separate module
 public class LinkFilter {
 
     private static final LinkFilter instance = new LinkFilter();
