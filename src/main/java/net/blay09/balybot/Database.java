@@ -40,6 +40,10 @@ public class Database {
         stmt = connection.createStatement();
         stmt.executeUpdate("CREATE TABLE IF NOT EXISTS channels (channel_name VARCHAR(64) PRIMARY KEY NOT NULL)");
         stmt.close();
+
+        stmt = connection.createStatement();
+        stmt.executeUpdate("CREATE TABLE IF NOT EXISTS timed_commands (channel_name VARCHAR(64) PRIMARY KEY NOT NULL, command VARCHAR(32) PRIMARY KEY NOT NULL, interval INTEGER(4))");
+        stmt.close();
     }
 
     public void prepareStatements() throws SQLException {

@@ -56,19 +56,23 @@ public class CommandHandler {
     @Subscribe
     @SuppressWarnings("unused")
     public void onChannelChat(IRCChannelChatEvent event) {
-        if(!checkCommandList(event, commands.get("*"))) {
-            checkCommandList(event, commands.get(event.channel.getName()));
+        handleCommand(event.channel, event.sender, event.message);
+    }
+
+    public static void handleCommand(IRCChannel channel, IRCUser sender, String message) {
+        if(!checkCommandList(channel, sender, message, commands.get("*"))) {
+            checkCommandList(channel, sender, message, commands.get(channel.getName()));
         }
     }
 
-    private static boolean checkCommandList(IRCChannelChatEvent event, Collection<BotCommand> commands) {
+    private static boolean checkCommandList(IRCChannel channel, IRCUser sender, String message, Collection<BotCommand> commands) {
         Matcher matcher = null;
         for(BotCommand command : commands) {
-            if(!passesUserLevel(event.sender, event.channel, command.minUserLevel)) {
+            if(!passesUserLevel(sender, channel, command.minUserLevel)) {
                 continue;
             }
             if(matcher == null) {
-                matcher = command.pattern.matcher(event.message);
+                matcher = command.pattern.matcher(message);
             } else {
                 matcher.usePattern(command.pattern);
             }
@@ -79,7 +83,7 @@ public class CommandHandler {
                 } else {
                     args = new String[0];
                 }
-                command.execute(event.channel, event.sender, args);
+                command.execute(channel, sender, args);
                 return true;
             }
         }

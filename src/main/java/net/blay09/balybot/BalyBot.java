@@ -7,6 +7,7 @@ import net.blay09.balybot.irc.IRCConnection;
 import net.blay09.balybot.irc.event.IRCConnectEvent;
 import net.blay09.balybot.module.linkfilter.LinkFilter;
 import net.blay09.balybot.module.regulars.Regulars;
+import net.blay09.balybot.module.timer.TimerHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -50,6 +51,7 @@ public class BalyBot {
                 logger.error(e);
             }
         }
+        TimerHandler.stop();
     }
 
     private final Database database;
@@ -63,6 +65,7 @@ public class BalyBot {
 
         CommandHandler.load(database, eventBus);
         LinkFilter.load(database, eventBus);
+        TimerHandler.load(database, eventBus);
         eventBus.register(this);
 
         load();
