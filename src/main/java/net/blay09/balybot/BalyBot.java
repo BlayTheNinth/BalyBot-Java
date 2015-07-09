@@ -4,8 +4,9 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import net.blay09.balybot.irc.IRCConfig;
 import net.blay09.balybot.irc.IRCConnection;
-import net.blay09.balybot.command.CommandHandler;
 import net.blay09.balybot.irc.event.IRCConnectEvent;
+import net.blay09.balybot.module.linkfilter.LinkFilter;
+import net.blay09.balybot.module.regulars.Regulars;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

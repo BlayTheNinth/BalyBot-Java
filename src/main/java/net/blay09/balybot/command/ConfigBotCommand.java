@@ -4,6 +4,7 @@ import net.blay09.balybot.Config;
 import net.blay09.balybot.UserLevel;
 import net.blay09.balybot.irc.IRCChannel;
 import net.blay09.balybot.irc.IRCUser;
+import net.blay09.balybot.CommandHandler;
 
 import java.util.Arrays;
 

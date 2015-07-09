@@ -1,7 +1,8 @@
-package net.blay09.balybot.command;
+package net.blay09.balybot.module.time;
 
 import net.blay09.balybot.Config;
 import net.blay09.balybot.UserLevel;
+import net.blay09.balybot.command.BotCommand;
 import net.blay09.balybot.irc.IRCChannel;
 import net.blay09.balybot.irc.IRCUser;
 

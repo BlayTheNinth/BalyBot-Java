@@ -1,9 +1,10 @@
-package net.blay09.balybot.command;
+package net.blay09.balybot.module.song;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import net.blay09.balybot.Config;
 import net.blay09.balybot.UserLevel;
+import net.blay09.balybot.command.BotCommand;
 import net.blay09.balybot.irc.IRCChannel;
 import net.blay09.balybot.irc.IRCUser;
 import org.apache.logging.log4j.core.util.FileUtils;

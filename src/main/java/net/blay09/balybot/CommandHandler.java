@@ -1,16 +1,18 @@
-package net.blay09.balybot.command;
+package net.blay09.balybot;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
-import net.blay09.balybot.BalyBot;
-import net.blay09.balybot.Database;
-import net.blay09.balybot.Regulars;
-import net.blay09.balybot.UserLevel;
+import net.blay09.balybot.command.*;
+import net.blay09.balybot.module.regulars.RegularBotCommand;
+import net.blay09.balybot.module.regulars.Regulars;
 import net.blay09.balybot.irc.IRCChannel;
 import net.blay09.balybot.irc.IRCUser;
 import net.blay09.balybot.irc.event.IRCChannelChatEvent;
+import net.blay09.balybot.module.linkfilter.PermitBotCommand;
+import net.blay09.balybot.module.song.SongBotCommand;
+import net.blay09.balybot.module.time.TimeBotCommand;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

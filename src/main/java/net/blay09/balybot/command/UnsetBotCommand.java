@@ -3,6 +3,7 @@ package net.blay09.balybot.command;
 import net.blay09.balybot.UserLevel;
 import net.blay09.balybot.irc.IRCChannel;
 import net.blay09.balybot.irc.IRCUser;
+import net.blay09.balybot.CommandHandler;
 
 public class UnsetBotCommand extends BotCommand {
 

@@ -1,10 +1,13 @@
-package net.blay09.balybot;
+package net.blay09.balybot.module.linkfilter;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
-import net.blay09.balybot.command.CommandHandler;
+import net.blay09.balybot.Config;
+import net.blay09.balybot.Database;
+import net.blay09.balybot.UserLevel;
+import net.blay09.balybot.CommandHandler;
 import net.blay09.balybot.irc.event.IRCChannelChatEvent;
 
 import java.util.regex.Matcher;

@@ -1,7 +1,9 @@
-package net.blay09.balybot;
+package net.blay09.balybot.module.regulars;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import net.blay09.balybot.BalyBot;
+import net.blay09.balybot.Database;
 import net.blay09.balybot.irc.IRCChannel;
 
 import java.sql.PreparedStatement;

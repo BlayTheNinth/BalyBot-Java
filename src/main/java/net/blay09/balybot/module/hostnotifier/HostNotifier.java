@@ -1,8 +1,11 @@
-package net.blay09.balybot;
+package net.blay09.balybot.module.hostnotifier;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
+import net.blay09.balybot.Config;
+import net.blay09.balybot.Database;
 import net.blay09.balybot.irc.event.TwitchHostStartEvent;
+import net.blay09.balybot.module.linkfilter.LinkFilter;
 
 // TODO move into separate module
 public class HostNotifier {

@@ -1,6 +1,6 @@
-package net.blay09.balybot.command;
+package net.blay09.balybot.module.linkfilter;
 
-import net.blay09.balybot.LinkFilter;
+import net.blay09.balybot.command.BotCommand;
 import net.blay09.balybot.UserLevel;
 import net.blay09.balybot.irc.IRCChannel;
 import net.blay09.balybot.irc.IRCUser;
