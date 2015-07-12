@@ -5,6 +5,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import net.blay09.balybot.command.*;
+import net.blay09.balybot.module.ccpoll.CountedChatPollBotCommand;
 import net.blay09.balybot.module.regulars.RegularBotCommand;
 import net.blay09.balybot.module.regulars.Regulars;
 import net.blay09.balybot.irc.IRCChannel;
@@ -37,6 +38,7 @@ public class CommandHandler {
         commands.put("*", new ConfigBotCommand());
         commands.put("*", new PermitBotCommand());
         commands.put("*", new UptimeBotCommand());
+        commands.put("*", new CountedChatPollBotCommand());
 
         try {
             Statement stmt = database.createStatement();
@@ -56,7 +58,11 @@ public class CommandHandler {
     @Subscribe
     @SuppressWarnings("unused")
     public void onChannelChat(IRCChannelChatEvent event) {
-        handleCommand(event.channel, event.sender, event.message);
+        try {
+            handleCommand(event.channel, event.sender, event.message);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static void handleCommand(IRCChannel channel, IRCUser sender, String message) {

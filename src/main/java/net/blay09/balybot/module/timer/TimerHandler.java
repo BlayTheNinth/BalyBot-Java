@@ -23,7 +23,7 @@ public class TimerHandler implements Runnable {
             Statement stmt = database.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT * FROM timed_commands");
             while(rs.next()) {
-                timedCommands.put(rs.getString("channel_name"), new TimedCommand(rs.getString("channel_name"), rs.getString("command"), rs.getInt("interval")));
+                timedCommands.put(rs.getString("channel_name"), new TimedCommand(rs.getString("channel_name"), rs.getString("command"), rs.getInt("time_interval")));
             }
             rs.close();
             stmt.close();

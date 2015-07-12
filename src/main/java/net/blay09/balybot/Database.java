@@ -34,7 +34,7 @@ public class Database {
         stmt.close();
 
         stmt = connection.createStatement();
-        stmt.executeUpdate("CREATE TABLE IF NOT EXISTS config (channel_name VARCHAR(64) PRIMARY KEY NOT NULL, config_name VARCHAR(32)  PRIMARY KEY NOT NULL, config_value TEXT NOT NULL)");
+        stmt.executeUpdate("CREATE TABLE IF NOT EXISTS config (channel_name VARCHAR(64) NOT NULL, config_name VARCHAR(32) NOT NULL, config_value TEXT NOT NULL, PRIMARY KEY (channel_name, config_name))");
         stmt.close();
 
         stmt = connection.createStatement();
@@ -42,7 +42,7 @@ public class Database {
         stmt.close();
 
         stmt = connection.createStatement();
-        stmt.executeUpdate("CREATE TABLE IF NOT EXISTS timed_commands (channel_name VARCHAR(64) PRIMARY KEY NOT NULL, command VARCHAR(32) PRIMARY KEY NOT NULL, interval INTEGER(4))");
+        stmt.executeUpdate("CREATE TABLE IF NOT EXISTS timed_commands (channel_name VARCHAR(64) NOT NULL, command VARCHAR(32) NOT NULL, time_interval INTEGER(4), PRIMARY KEY(channel_name, command))");
         stmt.close();
     }
 
