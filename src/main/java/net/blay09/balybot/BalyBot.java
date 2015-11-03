@@ -7,7 +7,6 @@ import net.blay09.balybot.irc.IRCConnection;
 import net.blay09.balybot.irc.event.IRCConnectEvent;
 import net.blay09.balybot.module.linkfilter.LinkFilter;
 import net.blay09.balybot.module.ccpoll.CountedChatPoll;
-import net.blay09.balybot.module.regulars.Regulars;
 import net.blay09.balybot.module.timer.TimerHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -49,6 +48,7 @@ public class BalyBot {
                     }
                 }
             } catch (IOException e) {
+                e.printStackTrace();
                 logger.error(e);
             }
         }

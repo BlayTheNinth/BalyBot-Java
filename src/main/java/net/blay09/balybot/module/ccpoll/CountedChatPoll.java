@@ -31,6 +31,9 @@ public class CountedChatPoll {
     @Subscribe
     @SuppressWarnings("unused")
     public void onChannelChat(IRCChannelChatEvent event) {
+        if(event.message.startsWith("!")) {
+            return;
+        }
         Poll poll = channelPolls.get(event.channel.getName());
         if(poll != null) {
             if(poll.users.contains(event.sender.getName())) {
@@ -41,8 +44,8 @@ public class CountedChatPoll {
                 poll.users.add(event.sender.getName());
             }
             int countIdx = 0;
-            int idx = 0;
-            while((idx = event.message.indexOf(poll.searchText, idx)) != -1) {
+            int idx = -1;
+            while((idx = event.message.indexOf(poll.searchText, idx + 1)) != -1) {
                 countIdx++;
             }
             if(countIdx > 0) {
@@ -52,9 +55,12 @@ public class CountedChatPoll {
         }
     }
 
-    public void startPoll(IRCChannel channel, String searchText, int maxCount) {
+    public void startPoll(IRCChannel channel, String searchText, int maxCount, String description) {
+        if(description == null) {
+            description = "Counted Chat Poll started";
+        }
         channelPolls.put(channel.getName(), new Poll(searchText, maxCount));
-        channel.message("Counted chat poll started. Type up to " + maxCount + "x " + searchText + " in chat or --- to vote zero!");
+        channel.message(description + " - Type up to " + maxCount + "x " + searchText + " in chat or --- to vote zero!");
     }
 
     public void stop(IRCChannel channel) {
@@ -64,14 +70,16 @@ public class CountedChatPoll {
             for(int i = 0; i < poll.votes.length; i++) {
                 maxCount += poll.votes[i];
             }
+            int voteCount = 0;
             StringBuilder sb = new StringBuilder();
             for(int i = 0; i < poll.votes.length; i++) {
+                voteCount += poll.votes[i] * i;
                 if(sb.length() > 0) {
                     sb.append(", ");
                 }
-                sb.append(getNumberName(i)).append(": ").append(poll.votes[i]).append(" (").append(poll.votes[i] / maxCount * 100).append("%)");
+                sb.append(getNumberName(i)).append(": ").append(poll.votes[i]).append(" (").append(Math.round((float) poll.votes[i] / (float) maxCount * 100f)).append("%)");
             }
-            channel.message(sb.toString());
+            channel.message("Average Result: " + String.format("%.1f", (float) voteCount / (float) maxCount) + " [" + sb.toString() + "]");
             channelPolls.remove(channel.getName());
         }
     }

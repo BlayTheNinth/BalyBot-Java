@@ -1,10 +1,17 @@
 package net.blay09.balybot.command;
 
+import net.blay09.balybot.TwitchAPI;
 import net.blay09.balybot.UserLevel;
 import net.blay09.balybot.irc.IRCChannel;
 import net.blay09.balybot.irc.IRCUser;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class MessageBotCommand extends BotCommand {
+
+    private static final Pattern varPattern = Pattern.compile("\\{(?:([^\\?]+)(\\?))?([A-Za-z0-9]+)(\\?)?([^\\}]+)?\\}");
+    private static final Matcher varMatcher = varPattern.matcher("");
 
     public final String message;
 
@@ -15,12 +22,46 @@ public class MessageBotCommand extends BotCommand {
 
     @Override
     public void execute(IRCChannel channel, IRCUser sender, String[] args) {
-        String msg = message;
-        msg = msg.replace("{SENDER}", sender.getName());
-        for(int i = 0; i < args.length; i++) {
-            msg = msg.replace("{" + i + "}", args[i]);
+        StringBuffer sb = new StringBuffer();
+        varMatcher.reset(message);
+        while(varMatcher.find()) {
+            String prefix = varMatcher.group(1);
+            if(prefix == null) {
+                prefix = "";
+            }
+            String varName = varMatcher.group(3);
+            boolean isOptional = varMatcher.group(2) != null || varMatcher.group(4) != null;
+            String suffix = varMatcher.group(5);
+            if(suffix == null) {
+                suffix = "";
+            }
+            String varValue = null;
+            if(varName.equals("SENDER")) {
+                varValue = sender.getName();
+            } else if(varName.equals("TITLE")) {
+                varValue = TwitchAPI.getChannelData(channel.getName()).getTitle();
+            } else if(varName.equals("GAME")) {
+                varValue = TwitchAPI.getChannelData(channel.getName()).getGame();
+            } else if(varName.equals("VIEWERS")) {
+                varValue = String.valueOf(TwitchAPI.getChannelData(channel.getName()).getViewers());
+            } else if(varName.matches("[0-9]+")) {
+                int index = Integer.parseInt(varName);
+                if(index >= 0 && index < args.length) {
+                    varValue = args[index];
+                }
+            }
+            if(varValue == null) {
+                if(isOptional) {
+                    varMatcher.appendReplacement(sb, "");
+                } else {
+                    varMatcher.appendReplacement(sb, prefix + "{" + varName + "}" + suffix);
+                }
+            } else {
+                varMatcher.appendReplacement(sb, prefix + varValue + suffix);
+            }
         }
-        channel.message(msg);
+        varMatcher.appendTail(sb);
+        channel.message(sb.toString());
     }
 
 }

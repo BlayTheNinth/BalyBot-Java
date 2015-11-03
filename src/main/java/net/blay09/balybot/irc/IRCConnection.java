@@ -160,7 +160,8 @@ public class IRCConnection implements Runnable {
 			sender.start();
 			String line;
 			while ((line = reader.readLine()) != null && sender.isRunning()) {
-				logger.debug("> " + line);
+				logger.info("> " + line);
+				System.out.println(line);
 				if (!line.isEmpty()) {
 					IRCMessage msg = parser.parse(line);
 					if (!handleNumericMessage(msg)) {
@@ -169,12 +170,14 @@ public class IRCConnection implements Runnable {
 				}
 			}
 		} catch (IOException e) {
+			e.printStackTrace();
 			if(!e.getMessage().equals("Socket closed")) {
 				e.printStackTrace();
 			} else {
 				closeSocket();
 			}
 		} catch (Exception e) {
+			e.printStackTrace();
 			eventBus.post(new IRCExceptionEvent(this, e));
 			closeSocket();
 		}
@@ -379,7 +382,11 @@ public class IRCConnection implements Runnable {
 							user.setChannelUserMode(channel, null);
 					}
 				}
-				eventBus.post(new IRCChannelChatEvent(this, channel, user, msg, message, isEmote, false));
+				try {
+					eventBus.post(new IRCChannelChatEvent(this, channel, user, msg, message, isEmote, false));
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			} else if(target.equals(this.nick)) {
 				eventBus.post(new IRCPrivateChatEvent(this, user, msg, message, isEmote, false));
 			}
@@ -503,6 +510,7 @@ public class IRCConnection implements Runnable {
 	}
 
 	public boolean irc(String message) {
+		System.out.println("SEND " + message);
 		return sender.addToSendQueue(message);
 	}
 

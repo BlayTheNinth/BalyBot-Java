@@ -1,4 +1,4 @@
-package net.blay09.balybot.module.regulars;
+package net.blay09.balybot;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;

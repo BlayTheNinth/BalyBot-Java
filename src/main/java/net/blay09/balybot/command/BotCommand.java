@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 
 public abstract class BotCommand {
 
+    public int id;
     public final String name;
     public final String regex;
     public final Pattern pattern;
@@ -22,4 +23,7 @@ public abstract class BotCommand {
 
     public abstract void execute(IRCChannel channel, IRCUser sender, String[] args);
 
+    public void setId(int id) {
+        this.id = id;
+    }
 }

@@ -6,8 +6,7 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import net.blay09.balybot.command.*;
 import net.blay09.balybot.module.ccpoll.CountedChatPollBotCommand;
-import net.blay09.balybot.module.regulars.RegularBotCommand;
-import net.blay09.balybot.module.regulars.Regulars;
+import net.blay09.balybot.command.RegularBotCommand;
 import net.blay09.balybot.irc.IRCChannel;
 import net.blay09.balybot.irc.IRCUser;
 import net.blay09.balybot.irc.event.IRCChannelChatEvent;
@@ -32,11 +31,12 @@ public class CommandHandler {
         commands.put("*", new SetBotCommand());
         commands.put("*", new SetRegexBotCommand());
         commands.put("*", new UnsetBotCommand());
-        commands.put("*", new TimeBotCommand());
         commands.put("*", new RegularBotCommand());
-        commands.put("*", new SongBotCommand());
         commands.put("*", new ConfigBotCommand());
         commands.put("*", new PermitBotCommand());
+
+        commands.put("*", new TimeBotCommand());
+        commands.put("*", new SongBotCommand());
         commands.put("*", new UptimeBotCommand());
         commands.put("*", new CountedChatPollBotCommand());
 
@@ -51,6 +51,8 @@ public class CommandHandler {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+
 
         eventBus.register(instance);
     }
@@ -105,6 +107,10 @@ public class CommandHandler {
             stmtRegisterCommand.setString(4, botCommand.message);
             stmtRegisterCommand.setInt(5, botCommand.minUserLevel.ordinal());
             stmtRegisterCommand.executeUpdate();
+            ResultSet rs = stmtRegisterCommand.getGeneratedKeys();
+            if(rs.next()) {
+                botCommand.setId(rs.getInt(1));
+            }
             commands.put(channel.getName(), botCommand);
             return true;
         } catch (SQLException e) {

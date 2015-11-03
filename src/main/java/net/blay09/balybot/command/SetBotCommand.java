@@ -10,7 +10,7 @@ import java.util.Arrays;
 public class SetBotCommand extends BotCommand {
 
     public SetBotCommand() {
-        super("set", "^!set\\s?(.*)", UserLevel.MODERATOR);
+        super("set", "^!set(?:\\s+(.*)|$)", UserLevel.MODERATOR);
     }
 
     @Override

@@ -44,10 +44,14 @@ public class Database {
         stmt = connection.createStatement();
         stmt.executeUpdate("CREATE TABLE IF NOT EXISTS timed_commands (channel_name VARCHAR(64) NOT NULL, command VARCHAR(32) NOT NULL, time_interval INTEGER(4), PRIMARY KEY(channel_name, command))");
         stmt.close();
+
+        stmt = connection.createStatement();
+        stmt.executeUpdate("CREATE TABLE IF NOT EXISTS modules (channel_name VARCHAR(64) NOT NULL, module_name VARCHAR(32) NOT NULL, PRIMARY KEY(channel_name, module_name))");
+        stmt.close();
     }
 
     public void prepareStatements() throws SQLException {
-        stmtRegisterCommand = connection.prepareStatement("INSERT INTO commands (channel_name, command_name, regex, message, userLevel) VALUES (?, ?, ?, ?, ?)");
+        stmtRegisterCommand = connection.prepareStatement("INSERT INTO commands (channel_name, command_name, regex, message, userLevel) VALUES (?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
         stmtUnregisterCommand = connection.prepareStatement("DELETE FROM commands WHERE channel_name = ? AND command_name = ?");
 
         stmtRegisterRegular = connection.prepareStatement("INSERT INTO regulars (channel_name, username) VALUES (?, ?)");
