@@ -5,6 +5,8 @@ import com.google.common.collect.Multimap;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import net.blay09.balybot.command.*;
+import net.blay09.balybot.expr.ExpressionLibrary;
+import net.blay09.balybot.module.calc.MathBotCommand;
 import net.blay09.balybot.module.ccpoll.CountedChatPollBotCommand;
 import net.blay09.balybot.command.RegularBotCommand;
 import net.blay09.balybot.irc.IRCChannel;
@@ -39,20 +41,19 @@ public class CommandHandler {
         commands.put("*", new SongBotCommand());
         commands.put("*", new UptimeBotCommand());
         commands.put("*", new CountedChatPollBotCommand());
+        commands.put("*", new MathBotCommand());
 
         try {
             Statement stmt = database.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT * FROM commands");
             while(rs.next()) {
-                commands.put(rs.getString("channel_name"), new MessageBotCommand(rs.getString("command_name"), rs.getString("regex"), rs.getString("message"), UserLevel.fromId(rs.getInt("userLevel"))));
+                commands.put(rs.getString("channel_name"), new MessageBotCommand(rs.getString("command_name"), rs.getString("regex"), rs.getString("message"), UserLevel.fromId(rs.getInt("userLevel")), rs.getString("condition")));
             }
             rs.close();
             stmt.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
-
 
         eventBus.register(instance);
     }
@@ -85,6 +86,17 @@ public class CommandHandler {
                 matcher.usePattern(command.pattern);
             }
             if(matcher.find()) {
+                if(command.condition != null) {
+                    try {
+                        Boolean obj = (Boolean) ExpressionLibrary.eval(channel, command.condition);
+                        if (obj == null || !obj) {
+                            continue;
+                        }
+                    } catch (Throwable e) {
+                        System.err.println("Condition failed at command " + command.name + ": " + command.condition + " (" + e.getMessage() + ")");
+                        continue;
+                    }
+                }
                 String[] args;
                 if(matcher.groupCount() > 0 && matcher.group(1).trim().length() > 0) {
                     args = matcher.group(1).split(" ");
@@ -106,6 +118,7 @@ public class CommandHandler {
             stmtRegisterCommand.setString(3, botCommand.regex);
             stmtRegisterCommand.setString(4, botCommand.message);
             stmtRegisterCommand.setInt(5, botCommand.minUserLevel.ordinal());
+            stmtRegisterCommand.setString(6, botCommand.condition);
             stmtRegisterCommand.executeUpdate();
             ResultSet rs = stmtRegisterCommand.getGeneratedKeys();
             if(rs.next()) {

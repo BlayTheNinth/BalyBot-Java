@@ -2,6 +2,7 @@ package net.blay09.balybot;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
+import net.blay09.balybot.expr.ExpressionLibrary;
 import net.blay09.balybot.irc.IRCConfig;
 import net.blay09.balybot.irc.IRCConnection;
 import net.blay09.balybot.irc.event.IRCConnectEvent;
@@ -116,6 +117,7 @@ public class BalyBot {
     @Subscribe
     @SuppressWarnings("unused")
     public void onConnected(IRCConnectEvent event) {
+        event.connection.irc("CAP REQ :twitch.tv/membership");
         event.connection.irc("CAP REQ :twitch.tv/tags");
         event.connection.irc("CAP REQ :twitch.tv/commands");
 

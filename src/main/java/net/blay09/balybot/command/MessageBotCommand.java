@@ -1,6 +1,6 @@
 package net.blay09.balybot.command;
 
-import net.blay09.balybot.TwitchAPI;
+import net.blay09.balybot.twitch.TwitchAPI;
 import net.blay09.balybot.UserLevel;
 import net.blay09.balybot.irc.IRCChannel;
 import net.blay09.balybot.irc.IRCUser;
@@ -15,8 +15,8 @@ public class MessageBotCommand extends BotCommand {
 
     public final String message;
 
-    public MessageBotCommand(String name, String regex, String message, UserLevel minUserLevel) {
-        super(name, regex, minUserLevel);
+    public MessageBotCommand(String name, String regex, String message, UserLevel minUserLevel, String condition) {
+        super(name, regex, minUserLevel, condition);
         this.message = message;
     }
 
@@ -37,13 +37,15 @@ public class MessageBotCommand extends BotCommand {
             }
             String varValue = null;
             if(varName.equals("SENDER")) {
-                varValue = sender.getName();
+                varValue = sender.getDisplayName();
             } else if(varName.equals("TITLE")) {
                 varValue = TwitchAPI.getChannelData(channel.getName()).getTitle();
             } else if(varName.equals("GAME")) {
                 varValue = TwitchAPI.getChannelData(channel.getName()).getGame();
             } else if(varName.equals("VIEWERS")) {
-                varValue = String.valueOf(TwitchAPI.getChannelData(channel.getName()).getViewers());
+                varValue = String.valueOf(TwitchAPI.getStreamData(channel.getName()).getViewers());
+            } else if(varName.equals("CHATTERS")) {
+                varValue = String.valueOf(channel.getUserList().size());
             } else if(varName.matches("[0-9]+")) {
                 int index = Integer.parseInt(varName);
                 if(index >= 0 && index < args.length) {

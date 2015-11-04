@@ -20,7 +20,7 @@ public class Regulars {
             Statement stmt = database.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT * FROM regulars");
             while(rs.next()) {
-                regulars.put(rs.getString("channel_name"), rs.getString("username"));
+                regulars.put(rs.getString("channel_name").toLowerCase(), rs.getString("username").toLowerCase());
             }
             rs.close();
             stmt.close();
@@ -35,7 +35,7 @@ public class Regulars {
             stmtRegisterRegular.setString(1, channel.getName());
             stmtRegisterRegular.setString(2, username);
             stmtRegisterRegular.executeUpdate();
-            regulars.put(channel.getName(), username);
+            regulars.put(channel.getName().toLowerCase(), username.toLowerCase());
             return true;
         } catch (SQLException e) {
             return false;
@@ -48,7 +48,7 @@ public class Regulars {
             stmtUnregisterRegular.setString(1, channel.getName());
             stmtUnregisterRegular.setString(2, username);
             stmtUnregisterRegular.executeUpdate();
-            regulars.remove(channel.getName(), username);
+            regulars.remove(channel.getName().toLowerCase(), username.toLowerCase());
             return true;
         } catch (SQLException e) {
             return false;
@@ -56,6 +56,6 @@ public class Regulars {
     }
 
     public static boolean isRegular(IRCChannel channel, String username) {
-        return regulars.containsEntry(channel.getName(), username);
+        return regulars.containsEntry(channel.getName().toLowerCase(), username.toLowerCase());
     }
 }
