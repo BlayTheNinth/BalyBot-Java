@@ -26,7 +26,7 @@ public class Database {
 
     public void initialSetup() throws SQLException {
         Statement stmt = connection.createStatement();
-        stmt.executeUpdate("CREATE TABLE IF NOT EXISTS commands (id INTEGER PRIMARY KEY AUTOINCREMENT, channel_name VARCHAR(64) NOT NULL, command_name VARCHAR(32) NOT NULL, regex VARCHAR(128) NOT NULL, message TEXT, userLevel INTEGER(4), condition TEXT)");
+        stmt.executeUpdate("CREATE TABLE IF NOT EXISTS commands (id INTEGER PRIMARY KEY AUTOINCREMENT, channel_name VARCHAR(64) NOT NULL, command_name VARCHAR(32) NOT NULL, regex VARCHAR(128) NOT NULL, message TEXT, user_level INTEGER(4), condition TEXT, whisper_to VARCHAR(32))");
         stmt.close();
 
         stmt = connection.createStatement();
@@ -51,7 +51,7 @@ public class Database {
     }
 
     public void prepareStatements() throws SQLException {
-        stmtRegisterCommand = connection.prepareStatement("INSERT INTO commands (channel_name, command_name, regex, message, userLevel, condition) VALUES (?, ?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
+        stmtRegisterCommand = connection.prepareStatement("INSERT INTO commands (channel_name, command_name, regex, message, user_level, condition, whisper_to) VALUES (?, ?, ?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
         stmtUnregisterCommand = connection.prepareStatement("DELETE FROM commands WHERE channel_name = ? AND command_name = ?");
 
         stmtRegisterRegular = connection.prepareStatement("INSERT INTO regulars (channel_name, username) VALUES (?, ?)");

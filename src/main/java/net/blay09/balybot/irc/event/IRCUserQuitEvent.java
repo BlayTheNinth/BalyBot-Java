@@ -16,7 +16,7 @@ public class IRCUserQuitEvent extends IRCEvent {
 	public final IRCUser user;
 
 	/**
-	 * the quit message that was sent along
+	 * the quit commandMessage that was sent along
 	 */
 	public final String message;
 
@@ -24,7 +24,7 @@ public class IRCUserQuitEvent extends IRCEvent {
 	 * INTERNAL EVENT. YOU SHOULD NOT POST THIS YOURSELF.
 	 * @param connection the connection this event is based on
 	 * @param user the user that disconnected from IRC
-	 * @param message the quit message that was sent along
+	 * @param message the quit commandMessage that was sent along
 	 */
 	public IRCUserQuitEvent(IRCConnection connection, IRCUser user, String message) {
 		super(connection);

@@ -2,6 +2,7 @@ package net.blay09.balybot.twitch;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -40,7 +41,7 @@ public class TwitchAPI {
                 httpGet.setHeader(HttpHeaders.ACCEPT, "application/vnd.twitchtv.v3+json");
                 try(CloseableHttpClient httpClient = HttpClients.createDefault(); CloseableHttpResponse response = httpClient.execute(httpGet)) {
                     Gson gson = new Gson();
-                    String jsonString = IOUtils.toString(response.getEntity().getContent());
+                    String jsonString = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
                     JsonObject jsonObject = gson.fromJson(jsonString, JsonObject.class);
                     if(jsonObject != null) {
                         channelData.updateFromJson(jsonObject);

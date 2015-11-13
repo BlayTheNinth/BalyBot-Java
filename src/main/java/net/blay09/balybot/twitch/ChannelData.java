@@ -21,12 +21,16 @@ public class ChannelData {
     }
 
     public boolean requiresUpdate() {
-        return lastUpdated - System.currentTimeMillis() > TwitchAPI.CACHE_LIFETIME;
+        return System.currentTimeMillis() - lastUpdated > TwitchAPI.CACHE_LIFETIME;
     }
 
     public void updateFromJson(JsonObject object) {
-        game = object.get("game").getAsString();
-        title = object.get("status").getAsString();
+        if(object.has("game")) {
+            game = object.get("game").getAsString();
+        }
+        if(object.has("status")) {
+            title = object.get("status").getAsString();
+        }
         lastUpdated = System.currentTimeMillis();
     }
 }

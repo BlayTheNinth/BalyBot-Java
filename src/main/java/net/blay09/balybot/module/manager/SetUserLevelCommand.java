@@ -1,30 +1,35 @@
-package net.blay09.balybot.command;
+package net.blay09.balybot.module.manager;
 
 import net.blay09.balybot.CommandHandler;
 import net.blay09.balybot.UserLevel;
+import net.blay09.balybot.command.BotCommand;
+import net.blay09.balybot.command.MessageBotCommand;
 import net.blay09.balybot.irc.IRCChannel;
 import net.blay09.balybot.irc.IRCUser;
 
-import java.util.Arrays;
-
 public class SetUserLevelCommand extends BotCommand {
 
-    public SetUserLevelCommand() {
-        super("setul", "^!setul(?:\\s+(.*)|$)", UserLevel.MODERATOR);
+    private final char prefix;
+
+    public SetUserLevelCommand(char prefix) {
+        super("setul", "^" + prefix + "setul(?:\\s+(.*)|$)", UserLevel.MODERATOR);
+        this.prefix = prefix;
+    }
+
+    private String getCommandSyntax() {
+        return prefix + "setul <name|id> <userlevel>";
     }
 
     @Override
-    public void execute(IRCChannel channel, IRCUser sender, String[] args) {
+    public String execute(IRCChannel channel, IRCUser sender, String message, String[] args, int depth) {
         if(args.length < 1) {
-            channel.message("Not enough parameters for setul command. Syntax: !setul <name|id> <userlevel>");
-            return;
+            return "Not enough parameters for setul command. Syntax: " + getCommandSyntax();
         }
 
         String name = args[0];
         for(BotCommand botCommand : CommandHandler.getGlobalCommands()) {
             if (botCommand.name.equals(name)) {
-                channel.message("Command '" + botCommand.name + "' can not be edited.");
-                return;
+                return "Command '" + botCommand.name + "' can not be edited.";
             }
         }
         BotCommand foundCommand = null;
@@ -49,22 +54,22 @@ public class SetUserLevelCommand extends BotCommand {
 
         UserLevel userLevel = UserLevel.fromName(args[1]);
         if(userLevel == null) {
-            channel.message("Invalid user level '" + args[1] + "'. Valid are: all, turbo, reg, sub, mod, broadcaster, owner");
-            return;
+            return "Invalid user level '" + args[1] + "'. Valid are: all, turbo, reg, sub, mod, broadcaster, owner";
         }
 
         if(foundCommand != null && foundCommand instanceof MessageBotCommand) {
             if(!CommandHandler.unregisterCommand(channel, foundCommand)) {
-                channel.message("Unexpected error, could not edit command!");
+                return "Unexpected error, could not edit command!";
             }
             foundCommand.setUserLevel(userLevel);
             if(CommandHandler.registerMessageCommand(channel, (MessageBotCommand) foundCommand)) {
-                channel.message("Command successfully edited: " + name);
+                return "Command successfully edited: " + name;
             } else {
-                channel.message("Unexpected error, could not save command!");
+                return "Unexpected error, could not save command!";
             }
         } else {
-            channel.message("Command not found: " + name);
+            return "Command not found: " + name;
+
         }
     }
 

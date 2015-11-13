@@ -1,87 +1,97 @@
 package net.blay09.balybot.module.ccpoll;
 
+import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import net.blay09.balybot.irc.IRCChannel;
 import net.blay09.balybot.irc.event.IRCChannelChatEvent;
+import net.blay09.balybot.module.Module;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class CountedChatPoll {
+public class ModuleCountedChatPoll extends Module {
 
     private static class Poll {
         public final List<String> users = new ArrayList<>();
         public final String searchText;
         public final int[] votes;
-
         public Poll(String searchText, int maxCount) {
             this.searchText = searchText;
-            this.votes = new int[maxCount];
+            this.votes = new int[maxCount + 1];
         }
     }
 
-    public static final CountedChatPoll instance = new CountedChatPoll();
+    private Poll currentPoll;
 
-    private Map<String, Poll> channelPolls = new HashMap<>();
+    public ModuleCountedChatPoll(String context, char prefix) {
+        super(context, prefix);
+    }
 
-    public CountedChatPoll() {}
+    @Override
+    public void activate(EventBus eventBus) {
+        eventBus.register(this);
+        registerCommand(new CountedChatPollBotCommand(this, prefix));
+    }
+
+    @Override
+    public void deactivate(EventBus eventBus) {
+        eventBus.unregister(this);
+    }
 
     @Subscribe
-    @SuppressWarnings("unused")
     public void onChannelChat(IRCChannelChatEvent event) {
         if(event.message.startsWith("!")) {
             return;
         }
-        Poll poll = channelPolls.get(event.channel.getName());
-        if(poll != null) {
-            if(poll.users.contains(event.sender.getName())) {
+        if(currentPoll != null) {
+            if(currentPoll.users.contains(event.sender.getName())) {
                 return;
             }
             if(event.message.startsWith("-") || event.message.startsWith("_")) {
-                poll.votes[0]++;
-                poll.users.add(event.sender.getName());
+                currentPoll.votes[0]++;
+                currentPoll.users.add(event.sender.getName());
             }
             int countIdx = 0;
             int idx = -1;
-            while((idx = event.message.indexOf(poll.searchText, idx + 1)) != -1) {
+            while((idx = event.message.indexOf(currentPoll.searchText, idx + 1)) != -1) {
                 countIdx++;
             }
             if(countIdx > 0) {
-                poll.votes[countIdx]++;
-                poll.users.add(event.sender.getName());
+                currentPoll.votes[Math.min(countIdx, currentPoll.votes.length - 1)]++;
+                currentPoll.users.add(event.sender.getName());
             }
         }
     }
 
-    public void startPoll(IRCChannel channel, String searchText, int maxCount, String description) {
+    public String startPoll(IRCChannel channel, String searchText, int maxCount, String description) {
         if(description == null) {
             description = "Counted Chat Poll started";
         }
-        channelPolls.put(channel.getName(), new Poll(searchText, maxCount));
-        channel.message(description + " - Type up to " + maxCount + "x " + searchText + " in chat or --- to vote zero!");
+        currentPoll = new Poll(searchText, maxCount);
+        return description + " - Type up to " + maxCount + "x " + searchText + " (" + searchText + ") in chat or --- to vote zero!";
     }
 
-    public void stop(IRCChannel channel) {
-        Poll poll = channelPolls.get(channel.getName());
-        if(poll != null) {
+    public String stop(IRCChannel channel) {
+        if(currentPoll != null) {
             int maxCount = 0;
-            for(int i = 0; i < poll.votes.length; i++) {
-                maxCount += poll.votes[i];
+            for(int i = 0; i < currentPoll.votes.length; i++) {
+                maxCount += currentPoll.votes[i];
             }
             int voteCount = 0;
             StringBuilder sb = new StringBuilder();
-            for(int i = 0; i < poll.votes.length; i++) {
-                voteCount += poll.votes[i] * i;
+            for(int i = 0; i < currentPoll.votes.length; i++) {
+                voteCount += currentPoll.votes[i] * i;
                 if(sb.length() > 0) {
                     sb.append(", ");
                 }
-                sb.append(getNumberName(i)).append(": ").append(poll.votes[i]).append(" (").append(Math.round((float) poll.votes[i] / (float) maxCount * 100f)).append("%)");
+                sb.append(getNumberName(i)).append(": ").append(currentPoll.votes[i]).append(" (").append(Math.round((float) currentPoll.votes[i] / (float) maxCount * 100f)).append("%)");
             }
-            channel.message("Average Result: " + String.format("%.1f", (float) voteCount / (float) maxCount) + " [" + sb.toString() + "]");
-            channelPolls.remove(channel.getName());
+            currentPoll = null;
+            return "Average Result: " + String.format("%.1f", (float) voteCount / (float) maxCount) + " [" + sb.toString() + "]";
         }
+        return "There was no poll running, silly!";
     }
 
     private static String getNumberName(int i) {

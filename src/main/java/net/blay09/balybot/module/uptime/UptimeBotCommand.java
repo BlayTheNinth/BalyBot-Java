@@ -12,16 +12,17 @@ import java.net.URL;
 
 public class UptimeBotCommand extends BotCommand {
 
-    public UptimeBotCommand() {
-        super("uptime", "^!uptime\\s?(.*)", UserLevel.ALL);
+    public UptimeBotCommand(char prefix) {
+        super("uptime", "^" + prefix + "uptime\\s?(.*)", UserLevel.ALL);
     }
 
     @Override
-    public void execute(IRCChannel channel, IRCUser sender, String[] args) {
+    public String execute(IRCChannel channel, IRCUser sender, String message, String[] args, int depth) {
         try {
-            channel.message(Resources.toString(new URL("https://nightdev.com/hosted/uptime.php?channel=" + channel.getName().substring(1)), Charsets.UTF_8));
+            return Resources.toString(new URL("https://nightdev.com/hosted/uptime.php?channel=" + channel.getName().substring(1)), Charsets.UTF_8);
         } catch (IOException e) {
             e.printStackTrace();
+            return "Could not retrieve uptime, sorry!";
         }
     }
 

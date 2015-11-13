@@ -7,19 +7,26 @@ import net.blay09.balybot.irc.IRCUser;
 
 public class PermitBotCommand extends BotCommand {
 
-    public PermitBotCommand() {
-        super("permit", "^!permit\\s?(.*)", UserLevel.MODERATOR);
+    private final ModuleLinkFilter module;
+    private final char prefix;
+
+    public PermitBotCommand(ModuleLinkFilter module, char prefix) {
+        super("permit", "^" + prefix + "permit\\s?(.*)", UserLevel.MODERATOR);
+        this.module = module;
+        this.prefix = prefix;
+    }
+
+    private String getCommandSyntax() {
+        return prefix + "permit <username>";
     }
 
     @Override
-    public void execute(IRCChannel channel, IRCUser sender, String[] args) {
+    public String execute(IRCChannel channel, IRCUser sender, String message, String[] args, int depth) {
         if(args.length < 1) {
-            channel.message("Not enough parameters for permit command. Syntax: !permit <username>");
-            return;
+            return "Not enough parameters for permit command. Syntax: " + getCommandSyntax();
         }
-
-        LinkFilter.permit(channel.getName(), args[0]);
-        channel.message(sender.getName() + ", you may now post one link. Yay!!");
+        module.permit(args[0]);
+        return sender.getName() + ", you may now post one link. Make it count!";
     }
 
 }

@@ -342,9 +342,9 @@ public class IRCConnection implements Runnable {
 				}
 			}
 		} else if(numeric == IRCReplyCodes.RPL_MOTD || numeric <= 4 || numeric == 251 || numeric == 252 || numeric == 254 || numeric == 255 || numeric == 265 || numeric == 266 || numeric == 250 || numeric == 375) {
-			logger.debug("Ignoring message code: " + msg.getCommand() + " (" + msg.argcount() + " arguments)");
+			logger.debug("Ignoring commandMessage code: " + msg.getCommand() + " (" + msg.argcount() + " arguments)");
 		} else {
-			logger.warn("Unhandled message code: " + msg.getCommand() + " (" + msg.argcount() + " arguments)");
+			logger.warn("Unhandled commandMessage code: " + msg.getCommand() + " (" + msg.argcount() + " arguments)");
 		}
 		return true;
 	}
@@ -353,7 +353,7 @@ public class IRCConnection implements Runnable {
 		String cmd = msg.getCommand();
 		if(cmd.equals("PING")) {
 			irc("PONG " + msg.arg(0));
-		} else if(cmd.equals("PRIVMSG")) {
+		} else if(cmd.equals("PRIVMSG") || cmd.equals("WHISPER")) {
 			IRCUser user = null;
 			if(msg.getNick() != null) {
 				user = getOrCreateUser(msg.getNick());
@@ -367,13 +367,13 @@ public class IRCConnection implements Runnable {
 			}
 			if(channelTypes.indexOf(target.charAt(0)) != -1) {
 				IRCChannel channel = getChannel(target);
-				if(user != null) {
+				if (user != null) {
 					user.setNameColor(msg.getTagByKey("color"));
 					user.setDisplayName(msg.getTagByKey("display-name"));
 					user.setTwitchSubscriber(msg.getTagByKey("subscriber").equals("1"));
 					user.setTwitchTurbo(msg.getTagByKey("turbo").equals("1"));
 					String userType = msg.getTagByKey("user-type");
-					switch(userType) {
+					switch (userType) {
 						case "mod":
 						case "global_mod":
 							user.setChannelUserMode(channel, IRCChannelUserMode.OPER);

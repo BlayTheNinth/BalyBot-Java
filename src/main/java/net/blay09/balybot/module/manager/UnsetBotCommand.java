@@ -1,28 +1,34 @@
-package net.blay09.balybot.command;
+package net.blay09.balybot.module.manager;
 
 import net.blay09.balybot.UserLevel;
+import net.blay09.balybot.command.BotCommand;
 import net.blay09.balybot.irc.IRCChannel;
 import net.blay09.balybot.irc.IRCUser;
 import net.blay09.balybot.CommandHandler;
 
 public class UnsetBotCommand extends BotCommand {
 
-    public UnsetBotCommand() {
-        super("unset", "^!unset(?:\\s+(.*)|$)", UserLevel.MODERATOR);
+    private final char prefix;
+
+    public UnsetBotCommand(char prefix) {
+        super("unset", "^" + prefix + "unset(?:\\s+(.*)|$)", UserLevel.MODERATOR);
+        this.prefix = prefix;
+    }
+
+    private String getCommandSyntax() {
+        return prefix + "unset <name|id>";
     }
 
     @Override
-    public void execute(IRCChannel channel, IRCUser sender, String[] args) {
+    public String execute(IRCChannel channel, IRCUser sender, String message, String[] args, int depth) {
         if(args.length < 1) {
-            channel.message("Not enough parameters for unset command. Syntax: !unset <name|id>");
-            return;
+            return "Not enough parameters for unset command. Syntax: " + getCommandSyntax();
         }
 
         String name = args[0];
         for(BotCommand botCommand : CommandHandler.getGlobalCommands()) {
             if (botCommand.name.equals(name)) {
-                channel.message("Command '" + botCommand.name + "' can not be removed.");
-                return;
+                return "Command '" + botCommand.name + "' can not be removed.";
             }
         }
         BotCommand foundCommand = null;
@@ -47,12 +53,12 @@ public class UnsetBotCommand extends BotCommand {
 
         if(foundCommand != null) {
             if(CommandHandler.unregisterCommand(channel, foundCommand)) {
-                channel.message("Command successfully removed: " + name);
+                return "Command successfully removed: " + foundCommand.name;
             } else {
-                channel.message("Unexpected error, could not remove command!");
+                return "Unexpected error, could not remove command!";
             }
         } else {
-            channel.message("Command not found: " + name);
+            return "Command not found: " + name;
         }
     }
 

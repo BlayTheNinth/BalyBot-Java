@@ -5,15 +5,23 @@ import com.google.common.eventbus.Subscribe;
 import net.blay09.balybot.Config;
 import net.blay09.balybot.Database;
 import net.blay09.balybot.irc.event.TwitchHostStartEvent;
-import net.blay09.balybot.module.linkfilter.LinkFilter;
+import net.blay09.balybot.module.Module;
+import net.blay09.balybot.module.linkfilter.ModuleLinkFilter;
 
-// TODO move into separate module
-public class HostNotifier {
+public class ModuleHostNotifier extends Module {
 
-    private static final LinkFilter instance = new LinkFilter();
+    public ModuleHostNotifier(String context, char prefix) {
+        super(context, prefix);
+    }
 
-    public static void load(Database database, EventBus eventBus) {
-        eventBus.register(instance);
+    @Override
+    public void activate(EventBus eventBus) {
+        eventBus.register(this);
+    }
+
+    @Override
+    public void deactivate(EventBus eventBus) {
+        eventBus.unregister(this);
     }
 
     @Subscribe

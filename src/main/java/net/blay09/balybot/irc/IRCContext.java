@@ -37,18 +37,18 @@ public interface IRCContext {
 	IRCConnection getConnection();
 
 	/**
-	 * Sends a message to this IRC context.
-	 * Raw IRC Equivalent: PRIVMSG getName() :message
+	 * Sends a commandMessage to this IRC context.
+	 * Raw IRC Equivalent: PRIVMSG getName() :commandMessage
 	 * Does nothing for types IRCConnection and Error.
-	 * @param message the message to be sent to this context
+	 * @param message the commandMessage to be sent to this context
 	 */
 	void message(String message);
 
 	/**
 	 * Sends a notice to this IRC context.
-	 * Raw IRC Equivalent: NOTICE getName() :message
+	 * Raw IRC Equivalent: NOTICE getName() :commandMessage
 	 * Does nothing for types IRCConnection and Error.
-	 * @param message the message to be sent to this context
+	 * @param message the commandMessage to be sent to this context
 	 */
 	void notice(String message);
 

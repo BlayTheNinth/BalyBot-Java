@@ -8,36 +8,43 @@ import org.apache.commons.lang3.StringUtils;
 
 public class CountedChatPollBotCommand extends BotCommand {
 
-    public CountedChatPollBotCommand() {
-        super("ccp", "^!ccp\\s?(.*)", UserLevel.MODERATOR);
+    private final ModuleCountedChatPoll module;
+    private final char prefix;
+
+    public CountedChatPollBotCommand(ModuleCountedChatPoll module, char prefix) {
+        super("ccp", "^" + prefix + "ccp\\s?(.*)", UserLevel.MODERATOR);
+        this.module = module;
+        this.prefix = prefix;
+    }
+
+    private String getCommandSyntax() {
+        return prefix + "ccp (start|stop) [maxCount] [text] [description]";
     }
 
     @Override
-    public void execute(IRCChannel channel, IRCUser sender, String[] args) {
+    public String execute(IRCChannel channel, IRCUser sender, String message, String[] args, int depth) {
         if(args.length < 1) {
-            channel.message("Not enough parameters for ccp command. Syntax: !ccp (start|stop) <text> <maxCount> [description]");
-            return;
+            return "Not enough parameters for ccp command. Syntax: " + getCommandSyntax();
         }
-        if(args[0].equals("start")) {
-            if(args.length < 3) {
-                channel.message("Not enough parameters for ccp command. Syntax: !ccp start <text> <maxCount> [description]");
-                return;
-            }
-            int maxCount;
-            try {
-                maxCount = Integer.parseInt(args[2]);
-                if(maxCount < 1 || maxCount > 12) {
-                    channel.message("Parameter 'maxCount' must be within 1 and 12. Syntax: !ccp start <text> <maxCount>");
+        switch (args[0]) {
+            case "start":
+                if (args.length < 3) {
+                    return "Not enough parameters for ccp command. Syntax: " + getCommandSyntax();
                 }
-            } catch (NumberFormatException e) {
-                channel.message("Expected numeric value for parameter 'maxCount'. Syntax: !ccp start <text> <maxCount>");
-                return;
-            }
-            CountedChatPoll.instance.startPoll(channel, args[1], maxCount, args.length > 3 ? String.join(" ", StringUtils.join(args, ' ', 3, args.length)) : null);
-        } else if(args[0].equals("stop")) {
-            CountedChatPoll.instance.stop(channel);
-        } else {
-            channel.message("Invalid parameters for ccp command. Syntax: !ccp (start|stop) [text] [maxCount]");
+                int maxCount;
+                try {
+                    maxCount = Integer.parseInt(args[1]);
+                    if (maxCount < 1 || maxCount > 12) {
+                        return "Parameter 'maxCount' must be within 1 and 12. Syntax: " + getCommandSyntax();
+                    }
+                } catch (NumberFormatException e) {
+                    return "Expected numeric value for parameter 'maxCount'. Syntax: " + getCommandSyntax();
+                }
+                return module.startPoll(channel, args[2], maxCount, args.length > 3 ? String.join(" ", StringUtils.join(args, ' ', 3, args.length)) : null);
+            case "stop":
+                return module.stop(channel);
+            default:
+                return "Invalid parameters for ccp command. Syntax: " + getCommandSyntax();
         }
     }
 

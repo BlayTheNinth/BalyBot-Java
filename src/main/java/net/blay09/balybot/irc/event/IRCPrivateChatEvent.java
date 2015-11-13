@@ -7,44 +7,44 @@ import net.blay09.balybot.irc.IRCMessage;
 import net.blay09.balybot.irc.IRCUser;
 
 /**
- * This event is published on the MinecraftForge.EVENTBUS bus whenever a private message was sent to EiraIRC from IRC.
- * If this event is cancelled, EiraIRC will not post the message in chat.
+ * This event is published on the MinecraftForge.EVENTBUS bus whenever a private commandMessage was sent to EiraIRC from IRC.
+ * If this event is cancelled, EiraIRC will not post the commandMessage in chat.
  */
 public class IRCPrivateChatEvent extends IRCEvent {
 
 	/**
-	 * the user that sent this IRC message
+	 * the user that sent this IRC commandMessage
 	 */
 	public final IRCUser sender;
 
 	/**
-	 * the raw IRC message that was sent
+	 * the raw IRC commandMessage that was sent
 	 */
 	public final IRCMessage rawMessage;
 
 	/**
-	 * the message that was sent
+	 * the commandMessage that was sent
 	 */
 	public final String message;
 
 	/**
-	 * true, if this message is an emote
+	 * true, if this commandMessage is an emote
 	 */
 	public final boolean isEmote;
 
 	/**
-	 * true, fi this message was sent as a NOTICE
+	 * true, fi this commandMessage was sent as a NOTICE
 	 */
 	public final boolean isNotice;
 
 	/**
 	 * INTERNAL EVENT. YOU SHOULD NOT POST THIS YOURSELF.
-	 * @param connection the connection this IRC message came from
-	 * @param sender the user that sent this IRC message
-	 * @param rawMessage the raw IRC message that was sent
-	 * @param message the message that was sent
-	 * @param isEmote true, if this message is an emote
-	 * @param isNotice true, if this message was sent as a NOTICE
+	 * @param connection the connection this IRC commandMessage came from
+	 * @param sender the user that sent this IRC commandMessage
+	 * @param rawMessage the raw IRC commandMessage that was sent
+	 * @param message the commandMessage that was sent
+	 * @param isEmote true, if this commandMessage is an emote
+	 * @param isNotice true, if this commandMessage was sent as a NOTICE
 	 */
 	public IRCPrivateChatEvent(IRCConnection connection, IRCUser sender, IRCMessage rawMessage, String message, boolean isEmote, boolean isNotice) {
 		super(connection);

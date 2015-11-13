@@ -14,20 +14,26 @@ import java.util.TimeZone;
 
 public class TimeBotCommand extends BotCommand {
 
-    public TimeBotCommand() {
-        super("time", "^!time\\s?(.*)", UserLevel.ALL);
+    private final char prefix;
+
+    public TimeBotCommand(char prefix) {
+        super("time", "^" + prefix + "time\\s?(.*)", UserLevel.ALL);
+        this.prefix = prefix;
+    }
+
+    private String getCommandSyntax() {
+        return prefix + "time <timezone>";
     }
 
     @Override
-    public void execute(IRCChannel channel, IRCUser sender, String[] args) {
+    public String execute(IRCChannel channel, IRCUser sender, String message, String[] args, int depth) {
         String timeZoneID;
         if(args.length > 0) {
             timeZoneID = String.join(" ", args);
         } else if(Config.hasOption(channel.getName(), "timezone")){
             timeZoneID = Config.getValue(channel.getName(), "timezone");
         } else {
-            channel.message("Not enough parameters for time command. Syntax: !time <timezone>");
-            return;
+            return "Not enough parameters for time command. Syntax: !time <timezone>";
         }
         String[] availableIDs = TimeZone.getAvailableIDs();
         for(String s : availableIDs) {
@@ -35,11 +41,10 @@ public class TimeBotCommand extends BotCommand {
                 TimeZone timeZone = TimeZone.getTimeZone(timeZoneID);
                 DateFormat dateFormat = new SimpleDateFormat("h:m a (H:m)");
                 dateFormat.setTimeZone(timeZone);
-                channel.message("The time in " + timeZone.getDisplayName(Locale.ENGLISH) + " is currently " + dateFormat.format(new Date(System.currentTimeMillis())) + ".");
-                return;
+                return "The time in " + timeZone.getDisplayName(Locale.ENGLISH) + " is currently " + dateFormat.format(new Date(System.currentTimeMillis())) + ".";
             }
         }
-        channel.message("Invalid timezone '" + timeZoneID + "'.");
+        return "Invalid timezone '" + timeZoneID + "'.";
     }
 
 }

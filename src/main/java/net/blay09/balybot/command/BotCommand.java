@@ -14,20 +14,22 @@ public abstract class BotCommand {
     public final Pattern pattern;
     public UserLevel minUserLevel;
     public final String condition;
+    public final String whisperTo;
 
     public BotCommand(String name, String regex, UserLevel minUserLevel) {
-        this(name, regex, minUserLevel, null);
+        this(name, regex, minUserLevel, null, null);
     }
 
-    public BotCommand(String name, String regex, UserLevel minUserLevel, String condition) {
+    public BotCommand(String name, String regex, UserLevel minUserLevel, String condition, String whisperTo) {
         this.name = name;
         this.regex = regex;
         this.pattern = Pattern.compile(regex);
         this.minUserLevel = minUserLevel;
         this.condition = condition;
+        this.whisperTo = whisperTo;
     }
 
-    public abstract void execute(IRCChannel channel, IRCUser sender, String[] args);
+    public abstract String execute(IRCChannel channel, IRCUser sender, String message, String[] args, int depth);
 
     public void setId(int id) {
         this.id = id;

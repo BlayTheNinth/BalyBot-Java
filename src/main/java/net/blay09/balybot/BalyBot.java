@@ -2,13 +2,20 @@ package net.blay09.balybot;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
-import net.blay09.balybot.expr.ExpressionLibrary;
 import net.blay09.balybot.irc.IRCConfig;
 import net.blay09.balybot.irc.IRCConnection;
 import net.blay09.balybot.irc.event.IRCConnectEvent;
-import net.blay09.balybot.module.linkfilter.LinkFilter;
-import net.blay09.balybot.module.ccpoll.CountedChatPoll;
+import net.blay09.balybot.module.Module;
+import net.blay09.balybot.module.calc.ModuleMath;
+import net.blay09.balybot.module.ccpoll.CountedChatPollBotCommand;
+import net.blay09.balybot.module.hostnotifier.ModuleHostNotifier;
+import net.blay09.balybot.module.linkfilter.ModuleLinkFilter;
+import net.blay09.balybot.module.ccpoll.ModuleCountedChatPoll;
+import net.blay09.balybot.module.manager.ModuleManager;
+import net.blay09.balybot.module.song.ModuleSong;
+import net.blay09.balybot.module.time.ModuleTime;
 import net.blay09.balybot.module.timer.TimerHandler;
+import net.blay09.balybot.module.uptime.ModuleUptime;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -59,16 +66,25 @@ public class BalyBot {
     private final Database database;
     private final EventBus eventBus;
     private IRCConnection connection;
+    private IRCConnection groupConnection;
 
     public BalyBot() {
         logger.info("Loading BalyBot {0}...", VERSION);
         database = new Database("balybot.db");
         eventBus = new EventBus();
 
+        Module.registerModule("manager", ModuleManager.class);
+        Module.registerModule("linkfilter", ModuleLinkFilter.class);
+        Module.registerModule("math", ModuleMath.class);
+        Module.registerModule("ccp", ModuleCountedChatPoll.class);
+        Module.registerModule("song", ModuleSong.class);
+        Module.registerModule("time", ModuleTime.class);
+        Module.registerModule("hostnotifier", ModuleHostNotifier.class);
+        Module.registerModule("uptime", ModuleUptime.class);
+
+        Module.load(database, eventBus);
         CommandHandler.load(database, eventBus);
-        LinkFilter.load(database, eventBus);
         TimerHandler.load(database, eventBus);
-        eventBus.register(CountedChatPoll.instance);
         eventBus.register(this);
 
         load();
@@ -121,6 +137,10 @@ public class BalyBot {
         event.connection.irc("CAP REQ :twitch.tv/tags");
         event.connection.irc("CAP REQ :twitch.tv/commands");
 
+        if(event.connection != connection) {
+            return;
+        }
+
         try {
             Statement stmt = database.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT * FROM channels");
@@ -142,6 +162,14 @@ public class BalyBot {
         config.serverPassword = Config.getValue("*", "oauth");
         connection = new IRCConnection(config, Config.getValue("*", "username"), eventBus);
         connection.start();
+
+        IRCConfig groupConfig = new IRCConfig();
+        groupConfig.host = Config.getValue("*", "groupServer");
+        groupConfig.ident = Config.getValue("*", "username");
+        groupConfig.realName = "BalyBot v" + VERSION;
+        groupConfig.serverPassword = Config.getValue("*", "oauth");
+        groupConnection = new IRCConnection(groupConfig, Config.getValue("*", "username"), eventBus);
+        groupConnection.start();
     }
 
     public Database getDatabase() {
@@ -152,4 +180,7 @@ public class BalyBot {
         return connection;
     }
 
+    public IRCConnection getGroupConnection() {
+        return groupConnection;
+    }
 }

@@ -1,41 +1,61 @@
-package net.blay09.balybot.command;
+package net.blay09.balybot.module.manager;
 
 import net.blay09.balybot.UserLevel;
+import net.blay09.balybot.command.BotCommand;
+import net.blay09.balybot.command.MessageBotCommand;
 import net.blay09.balybot.expr.ExpressionLibrary;
 import net.blay09.balybot.irc.IRCChannel;
 import net.blay09.balybot.irc.IRCUser;
 import net.blay09.balybot.CommandHandler;
+import org.apache.commons.lang3.StringUtils;
 
-import java.util.Arrays;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 public class SetRegexBotCommand extends BotCommand {
 
-    public SetRegexBotCommand() {
-        super("setrgx", "^!setrgx\\s?(.*)", UserLevel.MODERATOR);
+    private final char prefix;
+
+    public SetRegexBotCommand(char prefix) {
+        super("setregex", "^" + prefix + "setregex(?:\\s+(.*)|$)", UserLevel.MODERATOR);
+        this.prefix = prefix;
+    }
+
+    private String getCommandSyntax() {
+        return prefix + "setrgx [-ul userLevel] [-if condition] [-whisperto receiver] <pattern> <commandMessage>";
     }
 
     @Override
-    public void execute(IRCChannel channel, IRCUser sender, String[] args) {
+    public String execute(IRCChannel channel, IRCUser sender, String message, String[] args, int depth) {
         if(args.length < 2) {
-            channel.message("Not enough parameters for setrgx command. Syntax: !setrgx [-ul userLevel] [-if condition] <pattern> <message>");
-            return;
+            return "Not enough parameters for setrgx command. Syntax: " + getCommandSyntax();
         }
 
-        UserLevel userLevel = UserLevel.ALL;
+        UserLevel userLevel = null;
         String condition = null;
+        String whisperTo = null;
         int startIdx = 0;
         for(int i = 0; i < args.length; i++) {
             if (args[i].equals("-ul")) {
                 i++;
-                userLevel = UserLevel.fromName(args[i]);
-                if(userLevel == null) {
-                    channel.message("Invalid user level '" + args[1] + "'. Valid are: all, turbo, reg, sub, mod, broadcaster, owner");
-                    return;
+                if(i >= args.length) {
+                    return "Not enough parameters for setrgx command. Syntax: " + getCommandSyntax();
                 }
+                userLevel = UserLevel.fromName(args[i]);
+                if (userLevel == null) {
+                    return "Invalid user level '" + args[1] + "'. Valid are: all, turbo, reg, sub, mod, broadcaster, owner";
+                }
+            } else if (args[i].equals("-whisperto")) {
+                i++;
+                if(i >= args.length) {
+                    return "Not enough parameters for setrgx command. Syntax: " + getCommandSyntax();
+                }
+                whisperTo = args[i];
             } else if (args[i].equals("-if")) {
                 i++;
+                if(i >= args.length) {
+                    return "Not enough parameters for setrgx command. Syntax: " + getCommandSyntax();
+                }
                 if(args[i].startsWith("[")) {
                     StringBuilder sb = new StringBuilder();
                     if(args[i].length() > 1) {
@@ -68,8 +88,7 @@ public class SetRegexBotCommand extends BotCommand {
                         throw new RuntimeException("Return value is not a boolean.");
                     }
                 } catch (Throwable e) {
-                    channel.message("The supplied condition is invalid: " + e.getMessage());
-                    return;
+                    return "The supplied condition is invalid: " + e.getMessage();
                 }
             } else {
                 startIdx = i;
@@ -81,34 +100,38 @@ public class SetRegexBotCommand extends BotCommand {
         try {
             Pattern.compile(pattern);
         } catch (PatternSyntaxException e) {
-            channel.message("Regex Syntax Error: " + e.getMessage());
-            return;
+            return "Regex Syntax Error: " + e.getMessage();
         }
 
         boolean overwrite = false;
         String name = args[startIdx];
         for(BotCommand botCommand : CommandHandler.getGlobalCommands()) {
             if (botCommand.name.equals(name)) {
-                channel.message("Command '" + botCommand.name + "' can not be edited.");
-                return;
+                return "Command '" + botCommand.name + "' can not be edited.";
             }
         }
         for(BotCommand botCommand : CommandHandler.getChannelCommands(channel)) {
             if(botCommand.name.equals(name)) {
                 if(!CommandHandler.unregisterCommand(channel, botCommand)) {
-                    channel.message("Unexpected error, could not edit command!");
-                    return;
+                    return "Unexpected error, could not edit command!";
+                }
+                if(userLevel == null) {
+                    userLevel = botCommand.minUserLevel;
                 }
                 overwrite = true;
                 break;
             }
         }
 
-        String message = String.join(" ", Arrays.copyOfRange(args, startIdx + 1, args.length));
-        if(CommandHandler.registerMessageCommand(channel, new MessageBotCommand(pattern, pattern, message, userLevel, condition))) {
-            channel.message("Command successfully " + (overwrite ? "edited" : "registered") + ": " + pattern);
+        if(userLevel == null) {
+            userLevel = UserLevel.ALL;
+        }
+
+        String commandMessage = StringUtils.join(args, ' ', startIdx + 1, args.length);
+        if(CommandHandler.registerMessageCommand(channel, new MessageBotCommand(pattern, pattern, commandMessage, userLevel, condition, whisperTo))) {
+            return "Command successfully " + (overwrite ? "edited" : "registered") + ": " + pattern;
         } else {
-            channel.message("Unexpected error, could not save command!");
+            return "Unexpected error, could not save command!";
         }
     }
 

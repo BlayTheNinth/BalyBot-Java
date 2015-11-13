@@ -22,7 +22,7 @@ public class IRCUserLeaveEvent extends IRCEvent {
 	public final IRCUser user;
 
 	/**
-	 * the quit message that was sent along
+	 * the quit commandMessage that was sent along
 	 */
 	public final String message;
 
@@ -31,7 +31,7 @@ public class IRCUserLeaveEvent extends IRCEvent {
 	 * @param connection the connection this event is based on
 	 * @param channel the channel that the user left
 	 * @param user the user that left the channel
-	 * @param message the quit message that was sent along
+	 * @param message the quit commandMessage that was sent along
 	 */
 	public IRCUserLeaveEvent(IRCConnection connection, IRCChannel channel, IRCUser user, String message) {
 		super(connection);

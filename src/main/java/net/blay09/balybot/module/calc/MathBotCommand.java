@@ -5,26 +5,36 @@ import net.blay09.balybot.UserLevel;
 import net.blay09.balybot.command.BotCommand;
 import net.blay09.balybot.irc.IRCChannel;
 import net.blay09.balybot.irc.IRCUser;
-import org.apache.commons.lang3.StringUtils;
 
 public class MathBotCommand extends BotCommand {
 
-    public MathBotCommand() {
-        super("math", "^!math\\s?(.*)", UserLevel.REGULAR);
+    private final char prefix;
+
+    public MathBotCommand(char prefix) {
+        super("math", "^" + prefix + "math\\s?(.*)", UserLevel.REGULAR);
+        this.prefix = prefix;
+    }
+
+    private String getCommandSyntax() {
+        return prefix + "math <expression>";
     }
 
     @Override
-    public void execute(IRCChannel channel, IRCUser sender, String[] args) {
-        String message = StringUtils.join(args, ' ', 0, args.length);
+    public String execute(IRCChannel channel, IRCUser sender, String message, String[] args, int depth) {
+        int startIdx = message.indexOf(' ');
+        if(startIdx == -1) {
+            return "Not enough parameters for math command. Syntax: " + getCommandSyntax();
+        }
+        String expr = message.substring(startIdx);
         try {
-            Object result = ExpressionLibrary.eval(channel, message);
+            Object result = ExpressionLibrary.eval(channel, expr);
             if (result == null) {
-                channel.message(message + " = void");
+                return expr + " = void";
             } else {
-                channel.message(message + " = " + result.toString());
+                return expr + " = " + result.toString();
             }
         } catch (Throwable e) {
-            channel.message("Invalid expression: " + e.getMessage());
+            return "Invalid expression: " + e.getMessage();
         }
     }
 
