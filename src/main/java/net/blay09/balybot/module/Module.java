@@ -11,10 +11,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public abstract class Module {
 
@@ -33,8 +30,7 @@ public abstract class Module {
                 Class<? extends Module> moduleClass = availableModules.get(rs.getString("module_name"));
                 if (moduleClass != null) {
                     try {
-                        String modulePrefix = rs.getString("module_prefix");
-                        Module module = moduleClass.getConstructor(String.class, char.class).newInstance(rs.getString("channel_name"), modulePrefix.length() > 0 ? modulePrefix.charAt(0) : '!');
+                        Module module = moduleClass.getConstructor(String.class, String.class).newInstance(rs.getString("channel_name"), rs.getString("module_prefix"));
                         ;
                         module.activate(eventBus);
                         activeModules.put(module.getOwnerContext(), module);
@@ -50,9 +46,9 @@ public abstract class Module {
 
     private final List<BotCommand> commands = new ArrayList<>();
     protected final String context;
-    protected final char prefix;
+    protected final String prefix;
 
-    public Module(String context, char prefix) {
+    public Module(String context, String prefix) {
         this.context = context;
         this.prefix = prefix;
     }
@@ -73,5 +69,27 @@ public abstract class Module {
 
     public String getOwnerContext() {
         return context;
+    }
+
+    public abstract String getModuleCode();
+
+    public String getModuleName() {
+        return getModuleCode();
+    }
+
+    public String getModuleDescription() {
+        return "<no description set>";
+    }
+
+    public static Collection<Module> getActiveModules(String channel) {
+        return activeModules.get(channel);
+    }
+
+    public Collection<BotCommand> getCommands() {
+        return commands;
+    }
+
+    public String getPrefix() {
+        return prefix;
     }
 }

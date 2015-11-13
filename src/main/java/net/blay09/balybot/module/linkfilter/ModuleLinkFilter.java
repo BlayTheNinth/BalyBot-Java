@@ -23,7 +23,7 @@ public class ModuleLinkFilter extends Module {
 
     private final List<String> permissions = new ArrayList<>();
 
-    public ModuleLinkFilter(String context, char prefix) {
+    public ModuleLinkFilter(String context, String prefix) {
         super(context, prefix);
     }
 
@@ -61,5 +61,20 @@ public class ModuleLinkFilter extends Module {
 
     public void permit(String username) {
         permissions.add(username);
+    }
+
+    @Override
+    public String getModuleCode() {
+        return "linkfilter";
+    }
+
+    @Override
+    public String getModuleName() {
+        return "Link Filter";
+    }
+
+    @Override
+    public String getModuleDescription() {
+        return "Prevents people below a certain user level (linkfilter_userlevel) from posting links, unless they have been permitted using the !permit command.";
     }
 }

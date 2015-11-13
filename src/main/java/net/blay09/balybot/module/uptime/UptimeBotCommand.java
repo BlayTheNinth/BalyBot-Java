@@ -12,8 +12,16 @@ import java.net.URL;
 
 public class UptimeBotCommand extends BotCommand {
 
-    public UptimeBotCommand(char prefix) {
-        super("uptime", "^" + prefix + "uptime\\s?(.*)", UserLevel.ALL);
+    private final String prefix;
+
+    public UptimeBotCommand(String prefix) {
+        super("uptime", "^" + prefix + "uptime(?:\\s+(.*)|$)", UserLevel.ALL);
+        this.prefix = prefix;
+    }
+
+    @Override
+    public String getCommandSyntax() {
+        return prefix + "uptime";
     }
 
     @Override

@@ -1,5 +1,7 @@
 package net.blay09.balybot.module.manager;
 
+import net.blay09.balybot.BalyBot;
+import net.blay09.balybot.DocBuilder;
 import net.blay09.balybot.UserLevel;
 import net.blay09.balybot.command.BotCommand;
 import net.blay09.balybot.command.SimpleMessageBotCommand;
@@ -11,14 +13,15 @@ import org.apache.commons.lang3.StringUtils;
 
 public class SetBotCommand extends BotCommand {
 
-    private final char prefix;
+    private final String prefix;
 
-    public SetBotCommand(char prefix) {
+    public SetBotCommand(String prefix) {
         super("set", "^" + prefix + "set(?:\\s+(.*)|$)", UserLevel.MODERATOR);
         this.prefix = prefix;
     }
 
-    private String getCommandSyntax() {
+    @Override
+    public String getCommandSyntax() {
         return prefix + "set [-ul userLevel] [-if condition] [-whisperto receiver] <name> <commandMessage>";
     }
 

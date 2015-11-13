@@ -38,4 +38,8 @@ public abstract class BotCommand {
     public void setUserLevel(UserLevel minUserLevel) {
         this.minUserLevel = minUserLevel;
     }
+
+    public String getCommandSyntax() {
+        return "<no syntax set>";
+    }
 }

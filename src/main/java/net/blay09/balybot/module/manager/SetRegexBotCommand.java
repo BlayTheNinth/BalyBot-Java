@@ -14,14 +14,15 @@ import java.util.regex.PatternSyntaxException;
 
 public class SetRegexBotCommand extends BotCommand {
 
-    private final char prefix;
+    private final String prefix;
 
-    public SetRegexBotCommand(char prefix) {
+    public SetRegexBotCommand(String prefix) {
         super("setregex", "^" + prefix + "setregex(?:\\s+(.*)|$)", UserLevel.MODERATOR);
         this.prefix = prefix;
     }
 
-    private String getCommandSyntax() {
+    @Override
+    public String getCommandSyntax() {
         return prefix + "setrgx [-ul userLevel] [-if condition] [-whisperto receiver] <pattern> <commandMessage>";
     }
 

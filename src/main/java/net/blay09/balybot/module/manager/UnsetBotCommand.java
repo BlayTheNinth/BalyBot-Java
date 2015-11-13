@@ -8,14 +8,15 @@ import net.blay09.balybot.CommandHandler;
 
 public class UnsetBotCommand extends BotCommand {
 
-    private final char prefix;
+    private final String prefix;
 
-    public UnsetBotCommand(char prefix) {
+    public UnsetBotCommand(String prefix) {
         super("unset", "^" + prefix + "unset(?:\\s+(.*)|$)", UserLevel.MODERATOR);
         this.prefix = prefix;
     }
 
-    private String getCommandSyntax() {
+    @Override
+    public String getCommandSyntax() {
         return prefix + "unset <name|id>";
     }
 

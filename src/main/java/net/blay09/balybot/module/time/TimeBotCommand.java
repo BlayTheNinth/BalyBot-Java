@@ -14,14 +14,15 @@ import java.util.TimeZone;
 
 public class TimeBotCommand extends BotCommand {
 
-    private final char prefix;
+    private final String prefix;
 
-    public TimeBotCommand(char prefix) {
-        super("time", "^" + prefix + "time\\s?(.*)", UserLevel.ALL);
+    public TimeBotCommand(String prefix) {
+        super("time", "^" + prefix + "time(?:\\s+(.*)|$)", UserLevel.ALL);
         this.prefix = prefix;
     }
 
-    private String getCommandSyntax() {
+    @Override
+    public String getCommandSyntax() {
         return prefix + "time <timezone>";
     }
 
@@ -30,8 +31,8 @@ public class TimeBotCommand extends BotCommand {
         String timeZoneID;
         if(args.length > 0) {
             timeZoneID = String.join(" ", args);
-        } else if(Config.hasOption(channel.getName(), "timezone")){
-            timeZoneID = Config.getValue(channel.getName(), "timezone");
+        } else if(Config.hasOption(channel.getName(), "time_timezone")){
+            timeZoneID = Config.getValue(channel.getName(), "time_timezone");
         } else {
             return "Not enough parameters for time command. Syntax: !time <timezone>";
         }

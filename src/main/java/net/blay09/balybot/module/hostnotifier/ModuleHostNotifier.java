@@ -10,7 +10,7 @@ import net.blay09.balybot.module.linkfilter.ModuleLinkFilter;
 
 public class ModuleHostNotifier extends Module {
 
-    public ModuleHostNotifier(String context, char prefix) {
+    public ModuleHostNotifier(String context, String prefix) {
         super(context, prefix);
     }
 
@@ -26,13 +26,26 @@ public class ModuleHostNotifier extends Module {
 
     @Subscribe
     public void onStartHosting(TwitchHostStartEvent event) {
-        if(Config.getValue(event.channel.getName(), "host_notifier", "false").equals("true")) {
-            if(event.viewerCount >= Integer.parseInt(Config.getValue(event.channel.getName(), "host_notifier_minviewers", "2"))) {
-                String message = Config.getValue(event.channel.getName(), "host_notifier_message", "Guys, guys!! {HOSTNAME} is hosting us! Quick, hug them!");
-                message = message.replace("{HOSTCHANNEL}", event.hostingChannel);
-                message = message.replace("{HOSTVIEWERS}", String.valueOf(event.viewerCount));
-                event.channel.message(message);
-            }
+        if(event.viewerCount >= Integer.parseInt(Config.getValue(event.channel.getName(), "hostnotifier_minviewers", "2"))) {
+            String message = Config.getValue(event.channel.getName(), "hostnotifier_message", "Guys, guys!! {HOSTCHANNEL} is hosting us! Quick, hug them!");
+            message = message.replace("{HOSTCHANNEL}", event.hostingChannel);
+            message = message.replace("{HOSTVIEWERS}", String.valueOf(event.viewerCount));
+            event.channel.message(message);
         }
+    }
+
+    @Override
+    public String getModuleCode() {
+        return "hostnotifier";
+    }
+
+    @Override
+    public String getModuleName() {
+        return "Host Notifier";
+    }
+
+    @Override
+    public String getModuleDescription() {
+        return "Sends a configured message (hostnotifier_message) when someone hosts the channel for a minimum of (hostnotifier_minviewers) viewers. The message can contain the variables {HOSTCHANNEL} and {HOSTVIEWERS}.";
     }
 }

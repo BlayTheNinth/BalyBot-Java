@@ -11,14 +11,15 @@ import java.util.Arrays;
 
 public class ConfigBotCommand extends BotCommand {
 
-    private final char prefix;
+    private final String prefix;
 
-    public ConfigBotCommand(char prefix) {
-        super("cfg", "^" + prefix + "cfg\\s?(.*)", UserLevel.BROADCASTER);
+    public ConfigBotCommand(String prefix) {
+        super("cfg", "^" + prefix + "cfg(?:\\s+(.*)|$)", UserLevel.BROADCASTER);
         this.prefix = prefix;
     }
 
-    private String getCommandSyntax() {
+    @Override
+    public String getCommandSyntax() {
         return prefix + "cfg [channel] <option> <value>";
     }
 

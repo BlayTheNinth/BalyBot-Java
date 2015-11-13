@@ -8,14 +8,15 @@ import net.blay09.balybot.irc.IRCUser;
 
 public class RegularBotCommand extends BotCommand {
 
-    private final char prefix;
+    private final String prefix;
 
-    public RegularBotCommand(char prefix) {
-        super("reg", "^" + prefix + "reg\\s?(.*)", UserLevel.MODERATOR);
+    public RegularBotCommand(String prefix) {
+        super("reg", "^" + prefix + "reg(?:\\s+(.*)|$)", UserLevel.MODERATOR);
         this.prefix = prefix;
     }
 
-    private String getCommandSyntax() {
+    @Override
+    public String getCommandSyntax() {
         return prefix + "reg <add|remove> <username>";
     }
 

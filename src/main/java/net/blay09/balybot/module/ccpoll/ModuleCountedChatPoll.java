@@ -25,7 +25,7 @@ public class ModuleCountedChatPoll extends Module {
 
     private Poll currentPoll;
 
-    public ModuleCountedChatPoll(String context, char prefix) {
+    public ModuleCountedChatPoll(String context, String prefix) {
         super(context, prefix);
     }
 
@@ -124,5 +124,20 @@ public class ModuleCountedChatPoll extends Module {
                 return "Duodecuple";
         }
         return null;
+    }
+
+    @Override
+    public String getModuleCode() {
+        return "ccp";
+    }
+
+    @Override
+    public String getModuleName() {
+        return "Counted Chat Polls";
+    }
+
+    @Override
+    public String getModuleDescription() {
+        return "Provides the !ccp command to create polls that are voted for within chat by posting a certain amount of emoticons. Returns percentages and an average.";
     }
 }

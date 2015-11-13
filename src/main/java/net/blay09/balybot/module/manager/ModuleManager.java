@@ -5,7 +5,7 @@ import net.blay09.balybot.module.Module;
 
 public class ModuleManager extends Module {
 
-    public ModuleManager(String context, char prefix) {
+    public ModuleManager(String context, String prefix) {
         super(context, prefix);
     }
 
@@ -23,4 +23,18 @@ public class ModuleManager extends Module {
     public void deactivate(EventBus eventBus) {
     }
 
+    @Override
+    public String getModuleCode() {
+        return "manager";
+    }
+
+    @Override
+    public String getModuleName() {
+        return "Manager Module";
+    }
+
+    @Override
+    public String getModuleDescription() {
+        return "Base module of the bot. Provides commands to define and edit other commands, as well as regular handling using !reg.";
+    }
 }

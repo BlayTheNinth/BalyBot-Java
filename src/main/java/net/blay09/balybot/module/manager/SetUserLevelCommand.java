@@ -9,14 +9,15 @@ import net.blay09.balybot.irc.IRCUser;
 
 public class SetUserLevelCommand extends BotCommand {
 
-    private final char prefix;
+    private final String prefix;
 
-    public SetUserLevelCommand(char prefix) {
+    public SetUserLevelCommand(String prefix) {
         super("setul", "^" + prefix + "setul(?:\\s+(.*)|$)", UserLevel.MODERATOR);
         this.prefix = prefix;
     }
 
-    private String getCommandSyntax() {
+    @Override
+    public String getCommandSyntax() {
         return prefix + "setul <name|id> <userlevel>";
     }
 

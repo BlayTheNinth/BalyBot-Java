@@ -9,15 +9,16 @@ import org.apache.commons.lang3.StringUtils;
 public class CountedChatPollBotCommand extends BotCommand {
 
     private final ModuleCountedChatPoll module;
-    private final char prefix;
+    private final String prefix;
 
-    public CountedChatPollBotCommand(ModuleCountedChatPoll module, char prefix) {
-        super("ccp", "^" + prefix + "ccp\\s?(.*)", UserLevel.MODERATOR);
+    public CountedChatPollBotCommand(ModuleCountedChatPoll module, String prefix) {
+        super("ccp", "^" + prefix + "ccp(?:\\s+(.*)|$)", UserLevel.MODERATOR);
         this.module = module;
         this.prefix = prefix;
     }
 
-    private String getCommandSyntax() {
+    @Override
+    public String getCommandSyntax() {
         return prefix + "ccp (start|stop) [maxCount] [text] [description]";
     }
 

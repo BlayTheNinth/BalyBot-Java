@@ -55,6 +55,9 @@ public class CommandHandler {
     @Subscribe
     @SuppressWarnings("unused")
     public void onChannelChat(IRCChannelChatEvent event) {
+        if(event.channel == null) {
+            return;
+        }
         try {
             handleCommand(event.channel, event.sender, event.message);
         } catch (Exception e) {
@@ -81,7 +84,11 @@ public class CommandHandler {
                         }
                     }
                     if(command.whisperTo != null) {
-                        BalyBot.instance.getGroupConnection().message("#jtv", "/w " + resolveVariables(command.whisperTo, command, channel, sender, message, args, 0) + " " + result);
+                        String whisperTarget = resolveVariables(command.whisperTo, command, channel, sender, message, args, 0);
+                        if(whisperTarget.contains("{") || whisperTarget.contains("}")) {
+                            whisperTarget = sender.getName();
+                        }
+                        BalyBot.instance.getGroupConnection().message("#jtv", "/w " + whisperTarget + " " + result);
                     } else {
                         channel.message(result);
                     }
@@ -144,6 +151,7 @@ public class CommandHandler {
                 botCommand.setId(rs.getInt(1));
             }
             addCommand(channel.getName(), botCommand);
+            rebuildDocs(channel);
             return true;
         } catch (SQLException e) {
             return false;
@@ -157,6 +165,7 @@ public class CommandHandler {
             stmtUnregisterCommand.setString(2, botCommand.name);
             stmtUnregisterCommand.executeUpdate();
             removeCommand(channel.getName(), botCommand);
+            rebuildDocs(channel);
             return true;
         } catch (SQLException e) {
             return false;
@@ -281,5 +290,9 @@ public class CommandHandler {
     public static BotCommand removeCommand(String context, BotCommand command) {
         commands.remove(context, command);
         return command;
+    }
+
+    public static void rebuildDocs(IRCChannel channel) {
+        DocBuilder.buildDocs(BalyBot.instance.getDatabase(), channel.getName());
     }
 }

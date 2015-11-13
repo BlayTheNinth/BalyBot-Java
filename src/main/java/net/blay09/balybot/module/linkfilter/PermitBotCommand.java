@@ -8,15 +8,16 @@ import net.blay09.balybot.irc.IRCUser;
 public class PermitBotCommand extends BotCommand {
 
     private final ModuleLinkFilter module;
-    private final char prefix;
+    private final String prefix;
 
-    public PermitBotCommand(ModuleLinkFilter module, char prefix) {
-        super("permit", "^" + prefix + "permit\\s?(.*)", UserLevel.MODERATOR);
+    public PermitBotCommand(ModuleLinkFilter module, String prefix) {
+        super("permit", "^" + prefix + "permit(?:\\s+(.*)|$)", UserLevel.MODERATOR);
         this.module = module;
         this.prefix = prefix;
     }
 
-    private String getCommandSyntax() {
+    @Override
+    public String getCommandSyntax() {
         return prefix + "permit <username>";
     }
 

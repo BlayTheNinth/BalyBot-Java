@@ -13,8 +13,16 @@ import java.io.IOException;
 
 public class SongBotCommand extends BotCommand {
 
-    public SongBotCommand(char prefix) {
-        super("song", "^" + prefix + "song\\s?(.*)", UserLevel.ALL);
+    private final String prefix;
+
+    public SongBotCommand(String prefix) {
+        super("song", "^" + prefix + "song(?:\\s+(.*)|$)", UserLevel.ALL);
+        this.prefix = prefix;
+    }
+
+    @Override
+    public String getCommandSyntax() {
+        return prefix + "song";
     }
 
     @Override

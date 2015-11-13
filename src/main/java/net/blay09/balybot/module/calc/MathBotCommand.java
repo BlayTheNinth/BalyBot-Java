@@ -8,14 +8,15 @@ import net.blay09.balybot.irc.IRCUser;
 
 public class MathBotCommand extends BotCommand {
 
-    private final char prefix;
+    private final String prefix;
 
-    public MathBotCommand(char prefix) {
-        super("math", "^" + prefix + "math\\s?(.*)", UserLevel.REGULAR);
+    public MathBotCommand(String prefix) {
+        super("math", "^" + prefix + "math(?:\\s+(.*)|$)", UserLevel.REGULAR);
         this.prefix = prefix;
     }
 
-    private String getCommandSyntax() {
+    @Override
+    public String getCommandSyntax() {
         return prefix + "math <expression>";
     }
 
