@@ -12,6 +12,7 @@ import net.blay09.balybot.module.hostnotifier.ModuleHostNotifier;
 import net.blay09.balybot.module.linkfilter.ModuleLinkFilter;
 import net.blay09.balybot.module.ccpoll.ModuleCountedChatPoll;
 import net.blay09.balybot.module.manager.ModuleManager;
+import net.blay09.balybot.module.raffle.ModuleRaffle;
 import net.blay09.balybot.module.song.ModuleSong;
 import net.blay09.balybot.module.time.ModuleTime;
 import net.blay09.balybot.module.timer.TimerHandler;
@@ -81,6 +82,7 @@ public class BalyBot {
         Module.registerModule("time", ModuleTime.class);
         Module.registerModule("hostnotifier", ModuleHostNotifier.class);
         Module.registerModule("uptime", ModuleUptime.class);
+        Module.registerModule("raffle", ModuleRaffle.class);
 
         Module.load(database, eventBus);
         CommandHandler.load(database, eventBus);

@@ -46,7 +46,7 @@ public class DocBuilder {
         sb.append("<tr><td>sub</td><td>Subscribers of the channel the bot resides in. Obviously only useful for partnered streamers.</td></tr>\n");
         sb.append("<tr><td>reg</td><td>Regulars of the channel the bot resides in. Regulars have to be manually added.</td></tr>\n");
         sb.append("<tr><td>turbo</td><td>Twitch Turbo users. Might limit usage of certain commands, is not intuitive though.</td></tr>\n");
-        sb.append("<tr><td>turbo</td><td>All users. Everyone. Including your grandmother and the president of the United States.</td></tr>\n");
+        sb.append("<tr><td>all</td><td>All users. Everyone. Including your grandmother and the president of the United States.</td></tr>\n");
         sb.append("</table>\n");
 
         sb.append("<h3 id='variables'>Variables<h3>\n");
@@ -141,7 +141,7 @@ public class DocBuilder {
         }
         sb.append("</table>\n");
 
-        File commandsDir = new File("commands");
+        File commandsDir = new File(Config.getValue("*", "docs_dir"));
         if(commandsDir.exists() || commandsDir.mkdir()) {
             try {
                 Files.write(sb, new File(commandsDir, channel.substring(1) + ".html"), Charsets.UTF_8);

@@ -49,4 +49,16 @@ public class Config {
         config.put(channelName, option, value);
         BalyBot.instance.getDatabase().setConfigOption(channelName, option, value);
     }
+
+    public static int getValueAsInt(String channel, String name, int defaultVal) {
+        String value = config.get(channel, name);
+        if(value == null) {
+            return defaultVal;
+        }
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            return defaultVal;
+        }
+    }
 }

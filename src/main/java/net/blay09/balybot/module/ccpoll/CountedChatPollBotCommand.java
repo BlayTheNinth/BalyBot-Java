@@ -19,7 +19,7 @@ public class CountedChatPollBotCommand extends BotCommand {
 
     @Override
     public String getCommandSyntax() {
-        return prefix + "ccp (start|stop) [maxCount] [text] [description]";
+        return prefix + "ccp (start|stop) [maxCount] [keyword] [description]";
     }
 
     @Override

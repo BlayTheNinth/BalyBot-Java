@@ -1,8 +1,12 @@
-apply plugin: 'java'
+apply plugin: 'application'
 
+mainClassName = "net.blay09.balybot.BalyBot"
 archivesBaseName = "BalyBot"
 group = "net.blay09.balybot"
 version = "0.1.0"
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
 
 repositories {
     mavenCentral()
