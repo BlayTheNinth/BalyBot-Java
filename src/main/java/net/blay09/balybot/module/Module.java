@@ -5,6 +5,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.eventbus.EventBus;
 import net.blay09.balybot.CommandHandler;
 import net.blay09.balybot.Database;
+import net.blay09.balybot.EventManager;
 import net.blay09.balybot.command.BotCommand;
 
 import java.lang.reflect.InvocationTargetException;
@@ -22,7 +23,7 @@ public abstract class Module {
         availableModules.put(name, moduleClass);
     }
 
-    public static void load(Database database, EventBus eventBus) {
+    public static void load(Database database) {
         try {
             Statement stmt = database.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT * FROM modules");
@@ -30,9 +31,9 @@ public abstract class Module {
                 Class<? extends Module> moduleClass = availableModules.get(rs.getString("module_name"));
                 if (moduleClass != null) {
                     try {
-                        Module module = moduleClass.getConstructor(String.class, String.class).newInstance(rs.getString("channel_name"), rs.getString("module_prefix"));
-                        ;
-                        module.activate(eventBus);
+                        String channelName = rs.getString("channel_name");
+                        Module module = moduleClass.getConstructor(String.class, String.class).newInstance(channelName, rs.getString("module_prefix"));
+                        module.activate(EventManager.get(channelName));
                         activeModules.put(module.getOwnerContext(), module);
                     } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
                         e.printStackTrace();
@@ -54,12 +55,12 @@ public abstract class Module {
     }
 
     public void registerCommand(BotCommand botCommand) {
-        commands.add(CommandHandler.addCommand(context, botCommand));
+        commands.add(CommandHandler.get(context).addCommand(botCommand));
     }
 
     public void unregisterCommands() {
         for(BotCommand command : commands) {
-            CommandHandler.removeCommand(context, command);
+            CommandHandler.get(context).removeCommand(command);
         }
         commands.clear();
     }

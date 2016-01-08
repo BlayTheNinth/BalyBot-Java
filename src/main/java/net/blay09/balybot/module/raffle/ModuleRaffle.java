@@ -55,7 +55,7 @@ public class ModuleRaffle extends Module {
                 int maxCount = Config.getValueAsInt(event.channel.getName(), "raffle_maxAllowedEntries", MAX_ALLOWED_ENTRIES);
                 if(currentRaffle.users.count(event.sender.getDisplayName()) > maxCount) {
                     String message = Config.getValue(event.channel.getName(), "raffle_maxAllowedEntriesMessage", MAX_ALLOWED_ENTRIES_MESSAGE);
-                    message = CommandHandler.resolveVariables(message, null, event.channel, event.sender, event.message, new String[0], 0);
+                    message = CommandHandler.get(event.channel).resolveVariables(message, null, event.channel, event.sender, event.message, new String[0], 0);
                     event.channel.message(message);
                     event.channel.message("/timeout " + event.sender.getName() + " " + Config.getValueAsInt(event.channel.getName(), "raffle_maxAllowedEntriesTimeout", MAX_ALLOWED_ENTRIES_TIMEOUT));
                 }

@@ -2,7 +2,6 @@ package net.blay09.balybot.module.timer;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import com.google.common.eventbus.EventBus;
 import net.blay09.balybot.BalyBot;
 import net.blay09.balybot.CommandHandler;
 import net.blay09.balybot.Database;
@@ -15,10 +14,9 @@ import java.sql.Statement;
 public class TimerHandler implements Runnable {
 
     private static final Multimap<String, TimedCommand> timedCommands = ArrayListMultimap.create();
-    private static Thread thread;
     private static boolean running;
 
-    public static void load(Database database, EventBus eventBus) {
+    public static void load(Database database) {
         try {
             Statement stmt = database.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT * FROM timed_commands");
@@ -31,7 +29,7 @@ public class TimerHandler implements Runnable {
             e.printStackTrace();
         }
 
-        thread = new Thread(new TimerHandler());
+        Thread thread = new Thread(new TimerHandler());
         running = true;
         thread.start();
     }
@@ -46,7 +44,7 @@ public class TimerHandler implements Runnable {
                 command.timeSinceLast += elapsedTime;
                 if(command.timeSinceLast > command.interval) {
                     IRCConnection connection = BalyBot.instance.getConnection();
-                    CommandHandler.handleCommand(connection.getChannel(command.channelName), connection.getBotUser(), command.command);
+                    CommandHandler.get(connection.getChannel(command.channelName)).handleCommand(connection.getChannel(command.channelName), connection.getBotUser(), command.command);
                     command.timeSinceLast = 0;
                 }
             }

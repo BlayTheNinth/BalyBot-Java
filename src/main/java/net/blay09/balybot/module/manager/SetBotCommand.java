@@ -1,7 +1,5 @@
 package net.blay09.balybot.module.manager;
 
-import net.blay09.balybot.BalyBot;
-import net.blay09.balybot.DocBuilder;
 import net.blay09.balybot.UserLevel;
 import net.blay09.balybot.command.BotCommand;
 import net.blay09.balybot.command.SimpleMessageBotCommand;
@@ -109,9 +107,9 @@ public class SetBotCommand extends BotCommand {
                 return "Command '" + botCommand.name + "' can not be edited.";
             }
         }
-        for(BotCommand botCommand : CommandHandler.getChannelCommands(channel)) {
+        for(BotCommand botCommand : CommandHandler.get(channel).getChannelCommands()) {
             if(botCommand.name.equals(name)) {
-                if(!CommandHandler.unregisterCommand(channel, botCommand)) {
+                if(!CommandHandler.get(channel).unregisterCommand(botCommand)) {
                     return "Unexpected error, could not edit command!";
                 }
                 if(userLevel == null) {
@@ -127,7 +125,7 @@ public class SetBotCommand extends BotCommand {
         }
 
         String commandMessage = StringUtils.join(args, ' ', startIdx + 1, args.length);
-        if(CommandHandler.registerMessageCommand(channel, new SimpleMessageBotCommand(name, commandMessage, userLevel, condition, whisperTo))) {
+        if(CommandHandler.get(channel).registerMessageCommand(new SimpleMessageBotCommand(name, commandMessage, userLevel, condition, whisperTo))) {
             return "Command successfully " + (overwrite ? "edited" : "registered") + ": " + name;
         } else {
             return "Unexpected error, could not save command!";

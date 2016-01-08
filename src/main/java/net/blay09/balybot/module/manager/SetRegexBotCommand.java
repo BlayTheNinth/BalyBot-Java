@@ -111,9 +111,9 @@ public class SetRegexBotCommand extends BotCommand {
                 return "Command '" + botCommand.name + "' can not be edited.";
             }
         }
-        for(BotCommand botCommand : CommandHandler.getChannelCommands(channel)) {
+        for(BotCommand botCommand : CommandHandler.get(channel).getChannelCommands()) {
             if(botCommand.name.equals(name)) {
-                if(!CommandHandler.unregisterCommand(channel, botCommand)) {
+                if(!CommandHandler.get(channel).unregisterCommand(botCommand)) {
                     return "Unexpected error, could not edit command!";
                 }
                 if(userLevel == null) {
@@ -129,7 +129,7 @@ public class SetRegexBotCommand extends BotCommand {
         }
 
         String commandMessage = StringUtils.join(args, ' ', startIdx + 1, args.length);
-        if(CommandHandler.registerMessageCommand(channel, new MessageBotCommand(pattern, pattern, commandMessage, userLevel, condition, whisperTo))) {
+        if(CommandHandler.get(channel).registerMessageCommand(new MessageBotCommand(pattern, pattern, commandMessage, userLevel, condition, whisperTo))) {
             return "Command successfully " + (overwrite ? "edited" : "registered") + ": " + pattern;
         } else {
             return "Unexpected error, could not save command!";

@@ -7,7 +7,6 @@ import net.blay09.balybot.irc.IRCConnection;
 import net.blay09.balybot.irc.event.IRCConnectEvent;
 import net.blay09.balybot.module.Module;
 import net.blay09.balybot.module.calc.ModuleMath;
-import net.blay09.balybot.module.ccpoll.CountedChatPollBotCommand;
 import net.blay09.balybot.module.hostnotifier.ModuleHostNotifier;
 import net.blay09.balybot.module.linkfilter.ModuleLinkFilter;
 import net.blay09.balybot.module.ccpoll.ModuleCountedChatPoll;
@@ -65,14 +64,14 @@ public class BalyBot {
     }
 
     private final Database database;
-    private final EventBus eventBus;
+    private final EventBus globalBus;
     private IRCConnection connection;
     private IRCConnection groupConnection;
 
     public BalyBot() {
         logger.info("Loading BalyBot {0}...", VERSION);
         database = new Database("balybot.db");
-        eventBus = new EventBus();
+        globalBus = new EventBus();
 
         Module.registerModule("manager", ModuleManager.class);
         Module.registerModule("linkfilter", ModuleLinkFilter.class);
@@ -84,10 +83,11 @@ public class BalyBot {
         Module.registerModule("uptime", ModuleUptime.class);
         Module.registerModule("raffle", ModuleRaffle.class);
 
-        Module.load(database, eventBus);
-        CommandHandler.load(database, eventBus);
-        TimerHandler.load(database, eventBus);
-        eventBus.register(this);
+        Module.load(database);
+        CommandHandler.loadGlobalCommands(database);
+        CommandHandler.loadChannelCommands(database);
+        TimerHandler.load(database);
+        globalBus.register(this);
 
         load();
 
@@ -162,7 +162,7 @@ public class BalyBot {
         config.ident = Config.getValue("*", "username");
         config.realName = "BalyBot v" + VERSION;
         config.serverPassword = Config.getValue("*", "oauth");
-        connection = new IRCConnection(config, Config.getValue("*", "username"), eventBus);
+        connection = new IRCConnection(config, Config.getValue("*", "username"), globalBus);
         connection.start();
 
         IRCConfig groupConfig = new IRCConfig();
@@ -170,7 +170,7 @@ public class BalyBot {
         groupConfig.ident = Config.getValue("*", "username");
         groupConfig.realName = "BalyBot v" + VERSION;
         groupConfig.serverPassword = Config.getValue("*", "oauth");
-        groupConnection = new IRCConnection(groupConfig, Config.getValue("*", "username"), eventBus);
+        groupConnection = new IRCConnection(groupConfig, Config.getValue("*", "username"), globalBus);
         groupConnection.start();
     }
 

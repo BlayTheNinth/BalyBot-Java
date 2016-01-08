@@ -1,22 +1,13 @@
 package net.blay09.balybot;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
-import com.google.common.eventbus.EventBus;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.eventbus.Subscribe;
 import net.blay09.balybot.command.*;
 import net.blay09.balybot.expr.ExpressionLibrary;
-import net.blay09.balybot.module.calc.MathBotCommand;
-import net.blay09.balybot.module.ccpoll.CountedChatPollBotCommand;
-import net.blay09.balybot.module.manager.RegularBotCommand;
 import net.blay09.balybot.irc.IRCChannel;
 import net.blay09.balybot.irc.IRCUser;
 import net.blay09.balybot.irc.event.IRCChannelChatEvent;
-import net.blay09.balybot.module.linkfilter.PermitBotCommand;
-import net.blay09.balybot.module.manager.*;
-import net.blay09.balybot.module.song.SongBotCommand;
-import net.blay09.balybot.module.time.TimeBotCommand;
-import net.blay09.balybot.module.uptime.UptimeBotCommand;
 import net.blay09.balybot.twitch.TwitchAPI;
 
 import java.sql.PreparedStatement;
@@ -24,24 +15,50 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class CommandHandler {
 
-    public static final CommandHandler instance = new CommandHandler();
-    private static final Multimap<String, BotCommand> commands = ArrayListMultimap.create();
     private static final Pattern varPattern = Pattern.compile("\\{(?:([^\\?]+)(\\?))?([^\\}\\?]+)(\\?)?([^\\}]+)?\\}");
+    private static final Map<String, CommandHandler> handlers = Maps.newHashMap();
     private static final int MAX_CMD_DEPTH = 3;
+    private static final List<BotCommand> globalCommands = Lists.newArrayList();
 
-    public static void load(Database database, EventBus eventBus) {
+    public static void loadGlobalCommands(Database database) {
         try {
             Statement stmt = database.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM commands");
+            ResultSet rs = stmt.executeQuery("SELECT * FROM commands WHERE channel_name = '*'");
             while(rs.next()) {
                 MessageBotCommand botCommand = new MessageBotCommand(rs.getString("command_name"), rs.getString("regex"), rs.getString("message"), UserLevel.fromId(rs.getInt("user_level")), rs.getString("condition"), rs.getString("whisper_to"));
                 botCommand.setId(rs.getInt("id"));
-                commands.put(rs.getString("channel_name").toLowerCase(), botCommand);
+                globalCommands.add(botCommand);
+            }
+            rs.close();
+            stmt.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void loadChannelCommands(Database database) {
+        try {
+            Statement stmt = database.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT * FROM commands ORDER BY channel_name");
+            String currentChannelName = null;
+            CommandHandler currentCommandHandler = null;
+            while(rs.next()) {
+                String channelName = rs.getString("channel_name");
+                if(currentChannelName == null || !currentChannelName.equals(channelName)) {
+                    currentCommandHandler = CommandHandler.get(channelName);
+                    EventManager.get(channelName).register(currentCommandHandler);
+                    currentChannelName = channelName;
+                }
+                MessageBotCommand botCommand = new MessageBotCommand(rs.getString("command_name"), rs.getString("regex"), rs.getString("message"), UserLevel.fromId(rs.getInt("user_level")), rs.getString("condition"), rs.getString("whisper_to"));
+                botCommand.setId(rs.getInt("id"));
+                currentCommandHandler.addCommand(botCommand);
             }
             rs.close();
             stmt.close();
@@ -49,7 +66,13 @@ public class CommandHandler {
             e.printStackTrace();
         }
 
-        eventBus.register(instance);
+    }
+
+    private final List<BotCommand> commands = Lists.newArrayList();
+    private final String channelName;
+
+    public CommandHandler(String channelName) {
+        this.channelName = channelName;
     }
 
     @Subscribe
@@ -65,7 +88,7 @@ public class CommandHandler {
         }
     }
 
-    public static void handleCommand(IRCChannel channel, IRCUser sender, String message) {
+    public void handleCommand(IRCChannel channel, IRCUser sender, String message) {
         BotCommand command = findFirstCommand(channel, sender, message);
         if(command != null) {
             String[] args;
@@ -97,15 +120,15 @@ public class CommandHandler {
         }
     }
 
-    public static BotCommand findFirstCommand(IRCChannel channel, IRCUser sender, String message) {
-        BotCommand command = findFirstCommand(channel, sender, message, commands.get("*"));
+    public BotCommand findFirstCommand(IRCChannel channel, IRCUser sender, String message) {
+        BotCommand command = findFirstCommand(channel, sender, message, globalCommands);
         if(command == null) {
-            command = findFirstCommand(channel, sender, message, commands.get(channel.getName().toLowerCase()));
+            command = findFirstCommand(channel, sender, message, commands);
         }
         return command;
     }
 
-    public static BotCommand findFirstCommand(IRCChannel channel, IRCUser sender, String message, Collection<BotCommand> commands) {
+    public BotCommand findFirstCommand(IRCChannel channel, IRCUser sender, String message, Collection<BotCommand> commands) {
         Matcher matcher = null;
         for(BotCommand command : commands) {
             if(!passesUserLevel(sender, channel, command.minUserLevel)) {
@@ -135,10 +158,10 @@ public class CommandHandler {
         return null;
     }
 
-    public static boolean registerMessageCommand(IRCChannel channel, MessageBotCommand botCommand) {
+    public boolean registerMessageCommand(MessageBotCommand botCommand) {
         try {
             PreparedStatement stmtRegisterCommand = BalyBot.instance.getDatabase().stmtRegisterCommand;
-            stmtRegisterCommand.setString(1, channel.getName());
+            stmtRegisterCommand.setString(1, channelName);
             stmtRegisterCommand.setString(2, botCommand.name);
             stmtRegisterCommand.setString(3, botCommand.regex);
             stmtRegisterCommand.setString(4, botCommand.commandMessage);
@@ -150,22 +173,22 @@ public class CommandHandler {
             if(rs.next()) {
                 botCommand.setId(rs.getInt(1));
             }
-            addCommand(channel.getName(), botCommand);
-            rebuildDocs(channel);
+            addCommand(botCommand);
+            rebuildDocs();
             return true;
         } catch (SQLException e) {
             return false;
         }
     }
 
-    public static boolean unregisterCommand(IRCChannel channel, BotCommand botCommand) {
+    public boolean unregisterCommand(BotCommand botCommand) {
         try {
             PreparedStatement stmtUnregisterCommand = BalyBot.instance.getDatabase().stmtUnregisterCommand;
-            stmtUnregisterCommand.setString(1, channel.getName());
+            stmtUnregisterCommand.setString(1, channelName);
             stmtUnregisterCommand.setString(2, botCommand.name);
             stmtUnregisterCommand.executeUpdate();
-            removeCommand(channel.getName(), botCommand);
-            rebuildDocs(channel);
+            removeCommand(botCommand);
+            rebuildDocs();
             return true;
         } catch (SQLException e) {
             return false;
@@ -207,14 +230,14 @@ public class CommandHandler {
     }
 
     public static Collection<BotCommand> getGlobalCommands() {
-        return commands.get("*");
+        return globalCommands;
     }
 
-    public static Collection<BotCommand> getChannelCommands(IRCChannel channel) {
-        return commands.get(channel.getName());
+    public Collection<BotCommand> getChannelCommands() {
+        return commands;
     }
 
-    public static String resolveVariables(String variables, BotCommand botCommand, IRCChannel channel, IRCUser sender, String message, String[] args, int depth) {
+    public String resolveVariables(String variables, BotCommand botCommand, IRCChannel channel, IRCUser sender, String message, String[] args, int depth) {
         StringBuffer sb = new StringBuffer();
         Matcher varMatcher = varPattern.matcher(variables);
         while(varMatcher.find()) {
@@ -247,7 +270,7 @@ public class CommandHandler {
                 }
             } else if(varName.startsWith("CMD:") && varName.length() > 4) {
                 if(depth <= MAX_CMD_DEPTH) {
-                    BotCommand command = CommandHandler.findFirstCommand(channel, sender, varName.substring(4));
+                    BotCommand command = findFirstCommand(channel, sender, varName.substring(4));
                     if (command != null) {
                         varValue = command.execute(channel, sender, message, args, depth + 1);
                     }
@@ -282,17 +305,31 @@ public class CommandHandler {
         return sb.toString();
     }
 
-    public static BotCommand addCommand(String context, BotCommand command) {
-        commands.put(context, command);
+    public BotCommand addCommand(BotCommand command) {
+        commands.add(command);
         return command;
     }
 
-    public static BotCommand removeCommand(String context, BotCommand command) {
-        commands.remove(context, command);
+    public BotCommand removeCommand(BotCommand command) {
+        commands.remove(command);
         return command;
     }
 
-    public static void rebuildDocs(IRCChannel channel) {
-        DocBuilder.buildDocs(BalyBot.instance.getDatabase(), channel.getName());
+    public void rebuildDocs() {
+        DocBuilder.buildDocs(BalyBot.instance.getDatabase(), channelName);
     }
+
+    public static CommandHandler get(String name) {
+        CommandHandler handler = handlers.get(name);
+        if(handler == null) {
+            handler = new CommandHandler(name);
+            handlers.put(name, handler);
+        }
+        return handler;
+    }
+
+    public static CommandHandler get(IRCChannel channel) {
+        return get(channel.getName());
+    }
+
 }

@@ -3,6 +3,7 @@
 package net.blay09.balybot.irc;
 
 import com.google.common.eventbus.EventBus;
+import net.blay09.balybot.EventManager;
 import net.blay09.balybot.irc.event.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -39,7 +40,7 @@ public class IRCConnection implements Runnable {
 	private final Map<String, IRCUser> users = new HashMap<>();
 
 	private final IRCConfig config;
-	private final EventBus eventBus;
+	private final EventBus globalBus;
 	private String nick;
 	private boolean connected;
 	private int waitingReconnect;
@@ -52,10 +53,10 @@ public class IRCConnection implements Runnable {
 	protected BufferedWriter writer;
 	protected BufferedReader reader;
 
-	public IRCConnection(IRCConfig config, String nick, EventBus eventBus) {
+	public IRCConnection(IRCConfig config, String nick, EventBus globalBus) {
 		this.config = config;
 		this.nick = nick;
-		this.eventBus = eventBus;
+		this.globalBus = globalBus;
 	}
 
 	public String getNick() {
@@ -97,7 +98,7 @@ public class IRCConnection implements Runnable {
 	}
 
 	public boolean start() {
-		eventBus.post(new IRCConnectingEvent(this));
+		globalBus.post(new IRCConnectingEvent(this));
 		Thread thread = new Thread(this, "BalyBot Reader");
 		thread.start();
 		return true;
@@ -153,7 +154,7 @@ public class IRCConnection implements Runnable {
 			} catch (Exception e) {
 				logger.error("Connection failed: " + e.getMessage());
 				e.printStackTrace();
-				eventBus.post(new IRCConnectionFailedEvent(this, e));
+				globalBus.post(new IRCConnectionFailedEvent(this, e));
 				return;
 			}
 			register();
@@ -178,10 +179,10 @@ public class IRCConnection implements Runnable {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			eventBus.post(new IRCExceptionEvent(this, e));
+			globalBus.post(new IRCExceptionEvent(this, e));
 			closeSocket();
 		}
-		eventBus.post(new IRCDisconnectEvent(this));
+		globalBus.post(new IRCDisconnectEvent(this));
 		if(connected) {
 			tryReconnect();
 		}
@@ -194,7 +195,7 @@ public class IRCConnection implements Runnable {
 		} else {
 			waitingReconnect *= 2;
 		}
-		eventBus.post(new IRCReconnectEvent(this, waitingReconnect));
+		globalBus.post(new IRCReconnectEvent(this, waitingReconnect));
 		try {
 			Thread.sleep(waitingReconnect);
 		} catch (InterruptedException e) {
@@ -236,7 +237,7 @@ public class IRCConnection implements Runnable {
 			writer.flush();
 		} catch (IOException e) {
 			e.printStackTrace();
-			eventBus.post(new IRCConnectionFailedEvent(this, e));
+			globalBus.post(new IRCConnectionFailedEvent(this, e));
 			if(connected) {
 				tryReconnect();
 			}
@@ -257,7 +258,8 @@ public class IRCConnection implements Runnable {
 		if(irc("PART " + channelName)) {
 			IRCChannel channel = channels.remove(channelName.toLowerCase());
 			if(channel != null) {
-				eventBus.post(new IRCChannelLeftEvent(this, channel));
+				globalBus.post(new IRCChannelLeftEvent(this, channel));
+				EventManager.get(channelName).post(new IRCChannelLeftEvent(this, channel));
 			}
 		}
 	}
@@ -297,16 +299,17 @@ public class IRCConnection implements Runnable {
 				user.addChannel(channel);
 				channel.addUser(user);
 			}
-			eventBus.post(new IRCChannelJoinedEvent(this, channel));
+			globalBus.post(new IRCChannelJoinedEvent(this, channel));
+			EventManager.get(channel.getName()).post(new IRCChannelJoinedEvent(this, channel));
 		} else if(numeric == IRCReplyCodes.RPL_WELCOME) {
 			connected = true;
 			waitingReconnect = 0;
-			eventBus.post(new IRCConnectEvent(this));
+			globalBus.post(new IRCConnectEvent(this));
 		} else if(numeric == IRCReplyCodes.RPL_TOPIC) {
 			IRCChannel channel = getChannel(msg.arg(1));
 			if(channel != null) {
 				channel.setTopic(msg.arg(2));
-				eventBus.post(new IRCChannelTopicEvent(this, channel, null, channel.getTopic()));
+				EventManager.get(channel.getName()).post(new IRCChannelTopicEvent(this, channel, null, channel.getTopic()));
 			}
 		} else if(numeric == IRCReplyCodes.RPL_WHOISLOGIN) {
 			IRCUser user = getOrCreateUser(msg.arg(1));
@@ -321,7 +324,7 @@ public class IRCConnection implements Runnable {
 				user.setAccountName(null);
 			}
 		} else if(numeric == IRCReplyCodes.ERR_NICKNAMEINUSE || numeric == IRCReplyCodes.ERR_ERRONEUSNICKNAME || numeric == IRCReplyCodes.ERR_PASSWDMISMATCH) {
-			eventBus.post(new IRCErrorEvent(this, msg.getNumericCommand(), msg.args()));
+			globalBus.post(new IRCErrorEvent(this, msg.getNumericCommand(), msg.args()));
 		} else if(numeric == IRCReplyCodes.RPL_ISUPPORT) {
 			for(int i = 0; i < msg.argcount(); i++) {
 				if(msg.arg(i).startsWith("CHANTYPES=")) {
@@ -383,12 +386,13 @@ public class IRCConnection implements Runnable {
 					}
 				}
 				try {
-					eventBus.post(new IRCChannelChatEvent(this, channel, user, msg, message, isEmote, false));
+					globalBus.post(new IRCChannelChatEvent(this, channel, user, msg, message, isEmote, false));
+					EventManager.get(channel.getName()).post(new IRCChannelChatEvent(this, channel, user, msg, message, isEmote, false));
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			} else if(target.equals(this.nick)) {
-				eventBus.post(new IRCPrivateChatEvent(this, user, msg, message, isEmote, false));
+				globalBus.post(new IRCPrivateChatEvent(this, user, msg, message, isEmote, false));
 			}
 		} else if(cmd.equals("NOTICE")) {
 			IRCUser user = null;
@@ -398,15 +402,15 @@ public class IRCConnection implements Runnable {
 			String target = msg.arg(0);
 			String message = msg.arg(1);
 			if(channelTypes.indexOf(target.charAt(0)) != -1) {
-				eventBus.post(new IRCChannelChatEvent(this, getChannel(target), user, msg, message, false, true));
+				EventManager.get(target).post(new IRCChannelChatEvent(this, getChannel(target), user, msg, message, false, true));
 			} else if(target.equals(this.nick) || target.equals("*")) {
-				eventBus.post(new IRCPrivateChatEvent(this, user, msg, message, false, true));
+				globalBus.post(new IRCPrivateChatEvent(this, user, msg, message, false, true));
 			}
 		} else if(cmd.equals("HOSTTARGET")) {
 			String source = msg.arg(0);
 			String target = msg.arg(1);
 			if(target.startsWith("-")) {
-				eventBus.post(new TwitchHostStopEvent(this, source));
+				EventManager.get(target).post(new TwitchHostStopEvent(this, source));
 			} else {
 				int viewerCount = 0;
 				int lastSpace = target.lastIndexOf(' ');
@@ -416,28 +420,28 @@ public class IRCConnection implements Runnable {
 						target = target.substring(0, lastSpace);
 					} catch (NumberFormatException ignored) {}
 				}
-				eventBus.post(new TwitchHostStartEvent(this, getChannel(target), source, viewerCount));
+				EventManager.get(target).post(new TwitchHostStartEvent(this, getChannel(target), source, viewerCount));
 			}
 		} else if(cmd.equals("JOIN")) {
 			IRCUser user = getOrCreateUser(msg.getNick());
 			IRCChannel channel = getOrCreateChannel(msg.arg(0));
 			channel.addUser(user);
 			user.addChannel(channel);
-			eventBus.post(new IRCUserJoinEvent(this, channel, user));
+			EventManager.get(channel.getName()).post(new IRCUserJoinEvent(this, channel, user));
 		} else if(cmd.equals("PART")) {
 			IRCUser user = getOrCreateUser(msg.getNick());
 			IRCChannel channel = getChannel(msg.arg(0));
 			if(channel != null) {
 				channel.removeUser(user);
 				user.removeChannel(channel);
-				eventBus.post(new IRCUserLeaveEvent(this, channel, user, msg.arg(1)));
+				EventManager.get(channel.getName()).post(new IRCUserLeaveEvent(this, channel, user, msg.arg(1)));
 			}
 		} else if(cmd.equals("TOPIC")) {
 			IRCUser user = getOrCreateUser(msg.getNick());
 			IRCChannel channel = getChannel(msg.arg(0));
 			if(channel != null) {
 				channel.setTopic(msg.arg(1));
-				eventBus.post(new IRCChannelTopicEvent(this, channel, user, channel.getTopic()));
+				EventManager.get(channel.getName()).post(new IRCChannelTopicEvent(this, channel, user, channel.getTopic()));
 			}
 		} else if(cmd.equals("NICK")) {
 			String newNick = msg.arg(0);
@@ -446,7 +450,7 @@ public class IRCConnection implements Runnable {
 			String oldNick = user.getName();
 			user.setName(newNick);
 			users.put(user.getName().toLowerCase(), user);
-			eventBus.post(new IRCUserNickChangeEvent(this, user, oldNick, newNick));
+			globalBus.post(new IRCUserNickChangeEvent(this, user, oldNick, newNick));
 		} else if(cmd.equals("MODE")) {
 			if(channelTypes.indexOf(msg.arg(0).charAt(0)) == -1 || msg.argcount() < 3) {
 				return false;
@@ -486,8 +490,9 @@ public class IRCConnection implements Runnable {
 			}
 		} else if(cmd.equals("QUIT")) {
 			IRCUser user = getOrCreateUser(msg.getNick());
-			eventBus.post(new IRCUserQuitEvent(this, user, msg.arg(0)));
+			globalBus.post(new IRCUserQuitEvent(this, user, msg.arg(0)));
 			for(IRCChannel channel : user.getChannels()) {
+				EventManager.get(channel.getName()).post(new IRCUserQuitEvent(this, user, msg.arg(0)));
 				channel.removeUser(user);
 			}
 			users.remove(user.getName().toLowerCase());
@@ -540,8 +545,8 @@ public class IRCConnection implements Runnable {
 		return config;
 	}
 
-	public EventBus getEventBus() {
-		return eventBus;
+	public EventBus getGlobalBus() {
+		return globalBus;
 	}
 
 	public boolean isConnected() {

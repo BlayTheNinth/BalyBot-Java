@@ -68,7 +68,7 @@ public class IRCSender implements Runnable {
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
-			connection.getEventBus().post(new IRCExceptionEvent(connection, e));
+			connection.getGlobalBus().post(new IRCExceptionEvent(connection, e));
 		}
 		running = false;
 	}

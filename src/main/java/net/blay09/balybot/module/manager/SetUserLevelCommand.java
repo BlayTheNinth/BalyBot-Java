@@ -36,7 +36,7 @@ public class SetUserLevelCommand extends BotCommand {
         BotCommand foundCommand = null;
         if(name.matches("[0-9]+")) {
             int id = Integer.parseInt(name);
-            for(BotCommand botCommand : CommandHandler.getChannelCommands(channel)) {
+            for(BotCommand botCommand : CommandHandler.get(channel).getChannelCommands()) {
                 if(botCommand.id == id) {
                     foundCommand = botCommand;
                     break;
@@ -45,7 +45,7 @@ public class SetUserLevelCommand extends BotCommand {
         }
 
         if(foundCommand == null) {
-            for (BotCommand botCommand : CommandHandler.getChannelCommands(channel)) {
+            for (BotCommand botCommand : CommandHandler.get(channel).getChannelCommands()) {
                 if (botCommand.name.equals(name)) {
                     foundCommand = botCommand;
                     break;
@@ -59,11 +59,11 @@ public class SetUserLevelCommand extends BotCommand {
         }
 
         if(foundCommand != null && foundCommand instanceof MessageBotCommand) {
-            if(!CommandHandler.unregisterCommand(channel, foundCommand)) {
+            if(!CommandHandler.get(channel).unregisterCommand(foundCommand)) {
                 return "Unexpected error, could not edit command!";
             }
             foundCommand.setUserLevel(userLevel);
-            if(CommandHandler.registerMessageCommand(channel, (MessageBotCommand) foundCommand)) {
+            if(CommandHandler.get(channel).registerMessageCommand((MessageBotCommand) foundCommand)) {
                 return "Command successfully edited: " + name;
             } else {
                 return "Unexpected error, could not save command!";

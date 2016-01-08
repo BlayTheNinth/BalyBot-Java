@@ -21,7 +21,7 @@ public class MessageBotCommand extends BotCommand {
 
     @Override
     public String execute(IRCChannel channel, IRCUser sender, String message, String[] args, int depth) {
-        return CommandHandler.resolveVariables(commandMessage, this, channel, sender, message, args, depth);
+        return CommandHandler.get(channel).resolveVariables(commandMessage, this, channel, sender, message, args, depth);
     }
 
 }

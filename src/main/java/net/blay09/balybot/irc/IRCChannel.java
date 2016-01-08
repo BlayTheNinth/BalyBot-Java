@@ -9,8 +9,8 @@ import java.util.Map;
 
 public class IRCChannel {
 
-	private IRCConnection connection;
-	private String name;
+	private final IRCConnection connection;
+	private final String name;
 	private String topic;
 	private Map<String, IRCUser> users = new HashMap<>();
 

@@ -35,7 +35,7 @@ public class UnsetBotCommand extends BotCommand {
         BotCommand foundCommand = null;
         if(name.matches("[0-9]+")) {
             int id = Integer.parseInt(name);
-            for(BotCommand botCommand : CommandHandler.getChannelCommands(channel)) {
+            for(BotCommand botCommand : CommandHandler.get(channel).getChannelCommands()) {
                 if(botCommand.id == id) {
                     foundCommand = botCommand;
                     break;
@@ -44,7 +44,7 @@ public class UnsetBotCommand extends BotCommand {
         }
 
         if(foundCommand == null) {
-            for (BotCommand botCommand : CommandHandler.getChannelCommands(channel)) {
+            for (BotCommand botCommand : CommandHandler.get(channel).getChannelCommands()) {
                 if (botCommand.name.equals(name)) {
                     foundCommand = botCommand;
                     break;
@@ -53,7 +53,7 @@ public class UnsetBotCommand extends BotCommand {
         }
 
         if(foundCommand != null) {
-            if(CommandHandler.unregisterCommand(channel, foundCommand)) {
+            if(CommandHandler.get(channel).unregisterCommand(foundCommand)) {
                 return "Command successfully removed: " + foundCommand.name;
             } else {
                 return "Unexpected error, could not remove command!";
