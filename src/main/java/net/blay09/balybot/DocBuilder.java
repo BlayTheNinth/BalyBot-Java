@@ -26,11 +26,21 @@ public class DocBuilder {
         sb.append("<a href='#expressions'><li>Expressions</li></a>\n");
         sb.append("</ul></li>\n");
 
-        sb.append("<li>Modules<ul>\n");
+        sb.append("<li>Available Modules<ul>\n");
+        for(Module module : Module.getInactiveModules(channel)) {
+            sb.append("<a href='#").append(module.getModuleCode()).append("'><li>").append(module.getModuleName()).append("</li></a>\n");
+        }
+        sb.append("</ul></li>\n");
+
+        sb.append("<li>Enabled Modules<ul>\n");
         for(Module module : Module.getActiveModules(channel)) {
             sb.append("<a href='#").append(module.getModuleCode()).append("'><li>").append(module.getModuleName()).append("</li></a>\n");
         }
         sb.append("</ul></li>\n");
+
+        sb.append("<a href='#commands'><li>Commands</li></a>\n");
+
+        sb.append("</ul>\n");
 
         sb.append("<a href='#commands'><li>Commands</li></a>\n");
 
@@ -74,7 +84,13 @@ public class DocBuilder {
         sb.append("<tr><td>isLive(channel)</td><td>Returns true if the given channel name is currently live.</td></tr>\n");
         sb.append("</table>\n");
 
-        sb.append("<h2>Modules</h2>\n");
+        sb.append("<h2>Available Modules</h2>\n");
+        for(Module module : Module.getActiveModules(channel)) {
+            sb.append("<h3 id='").append(module.getModuleCode()).append("'>").append(module.getModuleName()).append(" (").append(module.getModuleCode()).append(")</h3>\n");
+            sb.append(module.getModuleDescription()).append("<br />\n");
+        }
+
+        sb.append("<h2>Enabled Modules</h2>\n");
         for(Module module : Module.getActiveModules(channel)) {
             sb.append("<h3 id='").append(module.getModuleCode()).append("'>").append(module.getModuleName()).append(" (").append(module.getModuleCode()).append(")</h3>\n");
             sb.append(module.getModuleDescription()).append("<br />\n");

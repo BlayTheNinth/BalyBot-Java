@@ -2,6 +2,7 @@ package net.blay09.balybot.module;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.eventbus.EventBus;
 import net.blay09.balybot.BalyBot;
@@ -19,7 +20,7 @@ import java.util.*;
 
 public abstract class Module {
 
-    private static final Map<String, Class<? extends Module>> availableModules = new HashMap<>();
+    private static final Map<String, Class<? extends Module>> availableModules = Maps.newHashMap();
     private static final Multimap<String, Module> activeModules = HashMultimap.create();
 
     public static void registerModule(String name, Class<? extends Module> moduleClass) {
@@ -88,6 +89,23 @@ public abstract class Module {
 
     public static Collection<Module> getActiveModules(String channel) {
         return activeModules.get(channel);
+    }
+
+    public static Collection<Module> getInactiveModules(String channel) {
+        List<Module> inactiveModules = Lists.newArrayList();
+        outerLoop: for(Map.Entry<String, Class<? extends Module>> entry : availableModules.entrySet()) {
+            for(Module module : activeModules.get(channel)) {
+                if(module.getModuleCode().equals(entry.getKey())) {
+                    continue outerLoop;
+                }
+            }
+            try {
+                inactiveModules.add(entry.getValue().getConstructor(String.class, String.class).newInstance(channel, "!"));
+            } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+                e.printStackTrace();
+            }
+        }
+        return inactiveModules;
     }
 
     public Collection<BotCommand> getCommands() {
