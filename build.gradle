@@ -24,3 +24,10 @@ dependencies {
     //compile 'com.udojava:EvalEx:1.1'
     compile files('lib/jel.jar');
 }
+
+jar {
+    manifest {
+        attributes \
+        'Main-Class': 'net.blay09.balybot.BalyBot'
+    }
+}

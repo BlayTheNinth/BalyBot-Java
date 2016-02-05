@@ -11,6 +11,7 @@ import net.blay09.balybot.module.hostnotifier.ModuleHostNotifier;
 import net.blay09.balybot.module.linkfilter.ModuleLinkFilter;
 import net.blay09.balybot.module.ccpoll.ModuleCountedChatPoll;
 import net.blay09.balybot.module.manager.ModuleManager;
+import net.blay09.balybot.module.poll.ModulePoll;
 import net.blay09.balybot.module.raffle.ModuleRaffle;
 import net.blay09.balybot.module.song.ModuleSong;
 import net.blay09.balybot.module.time.ModuleTime;
@@ -82,6 +83,7 @@ public class BalyBot {
         Module.registerModule("hostnotifier", ModuleHostNotifier.class);
         Module.registerModule("uptime", ModuleUptime.class);
         Module.registerModule("raffle", ModuleRaffle.class);
+        Module.registerModule("poll", ModulePoll.class);
 
         Module.load(database);
         CommandHandler.loadGlobalCommands(database);
@@ -125,6 +127,8 @@ public class BalyBot {
                 e.printStackTrace();
             }
         }
+
+        rebuildAllDocs();
     }
 
     public void load() {
@@ -184,5 +188,23 @@ public class BalyBot {
 
     public IRCConnection getGroupConnection() {
         return groupConnection;
+    }
+
+    public void rebuildDocs(String channelName) {
+        DocBuilder.buildDocs(database, channelName);
+    }
+
+    public void rebuildAllDocs() {
+        try {
+            Statement stmt = database.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT * FROM channels");
+            while(rs.next()) {
+                DocBuilder.buildDocs(database, rs.getString("channel_name"));
+            }
+            rs.close();
+            stmt.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -9,6 +9,8 @@ import net.blay09.balybot.irc.IRCUser;
 import net.blay09.balybot.CommandHandler;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Objects;
+
 public class SetBotCommand extends BotCommand {
 
     private final String prefix;
@@ -108,7 +110,7 @@ public class SetBotCommand extends BotCommand {
             }
         }
         for(BotCommand botCommand : CommandHandler.get(channel).getChannelCommands()) {
-            if(botCommand.name.equals(name)) {
+            if(botCommand.name.equals(name) && Objects.equals(botCommand.condition, condition)) {
                 if(!CommandHandler.get(channel).unregisterCommand(botCommand)) {
                     return "Unexpected error, could not edit command!";
                 }

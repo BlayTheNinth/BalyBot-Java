@@ -104,6 +104,7 @@ public class DocBuilder {
         sb.append("<h2 id='commands'>Commands</h2>\n");
         sb.append("<table border='1'>\n");
         sb.append("<tr>\n");
+        sb.append("<th>ID</th>\n");
         sb.append("<th>Name</th>\n");
         sb.append("<th>Message</th>\n");
         sb.append("<th>User Level</th>\n");
@@ -116,6 +117,7 @@ public class DocBuilder {
             ResultSet rs = stmt.executeQuery("SELECT * FROM commands WHERE channel_name = '" + channel + "'");
             while(rs.next()) {
                 sb.append("<tr>\n");
+                sb.append("<td>").append(rs.getString("id")).append("</td>\n");
                 sb.append("<td>").append(escape(rs.getString("command_name"))).append("</td>\n");
                 sb.append("<td>").append(escape(rs.getString("message"))).append("</td>\n");
 
@@ -141,7 +143,7 @@ public class DocBuilder {
         }
         sb.append("</table>\n");
 
-        File commandsDir = new File(Config.getValue("*", "docs_dir"));
+        File commandsDir = new File(Config.getValue("*", "docs_dir", "docs"));
         if(commandsDir.exists() || commandsDir.mkdir()) {
             try {
                 Files.write(sb, new File(commandsDir, channel.substring(1) + ".html"), Charsets.UTF_8);

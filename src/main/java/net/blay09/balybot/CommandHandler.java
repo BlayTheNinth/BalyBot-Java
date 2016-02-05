@@ -53,7 +53,6 @@ public class CommandHandler {
                 String channelName = rs.getString("channel_name");
                 if(currentChannelName == null || !currentChannelName.equals(channelName)) {
                     currentCommandHandler = CommandHandler.get(channelName);
-                    EventManager.get(channelName).register(currentCommandHandler);
                     currentChannelName = channelName;
                 }
                 MessageBotCommand botCommand = new MessageBotCommand(rs.getString("command_name"), rs.getString("regex"), rs.getString("message"), UserLevel.fromId(rs.getInt("user_level")), rs.getString("condition"), rs.getString("whisper_to"));
@@ -138,6 +137,7 @@ public class CommandHandler {
                 matcher = command.pattern.matcher(message);
             } else {
                 matcher.usePattern(command.pattern);
+                matcher.reset(message);
             }
             if(matcher.find()) {
                 if(command.condition != null) {
@@ -174,7 +174,7 @@ public class CommandHandler {
                 botCommand.setId(rs.getInt(1));
             }
             addCommand(botCommand);
-            rebuildDocs();
+            BalyBot.instance.rebuildDocs(channelName);
             return true;
         } catch (SQLException e) {
             return false;
@@ -184,11 +184,10 @@ public class CommandHandler {
     public boolean unregisterCommand(BotCommand botCommand) {
         try {
             PreparedStatement stmtUnregisterCommand = BalyBot.instance.getDatabase().stmtUnregisterCommand;
-            stmtUnregisterCommand.setString(1, channelName);
-            stmtUnregisterCommand.setString(2, botCommand.name);
+            stmtUnregisterCommand.setInt(1, botCommand.id);
             stmtUnregisterCommand.executeUpdate();
             removeCommand(botCommand);
-            rebuildDocs();
+            BalyBot.instance.rebuildDocs(channelName);
             return true;
         } catch (SQLException e) {
             return false;
@@ -315,14 +314,11 @@ public class CommandHandler {
         return command;
     }
 
-    public void rebuildDocs() {
-        DocBuilder.buildDocs(BalyBot.instance.getDatabase(), channelName);
-    }
-
     public static CommandHandler get(String name) {
         CommandHandler handler = handlers.get(name);
         if(handler == null) {
             handler = new CommandHandler(name);
+            EventManager.get(name).register(handler);
             handlers.put(name, handler);
         }
         return handler;

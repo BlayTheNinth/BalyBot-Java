@@ -1,6 +1,8 @@
 package net.blay09.balybot.module.manager;
 
 import com.google.common.eventbus.EventBus;
+import net.blay09.balybot.BalyBot;
+import net.blay09.balybot.irc.IRCChannel;
 import net.blay09.balybot.module.Module;
 
 public class ModuleManager extends Module {
@@ -17,6 +19,7 @@ public class ModuleManager extends Module {
         registerCommand(new UnsetBotCommand(prefix));
         registerCommand(new RegularBotCommand(prefix));
         registerCommand(new ConfigBotCommand(prefix));
+        registerCommand(new ModuleCommand(prefix));
     }
 
     @Override
@@ -37,4 +40,5 @@ public class ModuleManager extends Module {
     public String getModuleDescription() {
         return "Base module of the bot. Provides commands to define and edit other commands, as well as regular handling using !reg.";
     }
+
 }

@@ -12,6 +12,8 @@ public class Database {
     private PreparedStatement stmtSetConfigOption;
     private PreparedStatement stmtAddToChannel;
     private PreparedStatement stmtRemoveFromChannel;
+    private PreparedStatement stmtActivateModule;
+    private PreparedStatement stmtDeactivateModule;
 
     public Database(String databasePath) {
         try {
@@ -52,7 +54,7 @@ public class Database {
 
     public void prepareStatements() throws SQLException {
         stmtRegisterCommand = connection.prepareStatement("INSERT INTO commands (channel_name, command_name, regex, message, user_level, condition, whisper_to) VALUES (?, ?, ?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
-        stmtUnregisterCommand = connection.prepareStatement("DELETE FROM commands WHERE channel_name = ? AND command_name = ?");
+        stmtUnregisterCommand = connection.prepareStatement("DELETE FROM commands WHERE id = ?");
 
         stmtRegisterRegular = connection.prepareStatement("INSERT INTO regulars (channel_name, username) VALUES (?, ?)");
         stmtUnregisterRegular = connection.prepareStatement("DELETE FROM regulars WHERE channel_name = ? AND username = ?");
@@ -61,6 +63,9 @@ public class Database {
 
         stmtAddToChannel = connection.prepareStatement("INSERT OR REPLACE INTO channels (channel_name) VALUES (?)");
         stmtRemoveFromChannel = connection.prepareStatement("DELETE FROM channels WHERE channel_name = ?");
+
+        stmtActivateModule = connection.prepareStatement("INSERT OR REPLACE INTO modules (channel_name, module_name, module_prefix) VALUES(?, ?, ?)");
+        stmtDeactivateModule = connection.prepareStatement("DELETE FROM modules WHERE channel_name = ? AND module_name = ?");
     }
 
     public Statement createStatement() throws SQLException {
@@ -91,6 +96,27 @@ public class Database {
         try {
             stmtRemoveFromChannel.setString(1, channelName);
             stmtRemoveFromChannel.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void activateModule(String channelName, String moduleName, String prefix) {
+        try {
+            stmtActivateModule.setString(1, channelName);
+            stmtActivateModule.setString(2, moduleName);
+            stmtActivateModule.setString(3, prefix);
+            stmtActivateModule.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void deactivateModule(String channelName, String moduleName) {
+        try {
+            stmtDeactivateModule.setString(1, channelName);
+            stmtDeactivateModule.setString(2, moduleName);
+            stmtDeactivateModule.execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }

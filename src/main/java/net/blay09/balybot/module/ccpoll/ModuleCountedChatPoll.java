@@ -42,7 +42,7 @@ public class ModuleCountedChatPoll extends Module {
 
     @Subscribe
     public void onChannelChat(IRCChannelChatEvent event) {
-        if(event.message.startsWith("!")) {
+        if(event.message.startsWith(prefix)) {
             return;
         }
         if(currentPoll != null) {

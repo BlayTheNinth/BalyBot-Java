@@ -3,10 +3,12 @@ package net.blay09.balybot.module;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.eventbus.EventBus;
+import net.blay09.balybot.BalyBot;
 import net.blay09.balybot.CommandHandler;
 import net.blay09.balybot.Database;
 import net.blay09.balybot.EventManager;
 import net.blay09.balybot.command.BotCommand;
+import net.blay09.balybot.irc.IRCChannel;
 
 import java.lang.reflect.InvocationTargetException;
 import java.sql.ResultSet;
@@ -92,5 +94,45 @@ public abstract class Module {
 
     public String getPrefix() {
         return prefix;
+    }
+
+    private static boolean isModuleActive(IRCChannel channel, String moduleName) {
+        for(Module module : activeModules.get(channel.getName())) {
+            if(module.getModuleCode().equals(moduleName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static void activateModule(IRCChannel channel, String moduleName, String prefix) {
+        if(isModuleActive(channel, moduleName)) {
+            deactivateModule(channel, moduleName);
+        }
+        Class<? extends Module> moduleClass = availableModules.get(moduleName);
+        if(moduleClass != null) {
+            try {
+                BalyBot.instance.getDatabase().activateModule(channel.getName(), moduleName, prefix);
+                Module module = moduleClass.getConstructor(String.class, String.class).newInstance(channel.getName(), prefix);
+                module.activate(EventManager.get(channel.getName()));
+                activeModules.put(module.getOwnerContext(), module);
+            } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
+
+    public static void deactivateModule(IRCChannel channel, String moduleName) {
+        Iterator<Module> it = activeModules.get(channel.getName()).iterator();
+        while(it.hasNext()) {
+            Module module = it.next();
+            if(module.getModuleCode().equals(moduleName)) {
+                module.unregisterCommands();
+                BalyBot.instance.getDatabase().deactivateModule(channel.getName(), moduleName);
+                it.remove();
+                return;
+            }
+        }
     }
 }
