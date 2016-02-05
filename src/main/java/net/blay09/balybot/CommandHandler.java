@@ -98,7 +98,7 @@ public class CommandHandler {
                 } else {
                     args = new String[0];
                 }
-                String result = command.execute(channel, sender, message, args, 0);
+                String result = command.execute(channel, sender, message, args, 0, channel.getName().equals("#" + sender.getAccountName()));
                 if(result != null) {
                     if(result.startsWith("/") || result.startsWith(".")) {
                         if(!result.startsWith("/me") && !result.startsWith(".me")) {
@@ -271,7 +271,7 @@ public class CommandHandler {
                 if(depth <= MAX_CMD_DEPTH) {
                     BotCommand command = findFirstCommand(channel, sender, varName.substring(4));
                     if (command != null) {
-                        varValue = command.execute(channel, sender, message, args, depth + 1);
+                        varValue = command.execute(channel, sender, message, args, depth + 1, true);
                     }
                 }
             } else if(varName.startsWith("REG:")) {
