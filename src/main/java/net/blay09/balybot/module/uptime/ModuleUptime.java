@@ -6,6 +6,8 @@ import net.blay09.balybot.module.Module;
 
 public class ModuleUptime extends Module {
 
+    public ConfigEntry MSG_UPTIME_PREFIX = new ConfigEntry(this, "msg.uptime_prefix", "The prefix put in front of the uptime.", "Stream uptime: ");
+    public ConfigEntry MSG_NOT_LIVE = new ConfigEntry(this, "msg.not_live", "The message displayed if the channel is not live.", "This channel is not live.");
     public ConfigEntry UL_UPTIME = new ConfigEntry(this, "ul.uptime", "The minimum user level for the !uptime command.", "all");
 
     public ModuleUptime(String context, String prefix) {
@@ -14,7 +16,7 @@ public class ModuleUptime extends Module {
 
     @Override
     public void activate(EventBus eventBus) {
-        registerCommand(new UptimeBotCommand(prefix, UL_UPTIME.getUserLevel(context)));
+        registerCommand(new UptimeBotCommand(this, prefix, UL_UPTIME.getUserLevel(context)));
     }
 
     @Override

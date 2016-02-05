@@ -8,10 +8,12 @@ import net.blay09.balybot.twitch.TwitchAPI;
 
 public class UptimeBotCommand extends BotCommand {
 
+    private final ModuleUptime module;
     private final String prefix;
 
-    public UptimeBotCommand(String prefix, UserLevel userLevel) {
+    public UptimeBotCommand(ModuleUptime module, String prefix, UserLevel userLevel) {
         super("uptime", "^" + prefix + "uptime(?:\\s+(.*)|$)", userLevel);
+        this.module = module;
         this.prefix = prefix;
     }
 
@@ -23,7 +25,7 @@ public class UptimeBotCommand extends BotCommand {
     @Override
     public String execute(IRCChannel channel, IRCUser sender, String message, String[] args, int depth) {
         if(!TwitchAPI.getStreamData(channel.getName()).isLive()) {
-            return "This channel is not live.";
+            return module.MSG_NOT_LIVE.getString(channel);
         }
         StringBuilder sb = new StringBuilder();
         long uptime = TwitchAPI.getStreamData(channel.getName()).getUptime() / 1000;
@@ -67,7 +69,7 @@ public class UptimeBotCommand extends BotCommand {
                 sb.append("s");
             }
         }
-        return "Stream uptime: " + sb.toString();
+        return module.MSG_UPTIME_PREFIX.getString(channel) + sb.toString();
     }
 
 }
