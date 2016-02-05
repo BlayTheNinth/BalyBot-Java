@@ -1,17 +1,17 @@
-package net.blay09.balybot.module.calc;
+package net.blay09.balybot.module.expr;
 
 import com.google.common.eventbus.EventBus;
 import net.blay09.balybot.module.Module;
 
-public class ModuleMath extends Module {
+public class ModuleExpr extends Module {
 
-    public ModuleMath(String context, String prefix) {
+    public ModuleExpr(String context, String prefix) {
         super(context, prefix);
     }
 
     @Override
     public void activate(EventBus eventBus) {
-        registerCommand(new MathBotCommand(prefix));
+        registerCommand(new ExprBotCommand(prefix));
     }
 
     @Override
@@ -20,16 +20,16 @@ public class ModuleMath extends Module {
 
     @Override
     public String getModuleCode() {
-        return "math";
+        return "expr";
     }
 
     @Override
     public String getModuleName() {
-        return "Math Module";
+        return "Expression Module";
     }
 
     @Override
     public String getModuleDescription() {
-        return "Provides a silly !math command that can calculate any expression that works within the command conditions. Currently set to reg+ permissions and not configurable.";
+        return "Provides a silly !expr command that can calculate any expression that works within the command conditions. Currently set to reg+ permissions and not configurable.";
     }
 }

@@ -136,4 +136,9 @@ public class SetRegexBotCommand extends BotCommand {
         }
     }
 
+    @Override
+    public boolean ignoresCommandCooldown() {
+        return true;
+    }
+
 }

@@ -50,4 +50,9 @@ public class RegularBotCommand extends BotCommand {
         }
     }
 
+    @Override
+    public boolean ignoresCommandCooldown() {
+        return true;
+    }
+
 }

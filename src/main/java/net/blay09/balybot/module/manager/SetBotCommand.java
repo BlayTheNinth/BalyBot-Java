@@ -134,4 +134,8 @@ public class SetBotCommand extends BotCommand {
         }
     }
 
+    @Override
+    public boolean ignoresCommandCooldown() {
+        return true;
+    }
 }

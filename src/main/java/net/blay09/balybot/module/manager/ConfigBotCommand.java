@@ -49,4 +49,9 @@ public class ConfigBotCommand extends BotCommand {
         return "Config option '" + option + "' updated: " + value;
     }
 
+    @Override
+    public boolean ignoresCommandCooldown() {
+        return true;
+    }
+
 }

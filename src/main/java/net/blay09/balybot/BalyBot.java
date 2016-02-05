@@ -6,7 +6,7 @@ import net.blay09.balybot.irc.IRCConfig;
 import net.blay09.balybot.irc.IRCConnection;
 import net.blay09.balybot.irc.event.IRCConnectEvent;
 import net.blay09.balybot.module.Module;
-import net.blay09.balybot.module.calc.ModuleMath;
+import net.blay09.balybot.module.expr.ModuleExpr;
 import net.blay09.balybot.module.hostnotifier.ModuleHostNotifier;
 import net.blay09.balybot.module.linkfilter.ModuleLinkFilter;
 import net.blay09.balybot.module.ccpoll.ModuleCountedChatPoll;
@@ -76,7 +76,7 @@ public class BalyBot {
 
         Module.registerModule("manager", ModuleManager.class);
         Module.registerModule("linkfilter", ModuleLinkFilter.class);
-        Module.registerModule("math", ModuleMath.class);
+        Module.registerModule("math", ModuleExpr.class);
         Module.registerModule("ccp", ModuleCountedChatPoll.class);
         Module.registerModule("song", ModuleSong.class);
         Module.registerModule("time", ModuleTime.class);

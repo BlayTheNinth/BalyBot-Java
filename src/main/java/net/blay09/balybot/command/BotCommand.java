@@ -31,9 +31,9 @@ public abstract class BotCommand {
         this.whisperTo = whisperTo;
     }
 
-    public String execute(IRCChannel channel, IRCUser sender, String name, String[] args, int depth, boolean ignoreFlood) {
+    public String execute(IRCChannel channel, IRCUser sender, String name, String[] args, int depth, boolean ignoreCooldown) {
         long now = System.currentTimeMillis();
-        if(ignoreFlood || now - lastExecution >= Config.getValueAsInt(channel.getName(), "command_cooldown", 30)) {
+        if(ignoresCommandCooldown() || ignoreCooldown || now - lastExecution >= Config.getValueAsInt(channel.getName(), "command_cooldown", 30)) {
             lastExecution = now;
             return execute(channel, sender, name, args, depth);
         }
@@ -52,5 +52,9 @@ public abstract class BotCommand {
 
     public String getCommandSyntax() {
         return "<no syntax set>";
+    }
+
+    public boolean ignoresCommandCooldown() {
+        return false;
     }
 }

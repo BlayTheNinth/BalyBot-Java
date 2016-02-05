@@ -74,4 +74,9 @@ public class SetUserLevelCommand extends BotCommand {
         }
     }
 
+    @Override
+    public boolean ignoresCommandCooldown() {
+        return true;
+    }
+
 }
