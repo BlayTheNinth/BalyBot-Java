@@ -27,7 +27,9 @@ public class PermitBotCommand extends BotCommand {
             return "Not enough parameters for permit command. Syntax: " + getCommandSyntax();
         }
         module.permit(args[0]);
-        return sender.getName() + ", you may now post one link. Make it count!";
+        String result = module.MSG_PERMITTED.getString(channel);
+        result = result.replace("{NICK}", sender.getDisplayName());
+        return result;
     }
 
 }

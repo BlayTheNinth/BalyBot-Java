@@ -41,4 +41,8 @@ public class ConfigEntry {
         }
         return userLevel;
     }
+
+    public boolean getBoolean(IRCChannel channel) {
+        return Boolean.parseBoolean(getString(channel));
+    }
 }
