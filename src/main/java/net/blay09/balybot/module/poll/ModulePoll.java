@@ -3,6 +3,7 @@ package net.blay09.balybot.module.poll;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import net.blay09.balybot.irc.event.IRCChannelChatEvent;
+import net.blay09.balybot.module.ConfigEntry;
 import net.blay09.balybot.module.Module;
 
 import java.util.ArrayList;
@@ -11,6 +12,11 @@ import java.util.Comparator;
 import java.util.List;
 
 public class ModulePoll extends Module {
+
+    public ConfigEntry MSG_START_PREFIX = new ConfigEntry(this, "msg.start_prefix", "The prefix used for the poll started message.", "[New Poll]");
+    public ConfigEntry MSG_RESULTS_PREFIX = new ConfigEntry(this, "msg.results_prefix", "The prefix used for the poll ended message.", "[Results]");
+    public ConfigEntry MSG_NO_POLL = new ConfigEntry(this, "msg.no_poll", "The message displayed if no poll was running.", "There was no poll running, stupid.");
+    public ConfigEntry UL_POLL = new ConfigEntry(this, "ul.pool", "The minimum user level for the !pool command.", "mod");
 
     private static class Poll {
         public final List<String> users = new ArrayList<>();
@@ -68,7 +74,7 @@ public class ModulePoll extends Module {
     @Override
     public void activate(EventBus eventBus) {
         eventBus.register(this);
-        registerCommand(new PollBotCommand(this, prefix));
+        registerCommand(new PollBotCommand(this, prefix, UL_POLL.getUserLevel(context)));
     }
 
     @Override
@@ -98,7 +104,7 @@ public class ModulePoll extends Module {
 
     public String startPoll(String[] searchTexts, String[] options) {
         currentPoll = new Poll(searchTexts, options);
-        StringBuilder message = new StringBuilder("[New Poll] ");
+        StringBuilder message = new StringBuilder(MSG_START_PREFIX.getString(context) + " ");
         for(int i = 0; i < searchTexts.length; i++) {
             if(i > 0) {
                 message.append(" // ");
@@ -111,7 +117,7 @@ public class ModulePoll extends Module {
     public String stop() {
         if (currentPoll != null) {
             int totalVotes = currentPoll.getTotalVotes();
-            StringBuilder message = new StringBuilder("[Results] ");
+            StringBuilder message = new StringBuilder(MSG_RESULTS_PREFIX.getString(context) + " ");
             boolean first = true;
             for (PollResult result : currentPoll.getResults()) {
                 if (!first) {
@@ -123,7 +129,7 @@ public class ModulePoll extends Module {
             currentPoll = null;
             return message.toString();
         }
-        return "There was no poll running, stupid.";
+        return MSG_NO_POLL.getString(context);
     }
 
     @Override

@@ -1,20 +1,25 @@
 package net.blay09.balybot.module.ccpoll;
 
+import com.google.common.collect.Lists;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import net.blay09.balybot.irc.IRCChannel;
 import net.blay09.balybot.irc.event.IRCChannelChatEvent;
+import net.blay09.balybot.module.ConfigEntry;
 import net.blay09.balybot.module.Module;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class ModuleCountedChatPoll extends Module {
 
+    public ConfigEntry MSG_POLL_STARTED = new ConfigEntry(this, "msg.poll_started", "The message that appears in front of the instructions, when no description is supplied.", "Counted Chat Poll started");
+    public ConfigEntry MSG_INSTRUCTIONS = new ConfigEntry(this, "msg.instructions", "The instructions that appear after the poll description. Variables: MAX, TEXT", "Type up to {MAX}x {TEXT} ({TEXT}) in chat or --- to vote zero!");
+    public ConfigEntry MSG_RESULTS = new ConfigEntry(this, "msg.results", "The result output when the poll is ended. Variables: AVERAGE, PERCENTAGE", "Average Result: {AVERAGE} [{PERCENTAGE}]");
+    public ConfigEntry MSG_NO_POLL = new ConfigEntry(this, "msg.no_poll", "The message displayed if no poll was running.", "There was no poll running, silly!");
+    public ConfigEntry UL_CCP = new ConfigEntry(this, "ul.ccp", "The minimum user level for the !ccp command.", "mod");
+
     private static class Poll {
-        public final List<String> users = new ArrayList<>();
+        public final List<String> users = Lists.newArrayList();
         public final String searchText;
         public final int[] votes;
         public Poll(String searchText, int maxCount) {
@@ -32,7 +37,7 @@ public class ModuleCountedChatPoll extends Module {
     @Override
     public void activate(EventBus eventBus) {
         eventBus.register(this);
-        registerCommand(new CountedChatPollBotCommand(this, prefix));
+        registerCommand(new CountedChatPollBotCommand(this, prefix, UL_CCP.getUserLevel(context)));
     }
 
     @Override
@@ -67,10 +72,13 @@ public class ModuleCountedChatPoll extends Module {
 
     public String startPoll(IRCChannel channel, String searchText, int maxCount, String description) {
         if(description == null) {
-            description = "Counted Chat Poll started";
+            description = MSG_POLL_STARTED.getString(channel);
         }
         currentPoll = new Poll(searchText, maxCount);
-        return description + " - Type up to " + maxCount + "x " + searchText + " (" + searchText + ") in chat or --- to vote zero!";
+        String instructions = MSG_INSTRUCTIONS.getString(channel);
+        instructions = instructions.replace("{MAX}", String.valueOf(maxCount));
+        instructions = instructions.replace("{TEXT}", searchText);
+        return description + " - " + instructions;
     }
 
     public String stop(IRCChannel channel) {
@@ -89,9 +97,12 @@ public class ModuleCountedChatPoll extends Module {
                 sb.append(getNumberName(i)).append(": ").append(currentPoll.votes[i]).append(" (").append(Math.round((float) currentPoll.votes[i] / (float) maxCount * 100f)).append("%)");
             }
             currentPoll = null;
-            return "Average Result: " + String.format("%.1f", (float) voteCount / (float) maxCount) + " [" + sb.toString() + "]";
+            String result = MSG_RESULTS.getString(channel);
+            result = result.replace("{AVERAGE}", String.format("%.1f", (float) voteCount / (float) maxCount));
+            result = result.replace("{PERCENTAGE}", sb.toString());
+            return result;
         }
-        return "There was no poll running, silly!";
+        return MSG_NO_POLL.getString(channel);
     }
 
     private static String getNumberName(int i) {
@@ -140,4 +151,5 @@ public class ModuleCountedChatPoll extends Module {
     public String getModuleDescription() {
         return "Provides the !ccp command to create polls that are voted for within chat by posting a certain amount of emoticons. Returns percentages and an average.";
     }
+
 }

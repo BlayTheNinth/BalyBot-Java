@@ -1,6 +1,7 @@
 package net.blay09.balybot.module;
 
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.eventbus.EventBus;
 import net.blay09.balybot.BalyBot;
@@ -47,7 +48,8 @@ public abstract class Module {
         }
     }
 
-    private final List<BotCommand> commands = new ArrayList<>();
+    private final List<BotCommand> commands = Lists.newArrayList();
+    private final List<ConfigEntry> configEntries = Lists.newArrayList();
     protected final String context;
     protected final String prefix;
 
@@ -134,5 +136,9 @@ public abstract class Module {
                 return;
             }
         }
+    }
+
+    public void addConfigEntry(ConfigEntry entry) {
+        configEntries.add(entry);
     }
 }

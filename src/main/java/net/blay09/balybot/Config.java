@@ -2,6 +2,7 @@ package net.blay09.balybot;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
+import net.blay09.balybot.irc.IRCChannel;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -31,6 +32,10 @@ public class Config {
             throw new RuntimeException("Required config option " + name + " but it's missing and has no default value.");
         }
         return config.get(channel, name);
+    }
+
+    public static String getValue(IRCChannel channel, String name, String defaultVal) {
+        return getValue(channel.getName(), name, defaultVal);
     }
 
     public static String getValue(String channel, String name, String defaultVal) {

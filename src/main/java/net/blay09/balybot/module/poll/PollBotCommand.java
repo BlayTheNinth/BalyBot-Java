@@ -12,8 +12,8 @@ public class PollBotCommand extends BotCommand {
     private final ModulePoll module;
     private final String prefix;
 
-    public PollBotCommand(ModulePoll module, String prefix) {
-        super("poll", "^" + prefix + "poll(?:\\s+(.*)|$)", UserLevel.MODERATOR);
+    public PollBotCommand(ModulePoll module, String prefix, UserLevel userLevel) {
+        super("poll", "^" + prefix + "poll(?:\\s+(.*)|$)", userLevel);
         this.module = module;
         this.prefix = prefix;
     }

@@ -11,8 +11,8 @@ public class CountedChatPollBotCommand extends BotCommand {
     private final ModuleCountedChatPoll module;
     private final String prefix;
 
-    public CountedChatPollBotCommand(ModuleCountedChatPoll module, String prefix) {
-        super("ccp", "^" + prefix + "ccp(?:\\s+(.*)|$)", UserLevel.MODERATOR);
+    public CountedChatPollBotCommand(ModuleCountedChatPoll module, String prefix, UserLevel userLevel) {
+        super("ccp", "^" + prefix + "ccp(?:\\s+(.*)|$)", userLevel);
         this.module = module;
         this.prefix = prefix;
     }

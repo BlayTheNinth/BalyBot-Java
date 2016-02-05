@@ -1,9 +1,12 @@
 package net.blay09.balybot.module.expr;
 
 import com.google.common.eventbus.EventBus;
+import net.blay09.balybot.module.ConfigEntry;
 import net.blay09.balybot.module.Module;
 
 public class ModuleExpr extends Module {
+
+    public ConfigEntry UL_EXPR = new ConfigEntry(this, "ul.expr", "The minimum user level for the !expr command.", "reg");
 
     public ModuleExpr(String context, String prefix) {
         super(context, prefix);
@@ -11,7 +14,7 @@ public class ModuleExpr extends Module {
 
     @Override
     public void activate(EventBus eventBus) {
-        registerCommand(new ExprBotCommand(prefix));
+        registerCommand(new ExprBotCommand(prefix, UL_EXPR.getUserLevel(context)));
     }
 
     @Override

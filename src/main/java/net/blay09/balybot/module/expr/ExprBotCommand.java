@@ -10,8 +10,8 @@ public class ExprBotCommand extends BotCommand {
 
     private final String prefix;
 
-    public ExprBotCommand(String prefix) {
-        super("expr", "^" + prefix + "expr(?:\\s+(.*)|$)", UserLevel.REGULAR);
+    public ExprBotCommand(String prefix, UserLevel userLevel) {
+        super("expr", "^" + prefix + "expr(?:\\s+(.*)|$)", userLevel);
         this.prefix = prefix;
     }
 
