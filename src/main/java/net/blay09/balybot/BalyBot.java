@@ -48,6 +48,7 @@ public class BalyBot {
                         String channelName = s.substring(6);
                         instance.connection.join(channelName, null);
                         instance.database.addToChannel(channelName);
+                        Module.activateModule(instance.connection.getOrCreateChannel(channelName), "manager", "!");
                     } else if(s.startsWith("/part ")) {
                         String channelName = s.substring(6);
                         instance.connection.part(channelName);
