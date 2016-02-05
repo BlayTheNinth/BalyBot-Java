@@ -85,10 +85,18 @@ public class DocBuilder {
         sb.append("</table>\n");
 
         sb.append("<h2>Available Modules</h2>\n");
+        sb.append("<table border='1'>\n");
+        sb.append("<th>Module ID</th>\n");
+        sb.append("<th>Name</th>\n");
+        sb.append("<th>Description</th>\n");
         for(Module module : Module.getInactiveModules(channel)) {
-            sb.append("<h3 id='").append(module.getModuleCode()).append("'>").append(module.getModuleName()).append(" (").append(module.getModuleCode()).append(")</h3>\n");
-            sb.append(module.getModuleDescription()).append("<br />\n");
+            sb.append("<tr>\n");
+            sb.append("<td><a id='").append(module.getModuleCode()).append("'>").append(module.getModuleCode()).append("</a></td>\n");
+            sb.append("<td>").append(module.getModuleName()).append("</td>\n");
+            sb.append("<td>").append(module.getModuleDescription()).append("</td>\n");
+            sb.append("</tr>\n");
         }
+        sb.append("</table>\n");
 
         sb.append("<h2>Enabled Modules</h2>\n");
         for(Module module : Module.getActiveModules(channel)) {
