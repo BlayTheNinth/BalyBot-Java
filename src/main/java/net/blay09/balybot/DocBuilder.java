@@ -204,7 +204,7 @@ public class DocBuilder {
 
         File commandsDir = new File(Config.getValue("*", "docs_dir", "docs"));
         if(commandsDir.exists() || commandsDir.mkdir()) {
-            try(InputStream in = DocBuilder.class.getResourceAsStream("docs.css"); FileWriter writer = new FileWriter(new File(commandsDir, "docs.css"))) {
+            try(InputStream in = DocBuilder.class.getResourceAsStream("/docs.css"); FileWriter writer = new FileWriter(new File(commandsDir, "docs.css"))) {
                 if(in != null) {
                     IOUtils.copy(in, writer);
                 }
