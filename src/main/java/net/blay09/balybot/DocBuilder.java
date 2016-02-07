@@ -19,6 +19,7 @@ public class DocBuilder {
 
     public static void buildDocs(Database database, String channel) {
         StringBuilder sb = new StringBuilder();
+        sb.append("<!DOCTYPE html>\n");
         sb.append("<html>\n");
         sb.append("<head>\n");
         sb.append("<title>BalyBot Documentation - ").append(channel).append("</title>\n");
@@ -55,7 +56,7 @@ public class DocBuilder {
         sb.append("<h2>General</h2>\n");
 
         sb.append("<div class='module'>\n");
-        sb.append("<h3 id='userlevels'>User Levels<h3>\n");
+        sb.append("<h3 id='userlevels'>User Levels</h3>\n");
         sb.append("<table border='1'>\n");
         sb.append("<tr><th>Name</th><th>Description</th></tr>\n");
         sb.append("<tr><td>owner</td><td>The bot account itself, only used for global configurations and joining channels.</td></tr>\n");
@@ -69,7 +70,7 @@ public class DocBuilder {
         sb.append("</div>\n");
 
         sb.append("<div class='module'>\n");
-        sb.append("<h3 id='variables'>Variables<h3>\n");
+        sb.append("<h3 id='variables'>Variables</h3>\n");
         sb.append("<table border='1'>\n");
         sb.append("<tr><th>Name</th><th>Description</th></tr>\n");
         sb.append("<tr><td>{SENDER}</td><td>The display name of the command sender.</td></tr>\n");
@@ -85,7 +86,7 @@ public class DocBuilder {
         sb.append("</div>\n");
 
         sb.append("<div class='module'>\n");
-        sb.append("<h3 id='expressions'>Expressions<h3>\n");
+        sb.append("<h3 id='expressions'>Expressions</h3>\n");
         sb.append("<table border='1'>\n");
         sb.append("<tr><th>Name</th><th>Description</th></tr>\n");
         sb.append("<tr><td>in_str(src, find)</td><td>Takes two string parameters and returns true if the first contains the second string.</td></tr>\n");
