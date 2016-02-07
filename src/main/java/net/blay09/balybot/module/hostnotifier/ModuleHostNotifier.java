@@ -47,6 +47,6 @@ public class ModuleHostNotifier extends Module {
 
     @Override
     public String getModuleDescription() {
-        return "Sends a configured message (hostnotifier_message) when someone hosts the channel for a minimum of (hostnotifier_minviewers) viewers. The message can contain the variables {HOSTCHANNEL} and {HOSTVIEWERS}.";
+        return "Sends a configured message when someone hosts the channel for a minimum of viewers.";
     }
 }
