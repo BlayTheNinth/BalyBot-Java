@@ -10,7 +10,7 @@ public class ModuleCommand extends BotCommand {
     private final String prefix;
 
     public ModuleCommand(String prefix) {
-        super("module", "^" + prefix + "module(?:\\s+(.*)|$)", UserLevel.MODERATOR);
+        super("module", "^" + prefix + "module(?:\\s+(.*)|$)", UserLevel.BROADCASTER);
         this.prefix = prefix;
     }
 

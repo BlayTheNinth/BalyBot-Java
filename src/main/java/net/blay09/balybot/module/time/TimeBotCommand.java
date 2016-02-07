@@ -1,6 +1,5 @@
 package net.blay09.balybot.module.time;
 
-import net.blay09.balybot.Config;
 import net.blay09.balybot.UserLevel;
 import net.blay09.balybot.command.BotCommand;
 import net.blay09.balybot.irc.IRCChannel;
@@ -14,10 +13,12 @@ import java.util.TimeZone;
 
 public class TimeBotCommand extends BotCommand {
 
+    private final ModuleTime module;
     private final String prefix;
 
-    public TimeBotCommand(String prefix) {
-        super("time", "^" + prefix + "time(?:\\s+(.*)|$)", UserLevel.ALL);
+    public TimeBotCommand(ModuleTime module, String prefix, UserLevel userLevel) {
+        super("time", "^" + prefix + "time(?:\\s+(.*)|$)", userLevel);
+        this.module = module;
         this.prefix = prefix;
     }
 
@@ -28,12 +29,10 @@ public class TimeBotCommand extends BotCommand {
 
     @Override
     public String execute(IRCChannel channel, IRCUser sender, String message, String[] args, int depth) {
-        String timeZoneID;
+        String timeZoneID = module.TIMEZONE.getString(channel);
         if(args.length > 0) {
             timeZoneID = String.join(" ", args);
-        } else if(Config.hasOption(channel.getName(), "time_timezone")){
-            timeZoneID = Config.getValue(channel.getName(), "time_timezone");
-        } else {
+        } else if(timeZoneID.isEmpty()) {
             return "Not enough parameters for time command. Syntax: !time <timezone>";
         }
         String[] availableIDs = TimeZone.getAvailableIDs();

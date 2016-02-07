@@ -16,7 +16,7 @@ public class ModulePoll extends Module {
     public ConfigEntry MSG_START_PREFIX = new ConfigEntry(this, "msg.start_prefix", "The prefix used for the poll started message.", "[New Poll]");
     public ConfigEntry MSG_RESULTS_PREFIX = new ConfigEntry(this, "msg.results_prefix", "The prefix used for the poll ended message.", "[Results]");
     public ConfigEntry MSG_NO_POLL = new ConfigEntry(this, "msg.no_poll", "The message displayed if no poll was running.", "There was no poll running, stupid.");
-    public ConfigEntry UL_POLL = new ConfigEntry(this, "ul.pool", "The minimum user level for the !pool command.", "mod");
+    public ConfigEntry UL_POLL = new ConfigEntry(this, "ul.poll", "The minimum user level for the !poll command.", "mod");
 
     private static class Poll {
         public final List<String> users = new ArrayList<>();
