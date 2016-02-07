@@ -105,7 +105,7 @@ public class DocBuilder {
             sb.append(module.getModuleDescription()).append("<br />\n");
 
             if(module.getConfigEntries().size() > 0) {
-                sb.append("<table border='1'>\n");
+                sb.append("<p><table border='1'>\n");
                 sb.append("<tr>\n");
                 sb.append("<th>Option</th>\n");
                 sb.append("<th>Description</th>\n");
@@ -120,11 +120,11 @@ public class DocBuilder {
                     sb.append("</tr>\n");
                 }
 
-                sb.append("</table>\n");
+                sb.append("</table></p>\n");
             }
 
             if(module.getCommands().size() > 0) {
-                sb.append("<table border='1'>\n");
+                sb.append("<p><table border='1'>\n");
                 sb.append("<tr>\n");
                 sb.append("<th>Command</th>\n");
                 sb.append("<th>User Level</th>\n");
@@ -133,15 +133,11 @@ public class DocBuilder {
                 for (BotCommand command : module.getCommands()) {
                     sb.append("<tr>\n");
                     sb.append("<td>").append(escape(command.getCommandSyntax())).append("</td>\n");
-
-                    sb.append("<td>");
-                    sb.append(command.minUserLevel.name);
-                    sb.append("</td>\n");
-
+                    sb.append("<td>").append(command.minUserLevel.name).append("</td>\n");
                     sb.append("</tr>\n");
                 }
 
-                sb.append("</table>\n");
+                sb.append("</table></p>\n");
             }
         }
 
