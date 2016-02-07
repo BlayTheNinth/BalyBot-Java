@@ -5,9 +5,12 @@ import net.blay09.balybot.command.BotCommand;
 import net.blay09.balybot.module.ConfigEntry;
 import net.blay09.balybot.module.Module;
 import org.apache.commons.io.Charsets;
+import org.apache.commons.io.IOUtils;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -16,38 +19,42 @@ public class DocBuilder {
 
     public static void buildDocs(Database database, String channel) {
         StringBuilder sb = new StringBuilder();
+        sb.append("<html>\n");
+        sb.append("<head>\n");
+        sb.append("<title>BalyBot Documentation - ").append(channel).append("</title>\n");
+        sb.append("<link rel='stylesheet' type='text/css' href='docs.css' />");
+        sb.append("</head>\n");
+
         sb.append("<h1>BalyBot (").append(channel).append(")</h1>\n");
 
         sb.append("<h2>Index</h2>\n");
-        sb.append("<ul>\n");
 
+        sb.append("<ul>\n");
         sb.append("<li>General<ul>\n");
-        sb.append("<a href='#userlevels'><li>User Levels</li></a>\n");
-        sb.append("<a href='#variables'><li>Variables</li></a>\n");
-        sb.append("<a href='#expressions'><li>Expressions</li></a>\n");
+        sb.append("<a class='indexLink' href='#userlevels'><li>User Levels</li></a>\n");
+        sb.append("<a class='indexLink' href='#variables'><li>Variables</li></a>\n");
+        sb.append("<a class='indexLink' href='#expressions'><li>Expressions</li></a>\n");
         sb.append("</ul></li>\n");
 
         sb.append("<li>Available Modules<ul>\n");
         for(Module module : Module.getInactiveModules(channel)) {
-            sb.append("<a href='#").append(module.getModuleCode()).append("'><li>").append(module.getModuleName()).append("</li></a>\n");
+            sb.append("<a class='indexLink' href='#").append(module.getModuleCode()).append("'><li>").append(module.getModuleName()).append("</li></a>\n");
         }
         sb.append("</ul></li>\n");
 
         sb.append("<li>Enabled Modules<ul>\n");
         for(Module module : Module.getActiveModules(channel)) {
-            sb.append("<a href='#").append(module.getModuleCode()).append("'><li>").append(module.getModuleName()).append("</li></a>\n");
+            sb.append("<a class='indexLink' href='#").append(module.getModuleCode()).append("'><li>").append(module.getModuleName()).append("</li></a>\n");
         }
         sb.append("</ul></li>\n");
 
-        sb.append("<a href='#commands'><li>Commands</li></a>\n");
-
-        sb.append("</ul>\n");
-
-        sb.append("<a href='#commands'><li>Commands</li></a>\n");
+        sb.append("<a class='indexLink' href='#commands'><li>Commands</li></a>\n");
 
         sb.append("</ul>\n");
 
         sb.append("<h2>General</h2>\n");
+
+        sb.append("<div class='module'>\n");
         sb.append("<h3 id='userlevels'>User Levels<h3>\n");
         sb.append("<table border='1'>\n");
         sb.append("<tr><th>Name</th><th>Description</th></tr>\n");
@@ -59,7 +66,9 @@ public class DocBuilder {
         sb.append("<tr><td>turbo</td><td>Twitch Turbo users. Might limit usage of certain commands, is not intuitive though.</td></tr>\n");
         sb.append("<tr><td>all</td><td>All users. Everyone. Including your grandmother and the president of the United States.</td></tr>\n");
         sb.append("</table>\n");
+        sb.append("</div>\n");
 
+        sb.append("<div class='module'>\n");
         sb.append("<h3 id='variables'>Variables<h3>\n");
         sb.append("<table border='1'>\n");
         sb.append("<tr><th>Name</th><th>Description</th></tr>\n");
@@ -73,7 +82,9 @@ public class DocBuilder {
         sb.append("<tr><td>{REG:...}</td><td>The content of a regex group indexed by the value after the colons.</td></tr>\n");
         sb.append("<tr><td>{0}</td><td>The argument that was given to a command at the specified index, starting at 0.</td></tr>\n");
         sb.append("</table>\n");
+        sb.append("</div>\n");
 
+        sb.append("<div class='module'>\n");
         sb.append("<h3 id='expressions'>Expressions<h3>\n");
         sb.append("<table border='1'>\n");
         sb.append("<tr><th>Name</th><th>Description</th></tr>\n");
@@ -84,7 +95,9 @@ public class DocBuilder {
         sb.append("<tr><td>viewers(channel)</td><td>Returns the amount of people currently watching the given channel name.</td></tr>\n");
         sb.append("<tr><td>isLive(channel)</td><td>Returns true if the given channel name is currently live.</td></tr>\n");
         sb.append("</table>\n");
+        sb.append("</div>\n");
 
+        sb.append("<div class='module'>\n");
         sb.append("<h2>Available Modules</h2>\n");
         sb.append("<table border='1'>\n");
         sb.append("<th>Module ID</th>\n");
@@ -98,9 +111,11 @@ public class DocBuilder {
             sb.append("</tr>\n");
         }
         sb.append("</table>\n");
+        sb.append("</div>\n");
 
         sb.append("<h2>Enabled Modules</h2>\n");
         for(Module module : Module.getActiveModules(channel)) {
+            sb.append("<div class='module'>\n");
             sb.append("<h3 id='").append(module.getModuleCode()).append("'>").append(module.getModuleName()).append(" (").append(module.getModuleCode()).append(")</h3>\n");
             sb.append(module.getModuleDescription()).append("<br />\n");
 
@@ -141,6 +156,7 @@ public class DocBuilder {
 
                 sb.append("</table>\n");
             }
+            sb.append("</div>\n");
         }
 
         sb.append("<h2 id='commands'>Commands</h2>\n");
@@ -187,6 +203,11 @@ public class DocBuilder {
 
         File commandsDir = new File(Config.getValue("*", "docs_dir", "docs"));
         if(commandsDir.exists() || commandsDir.mkdir()) {
+            try(InputStream in = DocBuilder.class.getResourceAsStream("docs.css"); FileWriter writer = new FileWriter(new File(commandsDir, "docs.css"))) {
+                IOUtils.copy(in, writer);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             try {
                 Files.write(sb, new File(commandsDir, channel.substring(1) + ".html"), Charsets.UTF_8);
             } catch (IOException e) {
