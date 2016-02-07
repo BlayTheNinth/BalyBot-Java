@@ -195,10 +195,6 @@ public class CommandHandler {
     }
 
     public static boolean passesUserLevel(IRCUser user, IRCChannel channel, UserLevel level) {
-        if(user == null || channel == null || level == null) {
-            System.out.println("Wat. Can't check user level. User: " + user + ", channel: " + channel + ", level: " + level);
-            return false;
-        }
         if(user.getName().equalsIgnoreCase(BalyBot.instance.getConnection().getNick())) {
             return true;
         } else if(level == UserLevel.OWNER) {
