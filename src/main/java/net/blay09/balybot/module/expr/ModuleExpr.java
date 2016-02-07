@@ -6,7 +6,7 @@ import net.blay09.balybot.module.Module;
 
 public class ModuleExpr extends Module {
 
-    public ConfigEntry UL_EXPR = new ConfigEntry(this, "ul.expr", "The minimum user level for the !expr command.", "reg");
+    public ConfigEntry UL_EXPR = new ConfigEntry(this, "ul.expr", "The minimum user level for the !expr command.", "mod");
 
     public ModuleExpr(String context, String prefix) {
         super(context, prefix);
@@ -33,6 +33,6 @@ public class ModuleExpr extends Module {
 
     @Override
     public String getModuleDescription() {
-        return "Provides a silly !expr command that can calculate any expression that works within the command conditions. Currently set to reg+ permissions and not configurable.";
+        return "Provides an !expr command that can calculate any expression that works within the command conditions.";
     }
 }
