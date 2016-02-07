@@ -9,7 +9,7 @@ a {
 }
 
 div.module {
-    background-color: #D2F8FA;
+    background-color: #F9F9F9;
     padding-top: 10px;
     padding-left: 10px;
     padding-right: 10px;
@@ -17,16 +17,6 @@ div.module {
     width: 90%;
     margin: 0 auto;
     margin-bottom: 25px;
-    -webkit-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.75);
-    -moz-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.75);
-    box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.75);
-}
-
-div.moduleSub {
-    background-color: #F9F9F9;
-    padding: 10px;
-    margin: 0 auto;
-    margin-bottom: 7px;
     -webkit-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.75);
     -moz-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.75);
     box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.75);
