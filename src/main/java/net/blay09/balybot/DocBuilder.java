@@ -127,6 +127,7 @@ public class DocBuilder {
                 sb.append("<th>Option</th>\n");
                 sb.append("<th>Description</th>\n");
                 sb.append("<th>Default</th>\n");
+                sb.append("<th>Value</th>\n");
                 sb.append("</tr>\n");
 
                 for (ConfigEntry config : module.getConfigEntries()) {
@@ -134,6 +135,7 @@ public class DocBuilder {
                     sb.append("<td>").append(module.getModuleCode()).append(".").append(escape(config.name)).append("</td>\n");
                     sb.append("<td>").append(escape(config.description)).append("</td>\n");
                     sb.append("<td>").append(escape(config.defaultVal)).append("</td>\n");
+                    sb.append("<td>").append(escape(config.getString(channel))).append("</td>\n");
                     sb.append("</tr>\n");
                 }
 
