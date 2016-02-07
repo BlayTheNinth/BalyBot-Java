@@ -105,7 +105,8 @@ public class DocBuilder {
             sb.append(module.getModuleDescription()).append("<br />\n");
 
             if(module.getConfigEntries().size() > 0) {
-                sb.append("<p><table border='1'>\n");
+                sb.append("<h4>Module Options</h4>");
+                sb.append("<table border='1'>\n");
                 sb.append("<tr>\n");
                 sb.append("<th>Option</th>\n");
                 sb.append("<th>Description</th>\n");
@@ -120,11 +121,12 @@ public class DocBuilder {
                     sb.append("</tr>\n");
                 }
 
-                sb.append("</table></p>\n");
+                sb.append("</table>\n");
             }
 
             if(module.getCommands().size() > 0) {
-                sb.append("<p><table border='1'>\n");
+                sb.append("<h4>Module Commands</h4>");
+                sb.append("<table border='1'>\n");
                 sb.append("<tr>\n");
                 sb.append("<th>Command</th>\n");
                 sb.append("<th>User Level</th>\n");
@@ -137,7 +139,7 @@ public class DocBuilder {
                     sb.append("</tr>\n");
                 }
 
-                sb.append("</table></p>\n");
+                sb.append("</table>\n");
             }
         }
 
