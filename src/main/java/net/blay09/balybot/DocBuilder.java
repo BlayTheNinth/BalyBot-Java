@@ -2,6 +2,7 @@ package net.blay09.balybot;
 
 import com.google.common.io.Files;
 import net.blay09.balybot.command.BotCommand;
+import net.blay09.balybot.module.ConfigEntry;
 import net.blay09.balybot.module.Module;
 import org.apache.commons.io.Charsets;
 
@@ -102,6 +103,25 @@ public class DocBuilder {
         for(Module module : Module.getActiveModules(channel)) {
             sb.append("<h3 id='").append(module.getModuleCode()).append("'>").append(module.getModuleName()).append(" (").append(module.getModuleCode()).append(")</h3>\n");
             sb.append(module.getModuleDescription()).append("<br />\n");
+
+            if(module.getConfigEntries().size() > 0) {
+                sb.append("<table border='1'>\n");
+                sb.append("<tr>\n");
+                sb.append("<th>Option</th>\n");
+                sb.append("<th>Description</th>\n");
+                sb.append("<th>Default</th>\n");
+                sb.append("</tr>\n");
+
+                for (ConfigEntry config : module.getConfigEntries()) {
+                    sb.append("<tr>\n");
+                    sb.append("<td>").append(escape(config.name)).append("</td>\n");
+                    sb.append("<td>").append(escape(config.description)).append("</td>\n");
+                    sb.append("<td>").append(escape(config.defaultVal)).append("</td>\n");
+                    sb.append("</tr>\n");
+                }
+
+                sb.append("</table>\n");
+            }
 
             if(module.getCommands().size() > 0) {
                 sb.append("<table border='1'>\n");

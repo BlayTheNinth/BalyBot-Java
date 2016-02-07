@@ -159,4 +159,8 @@ public abstract class Module {
     public void addConfigEntry(ConfigEntry entry) {
         configEntries.add(entry);
     }
+
+    public Collection<ConfigEntry> getConfigEntries() {
+        return configEntries;
+    }
 }
