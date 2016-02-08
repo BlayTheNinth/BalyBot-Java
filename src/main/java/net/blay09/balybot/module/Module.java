@@ -149,6 +149,7 @@ public abstract class Module {
             Module module = it.next();
             if(module.getModuleCode().equals(moduleName)) {
                 module.unregisterCommands();
+                module.deactivate(EventManager.get(channel.getName()));
                 BalyBot.instance.getDatabase().deactivateModule(channel.getName(), moduleName);
                 it.remove();
                 return;

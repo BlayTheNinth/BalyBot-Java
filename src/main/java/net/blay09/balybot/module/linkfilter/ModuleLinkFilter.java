@@ -21,7 +21,7 @@ public class ModuleLinkFilter extends Module {
 
     private static final Pattern ipPattern = Pattern.compile("[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}");
     private static final Matcher ipMatcher = ipPattern.matcher("");
-    private static final Pattern linkPattern = Pattern.compile("(https?://)?([A-Za-z0-9\\.-]+)\\.([A-Za-z\\.]{2,6})([/\\w \\.-]*)*/?");
+    private static final Pattern linkPattern = Pattern.compile("((?:ftp|https?)://)?([A-Za-z0-9\\.-]+)\\.([A-Za-z]{2,6})([/\\w \\.-]*)*/?");
     private static final Matcher linkMatcher = linkPattern.matcher("");
 
     private final List<String> permissions = Lists.newArrayList();
@@ -55,7 +55,9 @@ public class ModuleLinkFilter extends Module {
             }
             event.channel.message("/timeout " + event.sender.getName() + " 1");
             if (SHOW_MESSAGE.getBoolean(event.channel)) {
-                event.channel.message(MSG_LINK_PURGED.getString(event.channel));
+                String message = MSG_LINK_PURGED.getString(event.channel);
+                message = message.replace("{NICK}", event.sender.getDisplayName());
+                event.channel.message(message);
             }
         }
     }
