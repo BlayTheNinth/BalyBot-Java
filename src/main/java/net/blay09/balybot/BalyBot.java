@@ -62,6 +62,9 @@ public class BalyBot {
                 e.printStackTrace();
                 logger.error(e);
             }
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException ignored) {}
         }
         TimerHandler.stop();
     }
@@ -120,6 +123,8 @@ public class BalyBot {
 
                 database.setConfigOption("*", "username", username);
                 database.setConfigOption("*", "oauth", oauth);
+                database.setConfigOption("*", "groupServer", "199.9.253.119");
+                database.setConfigOption("*", "docs_dir", "docs");
                 Config.load(database);
 
                 logger.info("Setup complete! Use /join <channel> to join a channel.");

@@ -48,6 +48,10 @@ public class Database {
         stmt.close();
 
         stmt = connection.createStatement();
+        stmt.executeUpdate("CREATE TABLE IF NOT EXISTS quotes (id INTEGER PRIMARY KEY AUTOINCREMENT, quote_nr INTEGER(4), quote_channel VARCHAR(64) NOT NULL, quote_text TEXT NOT NULL, quote_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)");
+        stmt.close();
+
+        stmt = connection.createStatement();
         stmt.executeUpdate("CREATE TABLE IF NOT EXISTS modules (channel_name VARCHAR(64) NOT NULL, module_name VARCHAR(32) NOT NULL, module_prefix VARCHAR(1) NOT NULL, PRIMARY KEY(channel_name, module_name))");
         stmt.close();
     }
