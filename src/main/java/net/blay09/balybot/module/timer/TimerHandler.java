@@ -48,6 +48,9 @@ public class TimerHandler implements Runnable {
                     command.timeSinceLast = 0;
                 }
             }
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException ignored) {}
         }
     }
 
