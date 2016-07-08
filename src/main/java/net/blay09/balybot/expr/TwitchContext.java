@@ -1,34 +1,38 @@
 package net.blay09.balybot.expr;
 
-import net.blay09.balybot.irc.IRCChannel;
+import net.blay09.balybot.BalyBot;
 import net.blay09.balybot.twitch.TwitchAPI;
 
+@SuppressWarnings("unused")
 public class TwitchContext {
 
-    private final IRCChannel channel;
+	private final String channelName;
 
-    public TwitchContext(IRCChannel channel) {
-        this.channel = channel;
-    }
+	public TwitchContext(String channelName) {
+		this.channelName = channelName;
+	}
 
-    public boolean IS_LIVE() {
-        return TwitchAPI.getStreamData(channel.getName()).isLive();
-    }
+	public String getChannelName() {
+		return channelName;
+	}
 
-    public int VIEWERS() {
-        return TwitchAPI.getStreamData(channel.getName()).getViewers();
-    }
+	public boolean IS_LIVE() {
+		return TwitchAPI.getStreamData(channelName).isLive();
+	}
 
-    public int CHATTERS() {
-        return channel.getUserList().size();
-    }
+	public int VIEWERS() {
+		return TwitchAPI.getStreamData(channelName).getViewers();
+	}
 
-    public String TITLE() {
-        return TwitchAPI.getChannelData(channel.getName()).getTitle();
-    }
+	public int CHATTERS() {
+		return BalyBot.getInstance().getClient().getIRCConnection().getChannelSnapshot(channelName).getUsers().size();
+	}
 
-    public String GAME() {
-        return TwitchAPI.getChannelData(channel.getName()).getGame();
-    }
+	public String TITLE() {
+		return TwitchAPI.getChannelData(channelName).getTitle();
+	}
 
+	public String GAME() {
+		return TwitchAPI.getChannelData(channelName).getGame();
+	}
 }

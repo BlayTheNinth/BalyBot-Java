@@ -1,217 +1,148 @@
 package net.blay09.balybot;
 
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
-import net.blay09.balybot.irc.IRCConfig;
-import net.blay09.balybot.irc.IRCConnection;
-import net.blay09.balybot.irc.event.IRCConnectEvent;
-import net.blay09.balybot.module.Module;
-import net.blay09.balybot.module.expr.ModuleExpr;
-import net.blay09.balybot.module.hostnotifier.ModuleHostNotifier;
-import net.blay09.balybot.module.linkfilter.ModuleLinkFilter;
-import net.blay09.balybot.module.ccpoll.ModuleCountedChatPoll;
-import net.blay09.balybot.module.manager.ModuleManager;
-import net.blay09.balybot.module.poll.ModulePoll;
-import net.blay09.balybot.module.raffle.ModuleRaffle;
-import net.blay09.balybot.module.song.ModuleSong;
-import net.blay09.balybot.module.time.ModuleTime;
-import net.blay09.balybot.module.timer.TimerHandler;
-import net.blay09.balybot.module.uptime.ModuleUptime;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import com.google.common.collect.*;
+import lombok.Getter;
+import lombok.extern.log4j.Log4j2;
+import net.blay09.balybot.module.ModuleDef;
+import net.blay09.balybot.module.commands.CommandsModule;
+import net.blay09.balybot.module.manager.ManagerModule;
+import net.blay09.balybot.script.ScriptManager;
+import net.blay09.javatmi.TMIClient;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 
+@Log4j2
 public class BalyBot {
 
     private static final String VERSION = "0.1.0";
-    private static final Logger logger = LogManager.getLogger();
 
-    public static BalyBot instance;
+    @Getter
+    private static BalyBot instance;
+
+	public static boolean SIMULATED = false;
 
     public static void main(String[] args) {
         instance = new BalyBot();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        while(true) {
-            try {
-                String s = reader.readLine();
-                if(s != null) {
-                    if (s.equals("/quit")) {
-                        instance.connection.disconnect("Bot stopped.");
-                        break;
-                    } else if (s.startsWith("/join ")) {
-                        String channelName = s.substring(6);
-                        instance.connection.join(channelName, null);
-                        instance.database.addToChannel(channelName);
-                        Module.activateModule(instance.connection.getOrCreateChannel(channelName), "manager", "!");
-                        DocBuilder.buildDocs(instance.database, channelName);
-                    } else if(s.startsWith("/part ")) {
-                        String channelName = s.substring(6);
-                        instance.connection.part(channelName);
-                        instance.database.removeFromChannel(channelName);
-                    } else if(s.startsWith("/quote ")) {
-                        instance.connection.irc(s.substring(7));
-                    }
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-                logger.error(e);
-            }
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException ignored) {}
-        }
-        TimerHandler.stop();
+        instance.start();
+        CommandLineHandler.handleCommands();
     }
 
-    private final Database database;
-    private final EventBus globalBus;
-    private IRCConnection connection;
-    private IRCConnection groupConnection;
+    @Getter
+    private TMIClient client;
 
-    public BalyBot() {
-        logger.info("Loading BalyBot {0}...", VERSION);
-        database = new Database("balybot.db");
-        globalBus = new EventBus();
-
-        Module.registerModule("manager", ModuleManager.class);
-        Module.registerModule("linkfilter", ModuleLinkFilter.class);
-        Module.registerModule("math", ModuleExpr.class);
-        Module.registerModule("ccp", ModuleCountedChatPoll.class);
-        Module.registerModule("song", ModuleSong.class);
-        Module.registerModule("time", ModuleTime.class);
-        Module.registerModule("hostnotifier", ModuleHostNotifier.class);
-        Module.registerModule("uptime", ModuleUptime.class);
-        Module.registerModule("raffle", ModuleRaffle.class);
-        Module.registerModule("poll", ModulePoll.class);
-
-        Module.load(database);
-        CommandHandler.loadGlobalCommands(database);
-        CommandHandler.loadChannelCommands(database);
-        TimerHandler.load(database);
-        globalBus.register(this);
-
-        load();
-
-        if(Config.hasOption("*", "username") && Config.hasOption("*", "oauth")) {
-            start();
-        } else {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-            try {
-                logger.info("BalyBot is not configured yet, but no worries, it's simple!");
-
-                String username = null;
-                while(username == null || username.isEmpty()) {
-                    System.out.print("Enter Twitch username: ");
-                    username = reader.readLine().trim();
-                }
-
-                String oauth = null;
-                while(oauth == null || oauth.isEmpty()) {
-                    System.out.print("Enter Twitch oauth token (see http://twitchapps.com/tmi/): ");
-                    oauth = reader.readLine();
-                    if(!oauth.startsWith("oauth:")) {
-                        System.out.println("Invalid oauth token. It should start with 'oauth:'.");
-                        oauth = null;
-                    }
-                }
-
-                database.setConfigOption("*", "username", username);
-                database.setConfigOption("*", "oauth", oauth);
-                database.setConfigOption("*", "groupServer", "199.9.253.119");
-                database.setConfigOption("*", "docs_dir", "docs");
-                Config.load(database);
-
-                logger.info("Setup complete! Use /join <channel> to join a channel.");
-
-                start();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        rebuildAllDocs();
-    }
-
-    public void load() {
-        Config.load(database);
-        Regulars.load(database);
-    }
-
-    @Subscribe
-    @SuppressWarnings("unused")
-    public void onConnected(IRCConnectEvent event) {
-        event.connection.irc("CAP REQ :twitch.tv/membership");
-        event.connection.irc("CAP REQ :twitch.tv/tags");
-        event.connection.irc("CAP REQ :twitch.tv/commands");
-
-        if(event.connection != connection) {
-            return;
-        }
-
-        try {
-            Statement stmt = database.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM channels");
-            while(rs.next()) {
-                event.connection.join(rs.getString("channel_name"), null);
-            }
-            rs.close();
-            stmt.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
+    private final Map<String, ModuleDef> availableModules = Maps.newHashMap();
+	@Getter
+	private final BalyBotListener listener = new BalyBotListener();
 
     public void start() {
-        IRCConfig config = new IRCConfig();
-        config.host = "irc.twitch.tv";
-        config.ident = Config.getValue("*", "username");
-        config.realName = "BalyBot v" + VERSION;
-        config.serverPassword = Config.getValue("*", "oauth");
-        connection = new IRCConnection(config, Config.getValue("*", "username"), globalBus);
-        connection.start();
-
-        IRCConfig groupConfig = new IRCConfig();
-        groupConfig.host = Config.getValue("*", "groupServer");
-        groupConfig.ident = Config.getValue("*", "username");
-        groupConfig.realName = "BalyBot v" + VERSION;
-        groupConfig.serverPassword = Config.getValue("*", "oauth");
-        groupConnection = new IRCConnection(groupConfig, Config.getValue("*", "username"), globalBus);
-        groupConnection.start();
+        log.info("Loading BalyBot {}...", VERSION);
+        preInit();
+        init();
+        postInit();
     }
 
-    public Database getDatabase() {
-        return database;
+    private void preInit() {
+        log.info("Phase: PRE-INIT");
+
+        log.info("Connecting to database...");
+		try {
+			Database.setup("balybot.db");
+		} catch (SQLException | ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+
+		log.info("Loading manager module...");
+        ManagerModule managerModule = new ManagerModule();
+        availableModules.put(managerModule.getId(), managerModule);
+		CommandsModule commandsModule = new CommandsModule();
+		availableModules.put(commandsModule.getId(), commandsModule);
+
+        log.info("Scanning for script modules...");
+        for(ModuleDef moduleDef : ScriptManager.getInstance().loadModules()) {
+            availableModules.put(moduleDef.getId(), moduleDef);
+        }
+
+		log.info("Loading channels...");
+		ChannelManager.loadChannels();
     }
 
-    public IRCConnection getConnection() {
-        return connection;
+    private void init() {
+        log.info("Phase: INIT");
+
+        log.info("Loading configuration from database...");
+        Config.load();
+
+        log.info("Initializing modules...");
+		ChannelManager.loadModules();
+	}
+
+    private void postInit() {
+        log.info("PHASE: POST-INIT");
+        if(Config.hasGlobalValue("username") && Config.hasGlobalValue("oauth")) {
+            connect();
+        } else {
+            setup();
+        }
+
+        DocBuilder.rebuildAllDocs();
     }
 
-    public IRCConnection getGroupConnection() {
-        return groupConnection;
-    }
-
-    public void rebuildDocs(String channelName) {
-        DocBuilder.buildDocs(database, channelName);
-    }
-
-    public void rebuildAllDocs() {
+    private void setup() {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         try {
-            Statement stmt = database.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM channels");
-            while(rs.next()) {
-                DocBuilder.buildDocs(database, rs.getString("channel_name"));
+            log.info("BalyBot is not configured yet, but no worries, it's simple!");
+
+            String username = null;
+            while(username == null || username.isEmpty()) {
+                System.out.print("Enter Twitch username: ");
+                username = reader.readLine().trim();
             }
-            rs.close();
-            stmt.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
+
+            String oauth = null;
+            while(oauth == null || oauth.isEmpty()) {
+                System.out.print("Enter Twitch oauth token (see http://twitchapps.com/tmi/): ");
+                oauth = reader.readLine();
+                if(!oauth.startsWith("oauth:")) {
+                    System.out.println("Invalid oauth token. It should start with 'oauth:'.");
+                    oauth = null;
+                }
+            }
+
+			try {
+				Database.dbReplaceConfig("*", "username", username);
+				Database.dbReplaceConfig("*", "oauth", oauth);
+				Database.dbReplaceConfig("*", "docs_dir", "docs");
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+            Config.load();
+
+            log.info("Setup complete! Use /join <channel> to join a channel.");
+
+            connect();
+        } catch (IOException e) {
+            log.error(e);
         }
     }
+
+    private void connect() {
+        client = new TMIClient(Config.getGlobalString("username", null), Config.getGlobalString("oauth", null), Collections.emptyList(), listener);
+		if(!SIMULATED) {
+			client.connect();
+		}
+    }
+
+    public Collection<ModuleDef> getAvailableModules() {
+        return availableModules.values();
+    }
+
+	public ModuleDef getModuleDef(String moduleId) {
+		return availableModules.get(moduleId);
+	}
 }

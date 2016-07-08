@@ -1,11 +1,13 @@
 package net.blay09.balybot.twitch;
 
 import com.google.gson.JsonObject;
+import lombok.Getter;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
 
+@Getter
 public class StreamData {
 
     public final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
@@ -14,14 +16,6 @@ public class StreamData {
     private boolean isLive;
     private int viewers;
     private long created_at;
-
-    public int getViewers() {
-        return viewers;
-    }
-
-    public long getLastUpdated() {
-        return lastUpdated;
-    }
 
     public boolean requiresUpdate() {
         return lastUpdated - System.currentTimeMillis() > TwitchAPI.CACHE_LIFETIME;
@@ -42,10 +36,6 @@ public class StreamData {
             viewers = 0;
         }
         lastUpdated = System.currentTimeMillis();
-    }
-
-    public boolean isLive() {
-        return isLive;
     }
 
     public long getUptime() {

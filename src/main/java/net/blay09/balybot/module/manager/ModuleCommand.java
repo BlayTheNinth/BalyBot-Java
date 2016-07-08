@@ -1,45 +1,75 @@
 package net.blay09.balybot.module.manager;
 
-import net.blay09.balybot.UserLevel;
+import net.blay09.balybot.BalyBot;
+import net.blay09.balybot.ChannelManager;
+import net.blay09.balybot.Config;
+import net.blay09.balybot.command.UserLevel;
 import net.blay09.balybot.command.BotCommand;
-import net.blay09.balybot.irc.IRCChannel;
-import net.blay09.balybot.irc.IRCUser;
+import net.blay09.balybot.module.Module;
+import net.blay09.balybot.module.ModuleDef;
+import net.blay09.javatmi.TwitchUser;
 
 public class ModuleCommand extends BotCommand {
 
-    private final String prefix;
+    private final Module module;
 
-    public ModuleCommand(String prefix) {
-        super("module", "^" + prefix + "module(?:\\s+(.*)|$)", UserLevel.BROADCASTER);
-        this.prefix = prefix;
+    public ModuleCommand(Module module) {
+        super("module", "^" + module.getPrefix() + "module(?:\\s+(.*)|$)", UserLevel.BROADCASTER.getLevel());
+        this.module = module;
     }
 
     @Override
     public String getCommandSyntax() {
-        return prefix + "module <name> (on|off) [prefix]";
+        return module.getPrefix() + name + " <name> (on|off) [prefix] OR " + module.getPrefix() + name + " list [active]";
     }
 
     @Override
-    public String execute(IRCChannel channel, IRCUser sender, String message, String[] args, int depth) {
-        if(args.length < 2) {
+    public String execute(String channelName, TwitchUser sender, String message, String[] args, int depth) {
+        if(args.length < 1) {
             return "Not enough parameters for module command. Syntax: " + getCommandSyntax();
         }
-
-        String moduleName = args[0];
+        String moduleId = args[0];
+		if(moduleId.equals("list")) {
+			if(args.length > 1) {
+				if(args[1].equals("active")) {
+					StringBuilder sb = new StringBuilder();
+					for(Module module : ChannelManager.getModules(channelName)) {
+						if(sb.length() > 0) {
+							sb.append(", ");
+						}
+						sb.append(module.getId());
+					}
+					return "Active Modules: " + sb.toString();
+				}
+			}
+			StringBuilder sb = new StringBuilder();
+			for(ModuleDef module : BalyBot.getInstance().getAvailableModules()) {
+				if(sb.length() > 0) {
+					sb.append(", ");
+				}
+				sb.append(module.getId());
+			}
+			return "Available Modules: " + sb.toString();
+		}
+		if(args.length < 2) {
+			return "Not enough parameters for module command. Syntax: " + getCommandSyntax();
+		}
         String state = args[1].toLowerCase();
-        String prefix = "!";
-        if(args.length > 2) {
-            prefix = args[2];
-        }
-        if(state.equals("on") || state.equals("true") || state.equals("1")) {
-            ModuleManager.activateModule(channel, moduleName, prefix);
-            return "Module activated: " + moduleName;
-        } else if(state.equals("off") || state.equals("false") || state.equals("0")) {
-            ModuleManager.deactivateModule(channel, moduleName);
-            return "Module deactivated: " + moduleName;
-        } else {
-            return "Invalid parameters for module command. Syntax: " + getCommandSyntax();
-        }
+		String prefix = "!";
+		if(args.length > 2) {
+			prefix = args[2];
+		}
+		switch (state) {
+			case "on":
+				Config.setChannelString(channelName, moduleId + ".prefix", prefix);
+				ChannelManager.activateModule(channelName, moduleId);
+				return "Module activated: " + moduleId;
+			case "off":
+				ChannelManager.deactivateModule(channelName, moduleId);
+				return "Module deactivated: " + moduleId;
+			default:
+				return "Invalid parameters for module command. Syntax: " + getCommandSyntax();
+		}
     }
 
     @Override

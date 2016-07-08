@@ -1,24 +1,34 @@
 package net.blay09.balybot;
 
 import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Table;
-import net.blay09.balybot.irc.IRCChannel;
+import lombok.extern.log4j.Log4j2;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Map;
 
+@Log4j2
 public class Config {
 
-    private static final Table<String, String, String> config = HashBasedTable.create();
+    private static final Map<String, String> globalConfig = Maps.newHashMap();
+	private static final Table<String, String, String> channelConfig = HashBasedTable.create();
 
-    public static void load(Database database) {
-        config.clear();
+    public static void load() {
+        globalConfig.clear();
+		channelConfig.clear();
         try {
-            Statement stmt = database.createStatement();
+            Statement stmt = Database.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT * FROM config");
             while(rs.next()) {
-                config.put(rs.getString("channel_name"), rs.getString("config_name"), rs.getString("config_value"));
+				int channelId = rs.getInt("config_channel");
+				if(channelId == 0) {
+					globalConfig.put(rs.getString("config_name"), rs.getString("config_value"));
+				} else {
+					channelConfig.put(ChannelManager.getName(channelId), rs.getString("config_name"), rs.getString("config_value"));
+				}
             }
             rs.close();
             stmt.close();
@@ -27,43 +37,53 @@ public class Config {
         }
     }
 
-    public static String getValue(String channel, String name) {
-        if(!config.contains(channel, name)) {
-            throw new RuntimeException("Required config option " + name + " but it's missing and has no default value.");
-        }
-        return config.get(channel, name);
-    }
+	public static String getGlobalString(String option, String defaultVal) {
+		String value = globalConfig.get(option);
+		if(value == null) {
+			value = defaultVal;
+		}
+		return value;
+	}
 
-    public static String getValue(IRCChannel channel, String name, String defaultVal) {
-        return getValue(channel.getName(), name, defaultVal);
-    }
+	public static int getGlobalInt(String option, int defaultVal) {
+		String value = globalConfig.get(option);
+		try {
+			return Integer.parseInt(value);
+		} catch (NumberFormatException e) {
+			return defaultVal;
+		}
+	}
 
-    public static String getValue(String channel, String name, String defaultVal) {
-        String value = config.get(channel, name);
-        if(value == null) {
-            return defaultVal;
-        }
-        return value;
-    }
+	public static String getChannelString(String channel, String option, String defaultVal) {
+		if(!channelConfig.contains(channel, option)) {
+			return getGlobalString(option, defaultVal);
+		}
+		return channelConfig.get(channel, option);
+	}
 
-    public static boolean hasOption(String channel, String name) {
-        return config.contains(channel, name);
-    }
+	public static void setChannelString(String channel, String option, String value) {
+		channelConfig.put(channel, option, value);
+		try {
+			Database.dbReplaceConfig(channel, option, value);
+		} catch (SQLException e) {
+			log.error("Failed to update config in database: " + e.getMessage());
+			log.error("Config value will reset upon reload.");
+		}
+	}
 
-    public static void setConfigOption(String channelName, String option, String value) {
-        config.put(channelName, option, value);
-        BalyBot.instance.getDatabase().setConfigOption(channelName, option, value);
-    }
+	public static int getChannelInt(String channel, String option, int defaultVal) {
+		if(!channelConfig.contains(channel, option)) {
+			return getGlobalInt(option, defaultVal);
+		}
+		String value = channelConfig.get(channel, option);
+		try {
+			return Integer.parseInt(value);
+		} catch (NumberFormatException e) {
+			return defaultVal;
+		}
+	}
 
-    public static int getValueAsInt(String channel, String name, int defaultVal) {
-        String value = config.get(channel, name);
-        if(value == null) {
-            return defaultVal;
-        }
-        try {
-            return Integer.parseInt(value);
-        } catch (NumberFormatException e) {
-            return defaultVal;
-        }
-    }
+	public static boolean hasGlobalValue(String option) {
+		return globalConfig.containsKey(option);
+	}
 }

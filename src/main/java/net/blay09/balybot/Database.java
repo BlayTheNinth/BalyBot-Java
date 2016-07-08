@@ -1,128 +1,86 @@
 package net.blay09.balybot;
 
+import org.intellij.lang.annotations.Language;
+
 import java.sql.*;
 
 public class Database {
 
-    private Connection connection;
-    public PreparedStatement stmtRegisterCommand;
-    public PreparedStatement stmtUnregisterCommand;
-    public PreparedStatement stmtRegisterRegular;
-    public PreparedStatement stmtUnregisterRegular;
-    private PreparedStatement stmtSetConfigOption;
-    private PreparedStatement stmtAddToChannel;
-    private PreparedStatement stmtRemoveFromChannel;
-    private PreparedStatement stmtActivateModule;
-    private PreparedStatement stmtDeactivateModule;
+    private static Connection connection;
 
-    public Database(String databasePath) {
-        try {
-            Class.forName("org.sqlite.JDBC");
-            connection = DriverManager.getConnection("jdbc:sqlite:" + databasePath);
-            initialSetup();
-            prepareStatements();
-        } catch (SQLException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
+	private static PreparedStatement replaceConfig;
+	private static PreparedStatement insertChannel;
+	private static PreparedStatement updateChannelActive;
+	private static PreparedStatement replaceModule;
+	private static PreparedStatement deleteModule;
+
+    public static void setup(String databasePath) throws ClassNotFoundException, SQLException {
+		Class.forName("org.sqlite.JDBC");
+		connection = DriverManager.getConnection("jdbc:sqlite:" + databasePath);
+
+		execute("CREATE TABLE IF NOT EXISTS channels (channel_id INTEGER PRIMARY KEY, channel_name VARCHAR(64) NOT NULL, channel_active BOOLEAN DEFAULT TRUE)");
+		execute("CREATE TABLE IF NOT EXISTS modules (module_channel INTEGER, module_id VARCHAR(64) NOT NULL, PRIMARY KEY(module_channel, module_id))");
+		execute("CREATE TABLE IF NOT EXISTS config (config_channel INTEGER, config_name VARCHAR(64) NOT NULL, config_value TEXT NOT NULL, PRIMARY KEY(channel_id, config_name))");
+
+		insertChannel = connection.prepareStatement("INSERT INTO channels (channel_name) VALUES (?)", Statement.RETURN_GENERATED_KEYS);
+		updateChannelActive = connection.prepareStatement("UPDATE channels SET channel_active = ? WHERE channel_id = ?");
+		replaceConfig = connection.prepareStatement("REPLACE INTO config (config_channel, config_name, config_value) VALUES (?, ?, ?)");
+		replaceModule = connection.prepareStatement("REPLACE INTO modules (module_channel, module_id) VALUES(?, ?)");
+		deleteModule = connection.prepareStatement("DELETE FROM modules WHERE module_channel = ? AND module_id = ?");
     }
 
-    public void initialSetup() throws SQLException {
-        Statement stmt = connection.createStatement();
-        stmt.executeUpdate("CREATE TABLE IF NOT EXISTS commands (id INTEGER PRIMARY KEY AUTOINCREMENT, channel_name VARCHAR(64) NOT NULL, command_name VARCHAR(32) NOT NULL, regex VARCHAR(128) NOT NULL, message TEXT, user_level INTEGER(4), condition TEXT, whisper_to VARCHAR(32))");
-        stmt.close();
-
-        stmt = connection.createStatement();
-        stmt.executeUpdate("CREATE TABLE IF NOT EXISTS regulars (id INTEGER PRIMARY KEY AUTOINCREMENT, channel_name VARCHAR(64) NOT NULL, username VARCHAR(64) NOT NULL)");
-        stmt.close();
-
-        stmt = connection.createStatement();
-        stmt.executeUpdate("CREATE TABLE IF NOT EXISTS config (channel_name VARCHAR(64) NOT NULL, config_name VARCHAR(32) NOT NULL, config_value TEXT NOT NULL, PRIMARY KEY (channel_name, config_name))");
-        stmt.close();
-
-        stmt = connection.createStatement();
-        stmt.executeUpdate("CREATE TABLE IF NOT EXISTS channels (channel_name VARCHAR(64) PRIMARY KEY NOT NULL)");
-        stmt.close();
-
-        stmt = connection.createStatement();
-        stmt.executeUpdate("CREATE TABLE IF NOT EXISTS timed_commands (channel_name VARCHAR(64) NOT NULL, command VARCHAR(32) NOT NULL, time_interval INTEGER(4), PRIMARY KEY(channel_name, command))");
-        stmt.close();
-
-        stmt = connection.createStatement();
-        stmt.executeUpdate("CREATE TABLE IF NOT EXISTS quotes (id INTEGER PRIMARY KEY AUTOINCREMENT, quote_nr INTEGER(4), quote_channel VARCHAR(64) NOT NULL, quote_text TEXT NOT NULL, quote_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)");
-        stmt.close();
-
-        stmt = connection.createStatement();
-        stmt.executeUpdate("CREATE TABLE IF NOT EXISTS modules (channel_name VARCHAR(64) NOT NULL, module_name VARCHAR(32) NOT NULL, module_prefix VARCHAR(1) NOT NULL, PRIMARY KEY(channel_name, module_name))");
-        stmt.close();
-    }
-
-    public void prepareStatements() throws SQLException {
-        stmtRegisterCommand = connection.prepareStatement("INSERT INTO commands (channel_name, command_name, regex, message, user_level, condition, whisper_to) VALUES (?, ?, ?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
-        stmtUnregisterCommand = connection.prepareStatement("DELETE FROM commands WHERE id = ?");
-
-        stmtRegisterRegular = connection.prepareStatement("INSERT INTO regulars (channel_name, username) VALUES (?, ?)");
-        stmtUnregisterRegular = connection.prepareStatement("DELETE FROM regulars WHERE channel_name = ? AND username = ?");
-
-        stmtSetConfigOption = connection.prepareStatement("INSERT OR REPLACE INTO config (channel_name, config_name, config_value) VALUES (?, ?, ?)");
-
-        stmtAddToChannel = connection.prepareStatement("INSERT OR REPLACE INTO channels (channel_name) VALUES (?)");
-        stmtRemoveFromChannel = connection.prepareStatement("DELETE FROM channels WHERE channel_name = ?");
-
-        stmtActivateModule = connection.prepareStatement("INSERT OR REPLACE INTO modules (channel_name, module_name, module_prefix) VALUES(?, ?, ?)");
-        stmtDeactivateModule = connection.prepareStatement("DELETE FROM modules WHERE channel_name = ? AND module_name = ?");
-    }
-
-    public Statement createStatement() throws SQLException {
+    public static Statement createStatement() throws SQLException {
         return connection.createStatement();
     }
 
-    public void setConfigOption(String channel, String name, String value) {
-        try {
-            stmtSetConfigOption.setString(1, channel);
-            stmtSetConfigOption.setString(2, name);
-            stmtSetConfigOption.setString(3, value);
-            stmtSetConfigOption.execute();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+	public static PreparedStatement prepareStatement(String sql) throws SQLException {
+		return connection.prepareStatement(sql);
+	}
+
+    public static PreparedStatement prepareStatement(String sql, int autoGeneratedKeys) throws SQLException {
+        return connection.prepareStatement(sql, autoGeneratedKeys);
     }
 
-    public void addToChannel(String channelName) {
-        try {
-            stmtAddToChannel.setString(1, channelName);
-            stmtAddToChannel.execute();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    public static void execute(@Language("SQL") String sql) throws SQLException {
+        Statement stmt = connection.createStatement();
+        stmt.execute(sql);
+        stmt.close();
     }
 
-    public void removeFromChannel(String channelName) {
-        try {
-            stmtRemoveFromChannel.setString(1, channelName);
-            stmtRemoveFromChannel.execute();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
 
-    public void activateModule(String channelName, String moduleName, String prefix) {
-        try {
-            stmtActivateModule.setString(1, channelName);
-            stmtActivateModule.setString(2, moduleName);
-            stmtActivateModule.setString(3, prefix);
-            stmtActivateModule.execute();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
 
-    public void deactivateModule(String channelName, String moduleName) {
-        try {
-            stmtDeactivateModule.setString(1, channelName);
-            stmtDeactivateModule.setString(2, moduleName);
-            stmtDeactivateModule.execute();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
+	public static int dbInsertChannel(String channelName) throws SQLException {
+		insertChannel.setString(1, channelName);
+		insertChannel.execute();
+		ResultSet rs = insertChannel.getGeneratedKeys();
+		if(rs.next()) {
+			return rs.getInt(1);
+		}
+		return 0;
+	}
+
+	public static void dbUpdateChannelActive(String channelName, boolean active) throws SQLException {
+		updateChannelActive.setInt(1, ChannelManager.getId(channelName));
+		updateChannelActive.setBoolean(2, active);
+		updateChannelActive.execute();
+	}
+
+	public static void dbReplaceConfig(String channelName, String option, String value) throws SQLException {
+		replaceConfig.setInt(1, ChannelManager.getId(channelName));
+		replaceConfig.setString(2, option);
+		replaceConfig.setString(3, value);
+		replaceConfig.execute();
+	}
+
+	public static void dbReplaceModule(String channelName, String moduleId) throws SQLException {
+		replaceModule.setInt(1, ChannelManager.getId(channelName));
+		replaceModule.setString(2, moduleId);
+		replaceModule.execute();
+	}
+
+	public static void dbDeleteModule(String channelName, String moduleId) throws SQLException {
+		deleteModule.setInt(1, ChannelManager.getId(channelName));
+		deleteModule.setString(2, moduleId);
+		deleteModule.execute();
+	}
 }

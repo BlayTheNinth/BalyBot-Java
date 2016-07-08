@@ -1,24 +1,14 @@
 package net.blay09.balybot.twitch;
 
 import com.google.gson.JsonObject;
+import lombok.Getter;
 
+@Getter
 public class ChannelData {
 
     private long lastUpdated;
     private String game = "Could not retrieve game.";
     private String title = "Could not retrieve title.";
-
-    public String getTitle() {
-        return title;
-    }
-
-    public String getGame() {
-        return game;
-    }
-
-    public long getLastUpdated() {
-        return lastUpdated;
-    }
 
     public boolean requiresUpdate() {
         return System.currentTimeMillis() - lastUpdated > TwitchAPI.CACHE_LIFETIME;

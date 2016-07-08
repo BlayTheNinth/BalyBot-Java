@@ -17,16 +17,16 @@ import java.sql.Statement;
 
 public class DocBuilder {
 
-    public static void buildDocs(Database database, String channel) {
+    public static void buildDocs(String channelName) {
         StringBuilder sb = new StringBuilder();
         sb.append("<!DOCTYPE html>\n");
         sb.append("<html>\n");
         sb.append("<head>\n");
-        sb.append("<title>BalyBot Documentation - ").append(channel).append("</title>\n");
+        sb.append("<title>BalyBot Documentation - ").append(channelName).append("</title>\n");
         sb.append("<link rel='stylesheet' type='text/css' href='docs.css' />");
         sb.append("</head>\n");
 
-        sb.append("<h1>BalyBot (").append(channel).append(")</h1>\n");
+        sb.append("<h1>BalyBot (").append(channelName).append(")</h1>\n");
 
         sb.append("<h2>Index</h2>\n");
 
@@ -38,14 +38,14 @@ public class DocBuilder {
         sb.append("</ul></li>\n");
 
         sb.append("<li>Available Modules<ul>\n");
-        for(Module module : Module.getInactiveModules(channel)) {
-            sb.append("<a class='indexLink' href='#").append(module.getModuleCode()).append("'><li>").append(module.getModuleName()).append("</li></a>\n");
-        }
+//        for(ModuleOld module : ModuleOld.getInactiveModules(channel)) {
+//            sb.append("<a class='indexLink' href='#").append(module.getModuleCode()).append("'><li>").append(module.getModuleName()).append("</li></a>\n");
+//        }
         sb.append("</ul></li>\n");
 
         sb.append("<li>Enabled Modules<ul>\n");
-        for(Module module : Module.getActiveModules(channel)) {
-            sb.append("<a class='indexLink' href='#").append(module.getModuleCode()).append("'><li>").append(module.getModuleName()).append("</li></a>\n");
+        for(Module module : ChannelManager.getModules(channelName)) {
+            sb.append("<a class='indexLink' href='#").append(module.getId()).append("'><li>").append(module.getDefinition().getName()).append("</li></a>\n");
         }
         sb.append("</ul></li>\n");
 
@@ -104,23 +104,23 @@ public class DocBuilder {
         sb.append("<th>Module ID</th>\n");
         sb.append("<th>Name</th>\n");
         sb.append("<th>Description</th>\n");
-        for(Module module : Module.getInactiveModules(channel)) {
-            sb.append("<tr>\n");
-            sb.append("<td><a id='").append(module.getModuleCode()).append("'>").append(module.getModuleCode()).append("</a></td>\n");
-            sb.append("<td>").append(module.getModuleName()).append("</td>\n");
-            sb.append("<td>").append(module.getModuleDescription()).append("</td>\n");
-            sb.append("</tr>\n");
-        }
+//        for(ModuleOld module : ModuleOld.getInactiveModules(channel)) {
+//            sb.append("<tr>\n");
+//            sb.append("<td><a id='").append(module.getModuleCode()).append("'>").append(module.getModuleCode()).append("</a></td>\n");
+//            sb.append("<td>").append(module.getModuleName()).append("</td>\n");
+//            sb.append("<td>").append(module.getModuleDescription()).append("</td>\n");
+//            sb.append("</tr>\n");
+//        }
         sb.append("</table>\n");
         sb.append("</div>\n");
 
         sb.append("<h2>Enabled Modules</h2>\n");
-        for(Module module : Module.getActiveModules(channel)) {
+        for(Module module : ChannelManager.getModules(channelName)) {
             sb.append("<div class='module'>\n");
-            sb.append("<h3 id='").append(module.getModuleCode()).append("'>").append(module.getModuleName()).append(" (").append(module.getModuleCode()).append(")</h3>\n");
-            sb.append(module.getModuleDescription()).append("<br />\n");
+            sb.append("<h3 id='").append(module.getId()).append("'>").append(module.getDefinition().getName()).append(" (").append(module.getId()).append(")</h3>\n");
+            sb.append(module.getDefinition().getDescription()).append("<br />\n");
 
-            if(module.getConfigEntries().size() > 0) {
+            if(module.getDefinition().getConfigEntries().size() > 0) {
                 sb.append("<h4>Module Options</h4>");
                 sb.append("<table border='1'>\n");
                 sb.append("<tr>\n");
@@ -130,12 +130,12 @@ public class DocBuilder {
                 sb.append("<th>Value</th>\n");
                 sb.append("</tr>\n");
 
-                for (ConfigEntry config : module.getConfigEntries()) {
+                for (ConfigEntry config : module.getDefinition().getConfigEntries()) {
                     sb.append("<tr>\n");
-                    sb.append("<td>").append(module.getModuleCode()).append(".").append(escape(config.name)).append("</td>\n");
+                    sb.append("<td>").append(module.getId()).append(".").append(escape(config.name)).append("</td>\n");
                     sb.append("<td>").append(escape(config.description)).append("</td>\n");
                     sb.append("<td>").append(escape(config.defaultVal)).append("</td>\n");
-                    sb.append("<td>").append(escape(config.getString(channel))).append("</td>\n");
+                    sb.append("<td>").append(escape(config.getString(channelName))).append("</td>\n");
                     sb.append("</tr>\n");
                 }
 
@@ -153,7 +153,7 @@ public class DocBuilder {
                 for (BotCommand command : module.getCommands()) {
                     sb.append("<tr>\n");
                     sb.append("<td>").append(escape(command.getCommandSyntax())).append("</td>\n");
-                    sb.append("<td>").append(command.minUserLevel.name).append("</td>\n");
+                    sb.append("<td>").append(command.getUserLevel()).append("</td>\n");
                     sb.append("</tr>\n");
                 }
 
@@ -174,27 +174,27 @@ public class DocBuilder {
         sb.append("<th>Regex</th>\n");
         sb.append("</tr>\n");
         try {
-            Statement stmt = database.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM commands WHERE channel_name = '" + channel + "'");
+            Statement stmt = Database.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT * FROM commands WHERE command_channel = " + ChannelManager.getId(channelName));
             while(rs.next()) {
                 sb.append("<tr>\n");
-                sb.append("<td>").append(rs.getString("id")).append("</td>\n");
+                sb.append("<td>").append(rs.getInt("command_id")).append("</td>\n");
                 sb.append("<td>").append(escape(rs.getString("command_name"))).append("</td>\n");
-                sb.append("<td>").append(escape(rs.getString("message"))).append("</td>\n");
+                sb.append("<td>").append(escape(rs.getString("command_message"))).append("</td>\n");
 
                 sb.append("<td>");
-                sb.append(UserLevel.fromId(rs.getInt("user_level")).name);
+                sb.append(rs.getString("command_level"));
                 sb.append("</td>\n");
 
                 sb.append("<td>");
-                sb.append(rs.getString("condition") != null ? escape(rs.getString("condition")) : "---");
+                sb.append(rs.getString("command_condition") != null ? escape(rs.getString("command_condition")) : "---");
                 sb.append("</td>\n");
 
                 sb.append("<td>");
-                sb.append(rs.getString("whisper_to") != null ? escape(rs.getString("whisper_to")) : "---");
+                sb.append(rs.getString("command_whisper") != null ? escape(rs.getString("command_whisper")) : "---");
                 sb.append("</td>\n");
 
-                sb.append("<td>").append(escape(rs.getString("regex"))).append("</td>\n");
+                sb.append("<td>").append(escape(rs.getString("command_pattern"))).append("</td>\n");
 
                 sb.append("</tr>\n");
             }
@@ -204,7 +204,7 @@ public class DocBuilder {
         }
         sb.append("</table>\n");
 
-        File commandsDir = new File(Config.getValue("*", "docs_dir", "docs"));
+        File commandsDir = new File(Config.getGlobalString("docs_dir", "docs"));
         if(commandsDir.exists() || commandsDir.mkdir()) {
             try(InputStream in = DocBuilder.class.getResourceAsStream("/docs.css"); FileWriter writer = new FileWriter(new File(commandsDir, "docs.css"))) {
                 if(in != null) {
@@ -214,7 +214,7 @@ public class DocBuilder {
                 e.printStackTrace();
             }
             try {
-                Files.write(sb, new File(commandsDir, channel.substring(1) + ".html"), Charsets.UTF_8);
+                Files.write(sb, new File(commandsDir, channelName.substring(1) + ".html"), Charsets.UTF_8);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -227,4 +227,11 @@ public class DocBuilder {
         return s.replace("<", "&lt;").replace(">", "&gt;");
     }
 
+    public static void rebuildDocs(String channelName) {
+        DocBuilder.buildDocs(channelName);
+    }
+
+    public static void rebuildAllDocs() {
+		ChannelManager.getChannels().forEach(DocBuilder::buildDocs);
+    }
 }
