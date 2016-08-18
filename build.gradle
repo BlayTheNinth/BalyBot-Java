@@ -48,3 +48,13 @@ dependencies {
 task wrapper(type: Wrapper) {
     gradleVersion = '2.7'
 }
+
+distributions {
+    main {
+        contents {
+            from("modules") {
+                into "modules"
+            }
+        }
+    }
+}
