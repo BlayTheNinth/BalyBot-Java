@@ -1,9 +1,11 @@
 plugins {
     id 'io.franzbecker.gradle-lombok' version '1.7'
     id 'java'
+    id 'application'
 }
 
 archivesBaseName = "BalyBot"
+mainClassName = "net.blay09.balybot.BalyBot"
 group = "net.blay09.balybot"
 version = "0.1.0"
 
@@ -15,36 +17,34 @@ repositories {
     maven {
         url 'http://blay09.net:8081/artifactory/jenkins-maven/'
     }
+    maven {
+        url 'http://blay09.net:8081/artifactory/hosted-api/'
+    }
 }
 
-dependencies {
+dependencies {   
     compile 'org.jetbrains:annotations:15.0'
-    compile 'org.apache.httpcomponents:httpclient:4.5'
+
     compile 'com.google.code.gson:gson:2.3.1'
     compile 'com.google.guava:guava:18.0'
+    
     compile 'org.apache.logging.log4j:log4j-core:2.3'
-//    compile 'org.apache.logging.log4j:log4j-jul:2.3'
-    compile files('lib/sqlite-jdbc-3.8.10.1.jar');
+//  compile 'org.apache.logging.log4j:log4j-jul:2.3'
+
+    compile 'org.xerial:sqlite-jdbc:3.8.11.2'
+    compile 'mysql:mysql-connector-java:6.0.3'
+    
     compile 'org.apache.commons:commons-lang3:3.4'
+    compile 'org.apache.httpcomponents:httpclient:4.5'
     compile 'commons-io:commons-io:2.4'
-    compile files('lib/jel.jar');
+    
+    // GNU Java Expressions Library
+    compile 'hosted-api:jel:2.1.1'                   
+    
     compile 'net.blay09.lib:JavaTMI:0.1.28'
     compile 'net.blay09.lib:JavaIRC:0.0.20'
 }
 
 task wrapper(type: Wrapper) {
     gradleVersion = '2.7'
-}
-
-task delombok(type: io.franzbecker.gradle.lombok.task.DelombokTask) {
-    args("src/main/java", "-d", "src/main/generated")
-}
-jar.dependsOn delombok
-
-jar {
-    from configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
-    manifest {
-        attributes \
-        'Main-Class': 'net.blay09.balybot.BalyBot'
-    }
 }
