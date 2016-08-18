@@ -48,13 +48,13 @@ public class BalyBot {
     }
 
     private void preInit() {
-        log.info("Phase: PRE-INIT");
+		Config.loadFromFile();
 
         log.info("Connecting to database...");
 		try {
-			Database.setup("balybot.db");
+			Database.setup();
 		} catch (SQLException | ClassNotFoundException e) {
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 
 		log.info("Loading manager module...");
@@ -73,18 +73,16 @@ public class BalyBot {
     }
 
     private void init() {
-        log.info("Phase: INIT");
-
         log.info("Loading configuration from database...");
-        Config.load();
+        Config.loadFromDatabase();
 
         log.info("Initializing modules...");
 		ChannelManager.loadModules();
 	}
 
     private void postInit() {
-        log.info("PHASE: POST-INIT");
         if(Config.hasGlobalValue("username") && Config.hasGlobalValue("oauth")) {
+			log.info("BalyBot is now running.");
             connect();
         } else {
             setup();
@@ -121,7 +119,7 @@ public class BalyBot {
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
-            Config.load();
+            Config.loadFromDatabase();
 
             log.info("Setup complete! Use /join <channel> to join a channel.");
 

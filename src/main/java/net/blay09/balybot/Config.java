@@ -3,20 +3,63 @@ package net.blay09.balybot;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Table;
+import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
+import java.util.Properties;
 
 @Log4j2
 public class Config {
 
+	@Getter private static Database.Type databaseType;
+	@Getter private static String databaseHost;
+	@Getter private static String databaseName;
+	@Getter private static String databaseUser;
+	@Getter private static String databasePassword;
+
     private static final Map<String, String> globalConfig = Maps.newHashMap();
 	private static final Table<String, String, String> channelConfig = HashBasedTable.create();
 
-    public static void load() {
+	private static void createDefaultProperties(Properties prop) {
+		prop.setProperty("database-type", "SQLITE");
+		prop.setProperty("database-host", "");
+		prop.setProperty("database-name", "balybot.db");
+		prop.setProperty("database-user", "");
+		prop.setProperty("database-password", "");
+	}
+
+	public static void loadFromFile() {
+		Properties prop = new Properties();
+		try(FileReader reader = new FileReader("balybot.properties")) {
+			prop.load(reader);
+		} catch (IOException e) {
+			createDefaultProperties(prop);
+		}
+		try {
+			databaseType = Database.Type.valueOf(prop.getProperty("database-type"));
+			databaseHost = prop.getProperty("database-host");
+			databaseName = prop.getProperty("database-name");
+			databaseUser = prop.getProperty("database-user");
+			databasePassword = prop.getProperty("database-password");
+		} catch (IllegalArgumentException e) {
+			throw new RuntimeException("Invalid value for config option 'database-type': got '" + prop.getProperty("database-type") + "' but expected 'MYSQL' or 'SQLITE'");
+		}
+		try(FileWriter writer = new FileWriter("balybot.properties")) {
+			prop.store(writer, null);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+    public static void loadFromDatabase() {
         globalConfig.clear();
 		channelConfig.clear();
         try {

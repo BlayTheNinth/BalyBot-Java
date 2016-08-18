@@ -6,6 +6,11 @@ import java.sql.*;
 
 public class Database {
 
+	public enum Type {
+		SQLITE,
+		MYSQL
+	}
+
     private static Connection connection;
 
 	private static PreparedStatement replaceConfig;
@@ -14,13 +19,18 @@ public class Database {
 	private static PreparedStatement replaceModule;
 	private static PreparedStatement deleteModule;
 
-    public static void setup(String databasePath) throws ClassNotFoundException, SQLException {
-		Class.forName("org.sqlite.JDBC");
-		connection = DriverManager.getConnection("jdbc:sqlite:" + databasePath);
+    public static void setup() throws ClassNotFoundException, SQLException {
+		if(Config.getDatabaseType() == Type.SQLITE) {
+			Class.forName("org.sqlite.JDBC");
+			connection = DriverManager.getConnection("jdbc:sqlite:" + Config.getDatabaseName());
+		} else if(Config.getDatabaseType() == Type.MYSQL) {
+			Class.forName("com.mysql.cj.jdbc.Driver");
+			connection = DriverManager.getConnection("jdbc:mysql://" + Config.getDatabaseHost() + "/" + Config.getDatabaseName() + "?user=" + Config.getDatabaseUser() + "&password=" + Config.getDatabasePassword() + "&useSSL=false&serverTimezone=UTC");
+		}
 
-		execute("CREATE TABLE IF NOT EXISTS channels (channel_id INTEGER PRIMARY KEY, channel_name VARCHAR(64) NOT NULL, channel_active BOOLEAN DEFAULT TRUE)");
+		execute("CREATE TABLE IF NOT EXISTS channels (channel_id INTEGER PRIMARY KEY " + autoIncrementOrEmpty() + ", channel_name VARCHAR(64) NOT NULL, channel_active BOOLEAN DEFAULT TRUE)");
 		execute("CREATE TABLE IF NOT EXISTS modules (module_channel INTEGER, module_id VARCHAR(64) NOT NULL, PRIMARY KEY(module_channel, module_id))");
-		execute("CREATE TABLE IF NOT EXISTS config (config_channel INTEGER, config_name VARCHAR(64) NOT NULL, config_value TEXT NOT NULL, PRIMARY KEY(channel_id, config_name))");
+		execute("CREATE TABLE IF NOT EXISTS config (config_channel INTEGER, config_name VARCHAR(64) NOT NULL, config_value TEXT NOT NULL, PRIMARY KEY(config_channel, config_name))");
 
 		insertChannel = connection.prepareStatement("INSERT INTO channels (channel_name) VALUES (?)", Statement.RETURN_GENERATED_KEYS);
 		updateChannelActive = connection.prepareStatement("UPDATE channels SET channel_active = ? WHERE channel_id = ?");
@@ -29,7 +39,11 @@ public class Database {
 		deleteModule = connection.prepareStatement("DELETE FROM modules WHERE module_channel = ? AND module_id = ?");
     }
 
-    public static Statement createStatement() throws SQLException {
+	public static String autoIncrementOrEmpty() {
+		return Config.getDatabaseType() == Type.MYSQL ? "AUTO_INCREMENT" : "";
+	}
+
+	public static Statement createStatement() throws SQLException {
         return connection.createStatement();
     }
 

@@ -121,7 +121,7 @@ public class ChannelManager {
 				if(moduleDef != null) {
 					activeModules.put(channelName, moduleDef.create(channelName));
 				} else {
-					log.warn("Channel " + channelName + " tried to load " + moduleId + ", but it could not be found.");
+					log.warn("Channel " + channelName + " tried to loadFromDatabase " + moduleId + ", but it could not be found.");
 				}
 			}
 		} catch (SQLException e) {
@@ -134,10 +134,16 @@ public class ChannelManager {
 	}
 
 	public static String getName(int id) {
+		if(id == 0) {
+			return "*";
+		}
 		return idToName.get(id);
 	}
 
 	public static int getId(String name) {
+		if(name.equals("*")) {
+			return 0;
+		}
 		return nameToId.get(name);
 	}
 
