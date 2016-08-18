@@ -2,6 +2,7 @@ package net.blay09.balybot.module.commands;
 
 import com.google.common.base.Objects;
 import lombok.extern.log4j.Log4j2;
+import net.blay09.balybot.DocBuilder;
 import net.blay09.balybot.command.UserLevel;
 import net.blay09.balybot.command.BotCommand;
 import net.blay09.balybot.expr.ExpressionLibrary;
@@ -144,6 +145,7 @@ public class SetCommand extends BotCommand {
 				log.error("Changes will be lost upon reload.");
 			}
 		}
+		DocBuilder.buildDocs(channelName); // TODO builddocs
 		return "Command successfully " + (editCommand != null ? "edited" : "registered") + ": " + name;
     }
 
