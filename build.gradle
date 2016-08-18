@@ -32,6 +32,10 @@ dependencies {
     compile 'net.blay09:javairc:0.0.10'
 }
 
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.0'
+}
+
 task delombok(type: io.franzbecker.gradle.lombok.task.DelombokTask) {
     args("src/main/java", "-d", "src/main/generated")
 }
