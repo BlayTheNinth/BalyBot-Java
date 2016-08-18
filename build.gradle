@@ -13,7 +13,7 @@ targetCompatibility = 1.8
 repositories {
     mavenCentral()
     maven {
-        url 'http://repo.blay09.net'
+        url 'http://blay09.net:8081/artifactory/jenkins-maven/'
     }
 }
 
@@ -28,8 +28,8 @@ dependencies {
     compile 'org.apache.commons:commons-lang3:3.4'
     compile 'commons-io:commons-io:2.4'
     compile files('lib/jel.jar');
-    compile 'net.blay09.javatmi:JavaTMI:0.1.13'
-    compile 'net.blay09:javairc:0.0.10'
+    compile 'net.blay09.javatmi:JavaTMI:0.1.28'
+    compile 'net.blay09:javairc:0.0.20'
 }
 
 task wrapper(type: Wrapper) {
