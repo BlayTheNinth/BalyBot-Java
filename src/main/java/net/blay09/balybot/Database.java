@@ -13,11 +13,11 @@ public class Database {
 
     private static Connection connection;
 
-	private static PreparedStatement replaceConfig;
-	private static PreparedStatement insertChannel;
-	private static PreparedStatement updateChannelActive;
-	private static PreparedStatement replaceModule;
-	private static PreparedStatement deleteModule;
+	private static PreparedStatement setChannelConfig;
+	private static PreparedStatement addNewChannel;
+	private static PreparedStatement setChannelActive;
+	private static PreparedStatement activateModule;
+	private static PreparedStatement deactivateModule;
 
     public static void setup() throws ClassNotFoundException, SQLException {
 		if(Config.getDatabaseType() == Type.SQLITE) {
@@ -28,19 +28,53 @@ public class Database {
 			connection = DriverManager.getConnection("jdbc:mysql://" + Config.getDatabaseHost() + "/" + Config.getDatabaseName() + "?user=" + Config.getDatabaseUser() + "&password=" + Config.getDatabasePassword() + "&useSSL=false&serverTimezone=UTC");
 		}
 
-		execute("CREATE TABLE IF NOT EXISTS channels (channel_id INTEGER PRIMARY KEY " + autoIncrementOrEmpty() + ", channel_name VARCHAR(64) NOT NULL, channel_active BOOLEAN DEFAULT TRUE)");
-		execute("CREATE TABLE IF NOT EXISTS modules (module_channel INTEGER, module_id VARCHAR(64) NOT NULL, PRIMARY KEY(module_channel, module_id))");
-		execute("CREATE TABLE IF NOT EXISTS config (config_channel INTEGER, config_name VARCHAR(64) NOT NULL, config_value TEXT NOT NULL, PRIMARY KEY(config_channel, config_name))");
+		createTable("modules", true,
+				"`name` VARCHAR(64) NOT NULL",
+				"`friendly_name` VARCHAR(256) NOT NULL");
+		createTable("servers", true,
+				"`host` VARCHAR(256) NOT NULL",
+				"`type` INTEGER");
+		createTable("channels", true,
+				"`server_fk` INTEGER",
+				"`name` VARCHAR(64) NOT NULL",
+				"`is_active` BOOLEAN DEFAULT TRUE");
+		createTable("active_modules", false,
+				"`channel_fk` INTEGER",
+				"`module_fk` INTEGER",
+				"PRIMARY KEY(`channel_fk`, `module_fk`)");
+		createTable("channel_config", false,
+				"`channel_fk` INTEGER",
+				"`name` VARCHAR(64)",
+				"`value` TEXT NOT NULL",
+				"PRIMARY KEY(`channel_fk`, `name`)");
 
-		insertChannel = connection.prepareStatement("INSERT INTO channels (channel_name) VALUES (?)", Statement.RETURN_GENERATED_KEYS);
-		updateChannelActive = connection.prepareStatement("UPDATE channels SET channel_active = ? WHERE channel_id = ?");
-		replaceConfig = connection.prepareStatement("REPLACE INTO config (config_channel, config_name, config_value) VALUES (?, ?, ?)");
-		replaceModule = connection.prepareStatement("REPLACE INTO modules (module_channel, module_id) VALUES(?, ?)");
-		deleteModule = connection.prepareStatement("DELETE FROM modules WHERE module_channel = ? AND module_id = ?");
+		addNewChannel = connection.prepareStatement("INSERT INTO `channels` (`name`) VALUES (?)", Statement.RETURN_GENERATED_KEYS);
+		setChannelActive = connection.prepareStatement("UPDATE `channels` SET `is_active` = ? WHERE `id` = ?");
+		setChannelConfig = connection.prepareStatement("REPLACE INTO `channel_config` (`channel_fk`, `name`, `value`) VALUES (?, ?, ?)");
+		activateModule = connection.prepareStatement("REPLACE INTO `active_modules` (`channel_fk`, `module_fk`) VALUES(?, ?)");
+		deactivateModule = connection.prepareStatement("DELETE FROM `active_modules` WHERE `channel_fk` = ? AND `module_fk` = ?");
     }
 
-	public static String autoIncrementOrEmpty() {
-		return Config.getDatabaseType() == Type.MYSQL ? "AUTO_INCREMENT" : "";
+	public static void createTable(String tableName, boolean withId, String... fields) throws SQLException {
+		StringBuilder sb = new StringBuilder();
+		sb.append("CREATE TABLE IF NOT EXISTS ");
+		sb.append('`').append(tableName).append('`');
+		sb.append(" (");
+		if(withId) {
+			sb.append("id INTEGER PRIMARY KEY");
+			if(Config.getDatabaseType() == Type.MYSQL) {
+				sb.append(" AUTO_INCREMENT");
+			}
+			sb.append(", ");
+		}
+		for(int i = 0; i < fields.length; i++) {
+			if(i > 0) {
+				sb.append(", ");
+			}
+			sb.append(fields[i]);
+		}
+		sb.append(")");
+		execute(sb.toString());
 	}
 
 	public static Statement createStatement() throws SQLException {
@@ -64,9 +98,9 @@ public class Database {
 
 
 	public static int dbInsertChannel(String channelName) throws SQLException {
-		insertChannel.setString(1, channelName);
-		insertChannel.execute();
-		ResultSet rs = insertChannel.getGeneratedKeys();
+		addNewChannel.setString(1, channelName);
+		addNewChannel.execute();
+		ResultSet rs = addNewChannel.getGeneratedKeys();
 		if(rs.next()) {
 			return rs.getInt(1);
 		}
@@ -74,27 +108,27 @@ public class Database {
 	}
 
 	public static void dbUpdateChannelActive(String channelName, boolean active) throws SQLException {
-		updateChannelActive.setInt(1, ChannelManager.getId(channelName));
-		updateChannelActive.setBoolean(2, active);
-		updateChannelActive.execute();
+		setChannelActive.setInt(1, ChannelManager.getId(channelName));
+		setChannelActive.setBoolean(2, active);
+		setChannelActive.execute();
 	}
 
 	public static void dbReplaceConfig(String channelName, String option, String value) throws SQLException {
-		replaceConfig.setInt(1, ChannelManager.getId(channelName));
-		replaceConfig.setString(2, option);
-		replaceConfig.setString(3, value);
-		replaceConfig.execute();
+		setChannelConfig.setInt(1, ChannelManager.getId(channelName));
+		setChannelConfig.setString(2, option);
+		setChannelConfig.setString(3, value);
+		setChannelConfig.execute();
 	}
 
 	public static void dbReplaceModule(String channelName, String moduleId) throws SQLException {
-		replaceModule.setInt(1, ChannelManager.getId(channelName));
-		replaceModule.setString(2, moduleId);
-		replaceModule.execute();
+		activateModule.setInt(1, ChannelManager.getId(channelName));
+		activateModule.setString(2, moduleId);
+		activateModule.execute();
 	}
 
 	public static void dbDeleteModule(String channelName, String moduleId) throws SQLException {
-		deleteModule.setInt(1, ChannelManager.getId(channelName));
-		deleteModule.setString(2, moduleId);
-		deleteModule.execute();
+		deactivateModule.setInt(1, ChannelManager.getId(channelName));
+		deactivateModule.setString(2, moduleId);
+		deactivateModule.execute();
 	}
 }

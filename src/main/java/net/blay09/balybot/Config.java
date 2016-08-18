@@ -25,6 +25,11 @@ public class Config {
 	@Getter private static String databaseUser;
 	@Getter private static String databasePassword;
 
+	@Getter private static String twitchUsername;
+	@Getter private static String twitchOAuth;
+
+	@Getter private static String discordBotToken;
+
     private static final Map<String, String> globalConfig = Maps.newHashMap();
 	private static final Table<String, String, String> channelConfig = HashBasedTable.create();
 
@@ -34,6 +39,11 @@ public class Config {
 		prop.setProperty("database-name", "balybot.db");
 		prop.setProperty("database-user", "");
 		prop.setProperty("database-password", "");
+
+		prop.setProperty("twitch-username", "");
+		prop.setProperty("twitch-oauth", "");
+
+		prop.setProperty("discord-token", "");
 	}
 
 	public static void loadFromFile() {
@@ -49,6 +59,11 @@ public class Config {
 			databaseName = prop.getProperty("database-name");
 			databaseUser = prop.getProperty("database-user");
 			databasePassword = prop.getProperty("database-password");
+
+			twitchUsername = prop.getProperty("twitch-username");
+			twitchOAuth = prop.getProperty("twitch-oauth");
+
+			discordBotToken = prop.getProperty("discord-token");
 		} catch (IllegalArgumentException e) {
 			throw new RuntimeException("Invalid value for config option 'database-type': got '" + prop.getProperty("database-type") + "' but expected 'MYSQL' or 'SQLITE'");
 		}
@@ -64,7 +79,7 @@ public class Config {
 		channelConfig.clear();
         try {
             Statement stmt = Database.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM config");
+            ResultSet rs = stmt.executeQuery("SELECT * FROM channel_config");
             while(rs.next()) {
 				int channelId = rs.getInt("config_channel");
 				if(channelId == 0) {

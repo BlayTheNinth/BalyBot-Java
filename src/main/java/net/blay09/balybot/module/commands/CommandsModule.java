@@ -26,7 +26,14 @@ public class CommandsModule extends ModuleDef {
 		super("commands", "Commands Module", "Base module for custom commands. Provides commands to manage modules and config options.");
 
 		try {
-			Database.execute("CREATE TABLE IF NOT EXISTS commands (command_id INTEGER PRIMARY KEY " + Database.autoIncrementOrEmpty() + ", command_channel VARCHAR(64) NOT NULL, command_name VARCHAR(32) NOT NULL, command_pattern VARCHAR(128) NOT NULL, command_message TEXT, command_level INTEGER(4), command_condition TEXT, command_whisper VARCHAR(32))");
+			Database.createTable("commands", true,
+					"`channel_fk` INTEGER",
+					"`name` VARCHAR(32)",
+					"`pattern` VARCHAR(128)",
+					"`message` TEXT",
+					"`level` INTEGER",
+					"`condition` TEXT",
+					"`whisper_to` VARCHAR(32)");
 
 			insertCommand = Database.prepareStatement("INSERT INTO commands (command_channel, command_name, command_pattern, command_message, command_level, command_condition, command_whisper) VALUES (?, ?, ?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
 			replaceCommand = Database.prepareStatement("REPLACE INTO commands (command_id, command_channel, command_name, command_pattern, command_message, command_level, command_condition, command_whisper) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
