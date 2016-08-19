@@ -140,6 +140,7 @@ public class DiscordImplementation implements BotImplementation {
 				ServerManager.activateModule(server, "manager");
 				ServerManager.activateModule(server, "commands");
 				ServerManager.activateModule(server, "test");
+				ServerManager.activateModule(server, "smug"); // this is necessary because otherwise the bot will just crash and not work (not really but it's a cool module)
 			} catch (SQLException e) {
 				log.error("Failed to join channel: {}", e);
 			}

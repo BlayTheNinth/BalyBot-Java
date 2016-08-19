@@ -8,7 +8,9 @@ import net.blay09.balybot.impl.api.Channel;
 import net.blay09.balybot.impl.api.User;
 import net.blay09.balybot.impl.base.script.DefaultEvents;
 import net.blay09.balybot.script.ScriptManager;
+import net.dv8tion.jda.Permission;
 import net.dv8tion.jda.entities.Guild;
+import net.dv8tion.jda.entities.TextChannel;
 import net.dv8tion.jda.events.ReadyEvent;
 import net.dv8tion.jda.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.events.message.guild.GuildMessageReceivedEvent;
@@ -25,6 +27,9 @@ public class DiscordBotListener extends ListenerAdapter {
 		for(Guild guild : event.getJDA().getGuilds()) {
 			impl.joinServer(guild.getId());
 		}
+		event.getJDA().getTextChannels().stream()
+				.filter(channel -> channel.checkPermission(event.getJDA().getSelfInfo(), Permission.MESSAGE_READ, Permission.MESSAGE_WRITE))
+				.forEach(channel -> impl.joinChannel(channel.getGuild().getId() + "/" + channel.getId()));
 	}
 
 	@Override
