@@ -29,7 +29,7 @@ public class DiscordBotListener extends ListenerAdapter {
 		}
 		event.getJDA().getTextChannels().stream()
 				.filter(channel -> channel.checkPermission(event.getJDA().getSelfInfo(), Permission.MESSAGE_READ, Permission.MESSAGE_WRITE))
-				.forEach(channel -> impl.joinChannel(channel.getGuild().getId() + "/" + channel.getId()));
+				.forEach(channel -> impl.joinChannel(channel.getGuild().getId() + "/" + channel.getName()));
 	}
 
 	@Override
