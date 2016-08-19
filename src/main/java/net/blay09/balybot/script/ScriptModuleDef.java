@@ -2,7 +2,9 @@ package net.blay09.balybot.script;
 
 import com.google.common.collect.Lists;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
-import net.blay09.balybot.command.UserLevel;
+import net.blay09.balybot.BalyBot;
+import net.blay09.balybot.impl.api.UserLevel;
+import net.blay09.balybot.impl.base.DefaultUserLevels;
 import net.blay09.balybot.command.BotCommand;
 import net.blay09.balybot.module.ConfigEntry;
 import net.blay09.balybot.module.Module;
@@ -13,7 +15,7 @@ import javax.script.ScriptException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ScriptModuleDef extends ModuleDef {
 
@@ -48,9 +50,8 @@ public class ScriptModuleDef extends ModuleDef {
             return Collections.emptyList();
         }
 		List<ScriptEventHandler> eventHandlers = Lists.newArrayList();
-        for(Map.Entry<String, Object> entry : jsEvents.entrySet()) {
-			eventHandlers.add(ScriptManager.getInstance().registerEventHandler(module, EventType.fromName(entry.getKey()), (ScriptObjectMirror) entry.getValue()));
-        }
+        eventHandlers.addAll(jsEvents.entrySet().stream().map(
+                entry -> ScriptManager.getInstance().registerEventHandler(module, entry.getKey(), (ScriptObjectMirror) entry.getValue())).collect(Collectors.toList()));
 		return eventHandlers;
     }
 
@@ -66,9 +67,9 @@ public class ScriptModuleDef extends ModuleDef {
             if(userLevelConfig == null) {
                 userLevelConfig = addConfigEntry(new ConfigEntry(this, "userlevel." + commandName, "mod", "The minimum user level required to run the " + module.getPrefix() + commandName + " command."));
             }
-            UserLevel userLevel = UserLevel.fromName(userLevelConfig.getString(module.getChannelName()));
+            UserLevel userLevel = BalyBot.getUserLevelRegistry().fromName(userLevelConfig.getString(module.getChannel()));
             if(userLevel == null) {
-                userLevel = UserLevel.MOD;
+                userLevel = DefaultUserLevels.CHANNEL_OWNER;
             }
             commandList.add(new ScriptBotCommand(module, userLevel.getLevel(), jsCommand));
         }

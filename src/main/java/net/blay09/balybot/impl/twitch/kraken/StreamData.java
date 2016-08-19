@@ -1,13 +1,15 @@
-package net.blay09.balybot.twitch;
+package net.blay09.balybot.impl.twitch.kraken;
 
 import com.google.gson.JsonObject;
 import lombok.Getter;
+import lombok.extern.log4j.Log4j2;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
 
 @Getter
+@Log4j2
 public class StreamData {
 
     public final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
@@ -30,7 +32,7 @@ public class StreamData {
                 dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
                 created_at = dateFormat.parse(stream.get("created_at").getAsString()).getTime();
             } catch (ParseException e) {
-                e.printStackTrace();
+                log.error("Failed to parse stream data", e);
             }
         } else {
             viewers = 0;

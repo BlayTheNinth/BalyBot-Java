@@ -2,12 +2,13 @@ package net.blay09.balybot.module.commands;
 
 import com.google.common.base.Objects;
 import lombok.extern.log4j.Log4j2;
-import net.blay09.balybot.DocBuilder;
-import net.blay09.balybot.command.UserLevel;
+import net.blay09.balybot.BalyBot;
+import net.blay09.balybot.impl.api.Channel;
+import net.blay09.balybot.impl.api.User;
+import net.blay09.balybot.impl.api.UserLevel;
+import net.blay09.balybot.impl.base.DefaultUserLevels;
 import net.blay09.balybot.command.BotCommand;
-import net.blay09.balybot.expr.ExpressionLibrary;
 import net.blay09.balybot.module.Module;
-import net.blay09.javatmi.TwitchUser;
 import org.apache.commons.lang3.StringUtils;
 
 import java.sql.SQLException;
@@ -18,7 +19,7 @@ public class SetCommand extends BotCommand {
 	private final Module module;
 
 	public SetCommand(Module module) {
-		super("set", "^" + module.getPrefix() + "set(?:\\s+(.*)|$)", UserLevel.MOD.getLevel());
+		super("set", "^" + module.getPrefix() + "set(?:\\s+(.*)|$)", DefaultUserLevels.CHANNEL_OWNER.getLevel());
 		this.module = module;
 	}
 
@@ -28,7 +29,7 @@ public class SetCommand extends BotCommand {
 	}
 
     @Override
-    public String execute(String channelName, TwitchUser sender, String message, String[] args, int depth) {
+    public String execute(Channel channel, User sender, String message, String[] args, int depth) {
         if(args.length < 2) {
             return "Not enough parameters for set command. Syntax: " + getCommandSyntax();
         }
@@ -43,9 +44,9 @@ public class SetCommand extends BotCommand {
                 if (i >= args.length) {
                     return "Not enough parameters for set command. Syntax: " + getCommandSyntax();
                 }
-                userLevel = UserLevel.fromName(args[i]);
+                userLevel = BalyBot.getUserLevelRegistry().fromName(args[i]);
                 if (userLevel == null) {
-                    return "Invalid user level '" + args[1] + "'. Valid are: " + StringUtils.join(UserLevel.getValidLevels(), ", ");
+                    return "Invalid user level '" + args[1] + "'. Valid are: " + StringUtils.join(BalyBot.getUserLevelRegistry().getValidLevels(), ", ");
                 }
             } else if(args[i].equals("-whisperto")) {
                 i++;
@@ -85,7 +86,7 @@ public class SetCommand extends BotCommand {
                     condition = args[i];
                 }
                 try {
-                    Object obj = ExpressionLibrary.eval(channelName, condition);
+                    Object obj = BalyBot.getExpressionLibrary().eval(channel, condition);
                     if(!(obj instanceof Boolean)) {
                         throw new RuntimeException("Return value is not a boolean.");
                     }
@@ -120,7 +121,7 @@ public class SetCommand extends BotCommand {
 			}
 		}
 		if(userLevel == null) {
-			userLevel = UserLevel.ALL;
+			userLevel = DefaultUserLevels.ALL;
 		}
 
 		String commandMessage = StringUtils.join(args, ' ', startIdx + 1, args.length);
@@ -132,20 +133,19 @@ public class SetCommand extends BotCommand {
 		module.registerCommand(newCommand);
 		if(editCommand != null) {
 			try {
-				((CommandsModule) module.getDefinition()).dbReplaceCommand(newCommand, channelName);
+				((CommandsModule) module.getDefinition()).dbReplaceCommand(newCommand, channel.getId());
 			} catch (SQLException e) {
 				log.error("Could not save command to database: " + e.getMessage());
 				log.error("Changes will be lost upon reload.");
 			}
 		} else {
 			try {
-				((CommandsModule) module.getDefinition()).dbInsertCommand(newCommand, channelName);
+				((CommandsModule) module.getDefinition()).dbInsertCommand(newCommand, channel.getId());
 			} catch (SQLException e) {
 				log.error("Could not save command to database: " + e.getMessage());
 				log.error("Changes will be lost upon reload.");
 			}
 		}
-		DocBuilder.buildDocs(channelName); // TODO builddocs
 		return "Command successfully " + (editCommand != null ? "edited" : "registered") + ": " + name;
     }
 

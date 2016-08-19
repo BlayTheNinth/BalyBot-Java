@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import lombok.Getter;
 import net.blay09.balybot.command.BotCommand;
+import net.blay09.balybot.impl.api.Channel;
 import net.blay09.balybot.script.ScriptModuleDef;
 
 import java.util.Collection;
@@ -16,14 +17,14 @@ public class Module {
     @Getter
     private final ModuleDef definition;
     @Getter
-    private final String channelName;
+    private final Channel channel;
     @Getter
     private final String prefix;
 
-    public Module(ModuleDef definition, String channelName) {
+    public Module(ModuleDef definition, Channel channel) {
         this.definition = definition;
-        this.channelName = channelName;
-        this.prefix = definition.getConfigEntry("prefix").getString(channelName);
+        this.channel = channel;
+        this.prefix = definition.getConfigEntry("prefix").getString(channel);
         if(definition instanceof ScriptModuleDef) {
             ((ScriptModuleDef) definition).createEventHandlers(this);
         }
@@ -58,7 +59,7 @@ public class Module {
             if(sb.length() > 1) {
                 sb.append(",");
             }
-            sb.append("'").append(configEntry.name).append("':'").append(configEntry.getString(channelName)).append("'");
+            sb.append("'").append(configEntry.name).append("':'").append(configEntry.getString(channel)).append("'");
         }
         sb.append("};");
         function.eval("var config = " + sb.toString());

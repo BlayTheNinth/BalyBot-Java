@@ -6,10 +6,10 @@ import com.google.common.collect.Multimap;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import jdk.nashorn.internal.runtime.ECMAException;
 import lombok.extern.log4j.Log4j2;
+import net.blay09.balybot.impl.twitch.script.TwitchBinding;
 import net.blay09.balybot.module.Module;
 import net.blay09.balybot.module.ModuleDef;
 import net.blay09.balybot.script.binding.*;
-import org.apache.commons.lang3.tuple.Pair;
 
 import javax.script.*;
 import java.io.File;
@@ -31,7 +31,7 @@ public class ScriptManager {
         return instance;
     }
 
-    private final Multimap<EventType, ScriptEventHandler> callbacks = ArrayListMultimap.create();
+    private final Multimap<String, ScriptEventHandler> callbacks = ArrayListMultimap.create();
 
     public Collection<ModuleDef> loadModules() {
         List<ModuleDef> modules = Lists.newArrayList();
@@ -57,19 +57,19 @@ public class ScriptManager {
         globalBindings.put("JSystem", new SystemBinding());
         globalBindings.put("JString", new StringBinding());
         globalBindings.put("JDate", new DateBinding());
-        globalBindings.put("JTwitchAPI", new TwitchAPIBinding());
+        globalBindings.put("JTwitchAPI", new TwitchBinding());
         globalBindings.put("JError", new ErrorBinding());
         globalBindings.put("JBalyBot", new BalyBotBinding());
         engine.setBindings(globalBindings, ScriptContext.GLOBAL_SCOPE);
     }
 
-    public ScriptEventHandler registerEventHandler(Module module, EventType eventType, ScriptObjectMirror callback) {
+    public ScriptEventHandler registerEventHandler(Module module, String eventType, ScriptObjectMirror callback) {
 		ScriptEventHandler handler = new ScriptEventHandler(module, eventType, callback);
         callbacks.put(eventType, handler);
 		return handler;
     }
 
-    public void publishEvent(EventType eventType, Object... args) {
+    public void publishEvent(String eventType, Object... args) {
         for(ScriptEventHandler handler : callbacks.get(eventType)) {
             setCurrentScript(handler.getModule());
 			handler.getModule().pushConfigVariable(handler.getCallback());

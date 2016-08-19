@@ -1,8 +1,8 @@
 package net.blay09.balybot.command;
 
 import lombok.Getter;
-import net.blay09.balybot.CommandHandler;
-import net.blay09.javatmi.TwitchUser;
+import net.blay09.balybot.impl.api.Channel;
+import net.blay09.balybot.impl.api.User;
 
 public class MessageBotCommand extends BotCommand {
 
@@ -14,8 +14,8 @@ public class MessageBotCommand extends BotCommand {
     }
 
     @Override
-    public String execute(String channelName, TwitchUser sender, String message, String[] args, int depth) {
-        return CommandHandler.resolveVariables(commandMessage, this, channelName, sender, message, args, depth);
+    public String execute(Channel channel, User sender, String message, String[] args, int depth) {
+        return CommandHandler.resolveVariables(commandMessage, this, channel, sender, message, args, depth);
     }
 
 }

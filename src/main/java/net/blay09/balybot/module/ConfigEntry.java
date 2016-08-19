@@ -1,7 +1,9 @@
 package net.blay09.balybot.module;
 
-import net.blay09.balybot.Config;
-import net.blay09.balybot.command.UserLevel;
+import net.blay09.balybot.BalyBot;
+import net.blay09.balybot.ChannelManager;
+import net.blay09.balybot.impl.api.Channel;
+import net.blay09.balybot.impl.api.UserLevel;
 
 public class ConfigEntry {
     public final ModuleDef module;
@@ -16,23 +18,23 @@ public class ConfigEntry {
         this.description = description;
     }
 
-    public String getString(String channelName) {
-        return Config.getChannelString(channelName, module.getId() + "." + name, defaultVal);
+    public String getString(Channel channel) {
+        return ChannelManager.getChannelString(channel, module.getId() + "." + name, defaultVal);
     }
 
-    public int getInt(String channelName) {
-        return Config.getChannelInt(channelName, module.getId() + "." + name, Integer.parseInt(defaultVal));
+    public int getInt(Channel channel) {
+        return ChannelManager.getChannelInt(channel, module.getId() + "." + name, Integer.parseInt(defaultVal));
     }
 
-    public UserLevel getUserLevel(String channelName) {
-        UserLevel userLevel = UserLevel.fromName(Config.getChannelString(channelName, module.getId() + "." + name, defaultVal));
+    public UserLevel getUserLevel(Channel channel) {
+        UserLevel userLevel = BalyBot.getUserLevelRegistry().fromName(ChannelManager.getChannelString(channel, module.getId() + "." + name, defaultVal));
         if(userLevel == null) {
-            userLevel = UserLevel.fromName(defaultVal);
+            userLevel = BalyBot.getUserLevelRegistry().fromName(defaultVal);
         }
         return userLevel;
     }
 
-    public boolean getBoolean(String channelname) {
-        return Boolean.parseBoolean(getString(channelname));
+    public boolean getBoolean(Channel channel) {
+        return Boolean.parseBoolean(getString(channel));
     }
 }

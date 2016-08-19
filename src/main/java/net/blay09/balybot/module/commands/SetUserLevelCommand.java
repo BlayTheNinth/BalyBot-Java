@@ -1,10 +1,13 @@
 package net.blay09.balybot.module.commands;
 
 import lombok.extern.log4j.Log4j2;
-import net.blay09.balybot.command.UserLevel;
+import net.blay09.balybot.BalyBot;
+import net.blay09.balybot.impl.api.Channel;
+import net.blay09.balybot.impl.api.User;
+import net.blay09.balybot.impl.api.UserLevel;
+import net.blay09.balybot.impl.base.DefaultUserLevels;
 import net.blay09.balybot.command.BotCommand;
 import net.blay09.balybot.module.Module;
-import net.blay09.javatmi.TwitchUser;
 import org.apache.commons.lang3.StringUtils;
 
 import java.sql.SQLException;
@@ -15,7 +18,7 @@ public class SetUserLevelCommand extends BotCommand {
     private final Module module;
 
     public SetUserLevelCommand(Module module) {
-        super("setul", "^" + module.getPrefix() + "setul(?:\\s+(.*)|$)", UserLevel.MOD.getLevel());
+        super("setul", "^" + module.getPrefix() + "setul(?:\\s+(.*)|$)", DefaultUserLevels.CHANNEL_OWNER.getLevel());
         this.module = module;
     }
 
@@ -25,7 +28,7 @@ public class SetUserLevelCommand extends BotCommand {
 	}
 
     @Override
-    public String execute(String channelName, TwitchUser sender, String message, String[] args, int depth) {
+    public String execute(Channel channel, User sender, String message, String[] args, int depth) {
         if(args.length < 1) {
             return "Not enough parameters for setul command. Syntax: " + getCommandSyntax();
         }
@@ -45,15 +48,15 @@ public class SetUserLevelCommand extends BotCommand {
 			}
 		}
 
-        UserLevel userLevel = UserLevel.fromName(args[1]);
+        UserLevel userLevel = BalyBot.getUserLevelRegistry().fromName(args[1]);
         if(userLevel == null) {
-            return "Invalid user level '" + args[1] + "'. Valid are: " + StringUtils.join(UserLevel.getValidLevels(), ", ");
+            return "Invalid user level '" + args[1] + "'. Valid are: " + StringUtils.join(BalyBot.getUserLevelRegistry().getValidLevels(), ", ");
         }
 
         if(foundCommand != null) {
             foundCommand.setUserLevel(userLevel);
 			try {
-				((CommandsModule) module.getDefinition()).dbReplaceCommand(foundCommand, channelName);
+				((CommandsModule) module.getDefinition()).dbReplaceCommand(foundCommand, channel.getId());
 			} catch (SQLException e) {
 				log.error("Could not save command to database: " + e.getMessage());
 				log.error("Changes will be lost upon reload.");

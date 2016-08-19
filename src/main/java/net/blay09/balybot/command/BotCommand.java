@@ -1,8 +1,11 @@
 package net.blay09.balybot.command;
 
 import lombok.Getter;
-import net.blay09.balybot.Config;
-import net.blay09.javatmi.TwitchUser;
+import net.blay09.balybot.BalyBot;
+import net.blay09.balybot.impl.api.Channel;
+import net.blay09.balybot.impl.api.User;
+import net.blay09.balybot.impl.api.UserLevel;
+import net.blay09.balybot.impl.base.BaseImplementation;
 
 import java.util.regex.Pattern;
 
@@ -27,23 +30,23 @@ public abstract class BotCommand {
         this.whisperTo = whisperTo;
     }
 
-    public String execute(String channelName, TwitchUser sender, String message, String[] args, int depth, boolean ignoreCooldown) {
+    public String execute(Channel channel, User sender, String message, String[] args, int depth, boolean ignoreCooldown) {
         long now = System.currentTimeMillis();
-        if(ignoresCommandCooldown() || ignoreCooldown || now - lastExecution >= Config.getGlobalInt("command_cooldown", 30)) {
+        if(ignoresCommandCooldown() || ignoreCooldown || now - lastExecution >= BaseImplementation.getCommandCooldown()) {
             lastExecution = now;
-            return execute(channelName, sender, message, args, depth);
+            return execute(channel, sender, message, args, depth);
         }
         return null;
     }
 
-    public abstract String execute(String channelName, TwitchUser sender, String message, String[] args, int depth);
+    public abstract String execute(Channel channel, User sender, String message, String[] args, int depth);
 
     public void setUserLevel(UserLevel minUserLevel) {
         this.minUserLevel = minUserLevel.getLevel();
     }
 
     public UserLevel getUserLevel() {
-        return UserLevel.getMinimumUserLevel(minUserLevel);
+        return BalyBot.getUserLevelRegistry().getMinimumUserLevel(minUserLevel);
     }
 
     public String getCommandSyntax() {

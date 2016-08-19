@@ -1,6 +1,11 @@
-package net.blay09.balybot;
+package net.blay09.balybot.impl.twitch;
 
+import lombok.extern.log4j.Log4j2;
+import net.blay09.balybot.ChannelManager;
 import net.blay09.balybot.command.BotCommand;
+import net.blay09.balybot.command.CommandHandler;
+import net.blay09.balybot.impl.api.Channel;
+import net.blay09.balybot.impl.api.User;
 import net.blay09.balybot.script.EventType;
 import net.blay09.balybot.script.ScriptManager;
 import net.blay09.javatmi.TMIAdapter;
@@ -9,21 +14,26 @@ import net.blay09.javatmi.TwitchUser;
 
 import java.util.regex.Matcher;
 
-public class BalyBotListener extends TMIAdapter {
+@Log4j2
+public class TwitchBotListener extends TMIAdapter {
 
     @Override
     public void onConnected(TMIClient client) {
-		ChannelManager.getChannels().forEach(client::join);
+		for(Channel channel : ChannelManager.getChannels()) {
+			client.join(channel.getName());
+		}
     }
 
 	@Override
 	public void onUnhandledException(TMIClient tmiClient, Exception e) {
-		e.printStackTrace();
+		throw new RuntimeException(e);
 	}
 
 	@Override
-    public void onChatMessage(TMIClient client, String channel, TwitchUser user, String message) {
-        System.out.println(user.getDisplayName() + ": " + message);
+    public void onChatMessage(TMIClient client, String channelName, TwitchUser twitchUser, String message) {
+		log.info(twitchUser.getDisplayName() + ": " + message);
+		Channel channel = TwitchImplementation.getChannel(channelName);
+		User user = TwitchImplementation.createUserFrom(twitchUser);
         ScriptManager.getInstance().publishEvent(EventType.CHANNEL_CHAT, channel, user, message);
         BotCommand command = CommandHandler.findCommand(channel, user, message);
         if (command != null) {
@@ -47,11 +57,11 @@ public class BalyBotListener extends TMIAdapter {
 						if(whisperTarget.contains("{") || whisperTarget.contains("}")) {
 							whisperTarget = user.getDisplayName();
 						}
-						System.out.println("BalyBot -> " + whisperTarget + ": " + result);
-						BalyBot.getInstance().getClient().getTwitchCommands().whisper(whisperTarget, result);
+						log.info("BalyBot -> {}: {}", whisperTarget, result);
+						channel.getChatProvider().sendDirectMessage(whisperTarget, result);
                     } else {
-						System.out.println("BalyBot: " + result);
-						BalyBot.getInstance().getClient().send(channel, result);
+						log.info("BalyBot: {}", result);
+						channel.getChatProvider().sendMessage(channel, result);
                     }
                 }
             }

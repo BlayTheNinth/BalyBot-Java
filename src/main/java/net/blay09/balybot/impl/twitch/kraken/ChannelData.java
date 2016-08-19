@@ -1,4 +1,4 @@
-package net.blay09.balybot.twitch;
+package net.blay09.balybot.impl.twitch.kraken;
 
 import com.google.gson.JsonObject;
 import lombok.Getter;

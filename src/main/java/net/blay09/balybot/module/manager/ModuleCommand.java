@@ -2,19 +2,19 @@ package net.blay09.balybot.module.manager;
 
 import net.blay09.balybot.BalyBot;
 import net.blay09.balybot.ChannelManager;
-import net.blay09.balybot.Config;
-import net.blay09.balybot.command.UserLevel;
+import net.blay09.balybot.impl.api.Channel;
+import net.blay09.balybot.impl.api.User;
+import net.blay09.balybot.impl.base.DefaultUserLevels;
 import net.blay09.balybot.command.BotCommand;
 import net.blay09.balybot.module.Module;
 import net.blay09.balybot.module.ModuleDef;
-import net.blay09.javatmi.TwitchUser;
 
 public class ModuleCommand extends BotCommand {
 
     private final Module module;
 
     public ModuleCommand(Module module) {
-        super("module", "^" + module.getPrefix() + "module(?:\\s+(.*)|$)", UserLevel.BROADCASTER.getLevel());
+        super("module", "^" + module.getPrefix() + "module(?:\\s+(.*)|$)", DefaultUserLevels.CHANNEL_OWNER.getLevel());
         this.module = module;
     }
 
@@ -24,7 +24,7 @@ public class ModuleCommand extends BotCommand {
     }
 
     @Override
-    public String execute(String channelName, TwitchUser sender, String message, String[] args, int depth) {
+    public String execute(Channel channel, User sender, String message, String[] args, int depth) {
         if(args.length < 1) {
             return "Not enough parameters for module command. Syntax: " + getCommandSyntax();
         }
@@ -33,7 +33,7 @@ public class ModuleCommand extends BotCommand {
 			if(args.length > 1) {
 				if(args[1].equals("active")) {
 					StringBuilder sb = new StringBuilder();
-					for(Module module : ChannelManager.getModules(channelName)) {
+					for(Module module : ChannelManager.getModules(channel)) {
 						if(sb.length() > 0) {
 							sb.append(", ");
 						}
@@ -61,11 +61,11 @@ public class ModuleCommand extends BotCommand {
 		}
 		switch (state) {
 			case "on":
-				Config.setChannelString(channelName, moduleId + ".prefix", prefix);
-				ChannelManager.activateModule(channelName, moduleId);
+				ChannelManager.setChannelString(channel, moduleId + ".prefix", prefix);
+				ChannelManager.activateModule(channel, moduleId);
 				return "Module activated: " + moduleId;
 			case "off":
-				ChannelManager.deactivateModule(channelName, moduleId);
+				ChannelManager.deactivateModule(channel, moduleId);
 				return "Module deactivated: " + moduleId;
 			default:
 				return "Invalid parameters for module command. Syntax: " + getCommandSyntax();

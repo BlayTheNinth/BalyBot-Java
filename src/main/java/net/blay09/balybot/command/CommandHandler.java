@@ -1,11 +1,11 @@
-package net.blay09.balybot;
+package net.blay09.balybot.command;
 
-import net.blay09.balybot.command.BotCommand;
-import net.blay09.balybot.expr.ExpressionLibrary;
+import net.blay09.balybot.BalyBot;
+import net.blay09.balybot.ChannelManager;
+import net.blay09.balybot.impl.api.Channel;
+import net.blay09.balybot.impl.api.User;
 import net.blay09.balybot.module.Module;
-import net.blay09.balybot.twitch.TwitchAPI;
-import net.blay09.javairc.snapshot.ChannelSnapshot;
-import net.blay09.javatmi.TwitchUser;
+import net.blay09.balybot.impl.twitch.kraken.TwitchAPI;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,7 +15,7 @@ public class CommandHandler {
     private static final Pattern varPattern = Pattern.compile("\\{(?:([^\\?]+)(\\?))?([^\\}\\?]+)(\\?)?([^\\}]+)?\\}");
     private static final int MAX_CMD_DEPTH = 3;
 
-    public static String resolveVariables(String variables, BotCommand botCommand, String channelName, TwitchUser sender, String message, String[] args, int depth) {
+    public static String resolveVariables(String variables, BotCommand botCommand, Channel channel, User sender, String message, String[] args, int depth) {
         StringBuffer sb = new StringBuffer();
         Matcher varMatcher = varPattern.matcher(variables);
         while(varMatcher.find()) {
@@ -33,25 +33,24 @@ public class CommandHandler {
             if(varName.equals("SENDER")) {
                 varValue = sender.getDisplayName();
             } else if(varName.equals("TITLE")) {
-                varValue = TwitchAPI.getChannelData(channelName).getTitle();
+                varValue = TwitchAPI.getChannelData(channel).getTitle();
             } else if(varName.equals("GAME")) {
-                varValue = TwitchAPI.getChannelData(channelName).getGame();
+                varValue = TwitchAPI.getChannelData(channel).getGame();
             } else if(varName.equals("VIEWERS")) {
-                varValue = String.valueOf(TwitchAPI.getStreamData(channelName).getViewers());
+                varValue = String.valueOf(TwitchAPI.getStreamData(channel).getViewers());
             } else if(varName.equals("CHATTERS")) {
-                ChannelSnapshot channelSnapshot = BalyBot.getInstance().getClient().getIRCConnection().getChannelSnapshot(channelName);
-                varValue = String.valueOf(channelSnapshot.getUsers().size());
+                varValue = String.valueOf(channel.getChatProvider().getUserCount(channel));
             } else if(varName.startsWith("EXPR:") && varName.length() > 5) {
                 try {
-                    varValue = String.valueOf(ExpressionLibrary.eval(channelName, varName.substring(5)));
+                    varValue = String.valueOf(BalyBot.getExpressionLibrary().eval(channel, varName.substring(5)));
                 } catch (Throwable e) {
                     varValue = e.getMessage();
                 }
             } else if(varName.startsWith("CMD:") && varName.length() > 4) {
                 if(depth <= MAX_CMD_DEPTH) {
-                    BotCommand command = findCommand(channelName, sender, varName.substring(4));
+                    BotCommand command = findCommand(channel, sender, varName.substring(4));
                     if (command != null) {
-                        varValue = command.execute(channelName, sender, message, args, depth + 1, true);
+                        varValue = command.execute(channel, sender, message, args, depth + 1, true);
                     }
                 }
             } else if(varName.startsWith("REG:")) {
@@ -84,7 +83,7 @@ public class CommandHandler {
         return sb.toString();
     }
 
-    public static BotCommand findCommand(String channel, TwitchUser sender, String message) {
+    public static BotCommand findCommand(Channel channel, User sender, String message) {
         Matcher matcher = null;
         for (Module module : ChannelManager.getModules(channel)) {
             for (BotCommand command : module.getCommands()) {
@@ -97,7 +96,7 @@ public class CommandHandler {
                 if(matcher.find()) {
                     if (command.getCondition() != null) {
                         try {
-                            Boolean obj = (Boolean) ExpressionLibrary.eval(channel, command.getCondition());
+                            Boolean obj = (Boolean) BalyBot.getExpressionLibrary().eval(channel, command.getCondition());
                             if (obj == null || !obj) {
                                 continue;
                             }

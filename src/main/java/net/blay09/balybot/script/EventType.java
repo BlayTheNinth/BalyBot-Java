@@ -1,14 +1,6 @@
 package net.blay09.balybot.script;
 
-public enum EventType {
-    CHANNEL_CHAT,
-    CHANNEL_HOSTED;
-
-    public static EventType fromName(String key) {
-        try {
-            return valueOf(key.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new RuntimeException("Unknown event type '" + key + "'");
-        }
-    }
+public class EventType {
+    public static final String CHANNEL_CHAT = "channel_chat";
+    public static final String CHANNEL_HOSTED = "channel_hosted";
 }

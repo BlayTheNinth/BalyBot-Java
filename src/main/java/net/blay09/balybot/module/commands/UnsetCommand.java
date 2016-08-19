@@ -1,10 +1,11 @@
 package net.blay09.balybot.module.commands;
 
 import lombok.extern.log4j.Log4j2;
-import net.blay09.balybot.command.UserLevel;
+import net.blay09.balybot.impl.api.Channel;
+import net.blay09.balybot.impl.api.User;
+import net.blay09.balybot.impl.base.DefaultUserLevels;
 import net.blay09.balybot.command.BotCommand;
 import net.blay09.balybot.module.Module;
-import net.blay09.javatmi.TwitchUser;
 
 import java.sql.SQLException;
 
@@ -14,7 +15,7 @@ public class UnsetCommand extends BotCommand {
     private final Module module;
 
     public UnsetCommand(Module module) {
-        super("unset", "^" + module.getPrefix() + "unset(?:\\s+(.*)|$)", UserLevel.MOD.getLevel());
+        super("unset", "^" + module.getPrefix() + "unset(?:\\s+(.*)|$)", DefaultUserLevels.CHANNEL_OWNER.getLevel());
         this.module = module;
     }
 
@@ -24,7 +25,7 @@ public class UnsetCommand extends BotCommand {
     }
 
     @Override
-    public String execute(String channelName, TwitchUser sender, String message, String[] args, int depth) {
+    public String execute(Channel channel, User sender, String message, String[] args, int depth) {
         if(args.length < 1) {
             return "Not enough parameters for unset command. Syntax: " + getCommandSyntax();
         }

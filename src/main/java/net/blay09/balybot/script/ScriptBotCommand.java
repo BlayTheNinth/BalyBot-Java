@@ -2,6 +2,8 @@ package net.blay09.balybot.script;
 
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import net.blay09.balybot.command.SimpleMessageBotCommand;
+import net.blay09.balybot.impl.api.Channel;
+import net.blay09.balybot.impl.api.User;
 import net.blay09.balybot.module.Module;
 import net.blay09.javatmi.TwitchUser;
 
@@ -19,10 +21,10 @@ public class ScriptBotCommand extends SimpleMessageBotCommand {
     }
 
     @Override
-    public String execute(String channelName, TwitchUser sender, String message, String[] args, int depth) {
+    public String execute(Channel channel, User sender, String message, String[] args, int depth) {
         ScriptManager.getInstance().setCurrentScript(module);
         module.pushConfigVariable(function);
-		return (String) ScriptManager.getInstance().callSafely(function, this, channelName, sender, args);
+		return (String) ScriptManager.getInstance().callSafely(function, this, channel, sender, args);
     }
 
     @Override

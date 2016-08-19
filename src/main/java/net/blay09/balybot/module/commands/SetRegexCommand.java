@@ -1,12 +1,13 @@
 package net.blay09.balybot.module.commands;
 
-import lombok.Data;
 import lombok.extern.log4j.Log4j2;
-import net.blay09.balybot.command.UserLevel;
+import net.blay09.balybot.BalyBot;
+import net.blay09.balybot.impl.api.Channel;
+import net.blay09.balybot.impl.api.User;
+import net.blay09.balybot.impl.api.UserLevel;
+import net.blay09.balybot.impl.base.DefaultUserLevels;
 import net.blay09.balybot.command.BotCommand;
-import net.blay09.balybot.expr.ExpressionLibrary;
 import net.blay09.balybot.module.Module;
-import net.blay09.javatmi.TwitchUser;
 import org.apache.commons.lang3.StringUtils;
 
 import java.sql.SQLException;
@@ -19,7 +20,7 @@ public class SetRegexCommand extends BotCommand {
     private final Module module;
 
     public SetRegexCommand(Module module) {
-        super("setregex", "^" + module.getPrefix() + "setregex(?:\\s+(.*)|$)", UserLevel.MOD.getLevel());
+        super("setregex", "^" + module.getPrefix() + "setregex(?:\\s+(.*)|$)", DefaultUserLevels.CHANNEL_OWNER.getLevel());
         this.module = module;
     }
 
@@ -29,7 +30,7 @@ public class SetRegexCommand extends BotCommand {
     }
 
     @Override
-    public String execute(String channelName, TwitchUser sender, String message, String[] args, int depth) {
+    public String execute(Channel channel, User sender, String message, String[] args, int depth) {
         if(args.length < 2) {
             return "Not enough parameters for setregex command. Syntax: " + getCommandSyntax();
         }
@@ -38,64 +39,69 @@ public class SetRegexCommand extends BotCommand {
         String condition = null;
         String whisperTo = null;
         int startIdx = 0;
-        for(int i = 0; i < args.length; i++) {
-            if (args[i].equals("-ul")) {
-                i++;
-                if(i >= args.length) {
-                    return "Not enough parameters for setrgx command. Syntax: " + getCommandSyntax();
-                }
-                userLevel = UserLevel.fromName(args[i]);
-                if (userLevel == null) {
-                    return "Invalid user level '" + args[1] + "'. Valid are: all, turbo, reg, sub, mod, broadcaster, owner";
-                }
-            } else if (args[i].equals("-whisperto")) {
-                i++;
-                if(i >= args.length) {
-                    return "Not enough parameters for setrgx command. Syntax: " + getCommandSyntax();
-                }
-                whisperTo = args[i];
-            } else if (args[i].equals("-if")) {
-                i++;
-                if(i >= args.length) {
-                    return "Not enough parameters for setrgx command. Syntax: " + getCommandSyntax();
-                }
-                if(args[i].startsWith("[")) {
-                    StringBuilder sb = new StringBuilder();
-                    if(args[i].length() > 1) {
-                        if(args[i].endsWith("]")) {
-                            condition = args[i].substring(1, args[i].length() - 1);
-                            continue;
-                        } else {
-                            sb.append(args[i].substring(1));
-                        }
-                    }
+        label:
+        for (int i = 0; i < args.length; i++) {
+            switch (args[i]) {
+                case "-ul":
                     i++;
-                    while(i < args.length) {
-                        if(args[i].endsWith("]")) {
-                            if(args[i].length() > 1) {
-                                sb.append(' ').append(args[i].substring(0, args[i].length() - 1));
+                    if (i >= args.length) {
+                        return "Not enough parameters for setregex command. Syntax: " + getCommandSyntax();
+                    }
+                    userLevel = BalyBot.getUserLevelRegistry().fromName(args[i]);
+                    if (userLevel == null) {
+                        return "Invalid user level '" + args[1] + "'. Valid are: all, turbo, reg, sub, mod, broadcaster, owner";
+                    }
+                    break;
+                case "-whisperto":
+                    i++;
+                    if (i >= args.length) {
+                        return "Not enough parameters for setregex command. Syntax: " + getCommandSyntax();
+                    }
+                    whisperTo = args[i];
+                    break;
+                case "-if":
+                    i++;
+                    if (i >= args.length) {
+                        return "Not enough parameters for setregex command. Syntax: " + getCommandSyntax();
+                    }
+                    if (args[i].startsWith("[")) {
+                        StringBuilder sb = new StringBuilder();
+                        if (args[i].length() > 1) {
+                            if (args[i].endsWith("]")) {
+                                condition = args[i].substring(1, args[i].length() - 1);
+                                continue;
+                            } else {
+                                sb.append(args[i].substring(1));
                             }
-                            break;
-                        } else {
-                            sb.append(' ').append(args[i]);
                         }
                         i++;
+                        while (i < args.length) {
+                            if (args[i].endsWith("]")) {
+                                if (args[i].length() > 1) {
+                                    sb.append(' ').append(args[i].substring(0, args[i].length() - 1));
+                                }
+                                break;
+                            } else {
+                                sb.append(' ').append(args[i]);
+                            }
+                            i++;
+                        }
+                        condition = sb.toString();
+                    } else {
+                        condition = args[i];
                     }
-                    condition = sb.toString();
-                } else {
-                    condition = args[i];
-                }
-                try {
-                    Object obj = ExpressionLibrary.eval(channelName, condition);
-                    if(!(obj instanceof Boolean)) {
-                        throw new RuntimeException("Return value is not a boolean.");
+                    try {
+                        Object obj = BalyBot.getExpressionLibrary().eval(channel, condition);
+                        if (!(obj instanceof Boolean)) {
+                            throw new RuntimeException("Return value is not a boolean.");
+                        }
+                    } catch (Throwable e) {
+                        return "The supplied condition is invalid: " + e.getMessage();
                     }
-                } catch (Throwable e) {
-                    return "The supplied condition is invalid: " + e.getMessage();
-                }
-            } else {
-                startIdx = i;
-                break;
+                    break;
+                default:
+                    startIdx = i;
+                    break label;
             }
         }
 
@@ -108,14 +114,14 @@ public class SetRegexCommand extends BotCommand {
         }
 
         if(userLevel == null) {
-            userLevel = UserLevel.ALL;
+            userLevel = DefaultUserLevels.ALL;
         }
 
 		String commandMessage = StringUtils.join(args, ' ', startIdx + 1, args.length);
 		CustomBotRegexCommand newCommand = new CustomBotRegexCommand(pattern, pattern, commandMessage, userLevel.getLevel(), condition, whisperTo);
 		module.registerCommand(newCommand);
 		try {
-			((CommandsModule) module.getDefinition()).dbInsertCommand(newCommand, channelName);
+			((CommandsModule) module.getDefinition()).dbInsertCommand(newCommand, channel.getId());
 		} catch (SQLException e) {
 			log.error("Could not save command to database: " + e.getMessage());
 			log.error("Changes will be lost upon reload.");
