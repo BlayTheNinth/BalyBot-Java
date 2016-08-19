@@ -15,13 +15,14 @@ import net.blay09.balybot.impl.api.BotImplementation;
 import net.blay09.balybot.impl.api.Server;
 import net.blay09.balybot.impl.api.User;
 import net.blay09.balybot.impl.twitch.kraken.TwitchAPI;
+import net.blay09.balybot.impl.twitch.script.TwitchBinding;
 import net.blay09.balybot.impl.twitch.script.TwitchContext;
 import net.blay09.balybot.impl.twitch.script.TwitchExpressions;
 import net.blay09.javatmi.TMIClient;
 import net.blay09.javatmi.TwitchUser;
 
+import javax.script.Bindings;
 import java.sql.SQLException;
-import java.util.Collections;
 import java.util.Map;
 
 @Log4j2
@@ -35,6 +36,8 @@ public class TwitchImplementation implements BotImplementation {
 	private boolean isEnabled;
 	private String username;
 	private String token;
+
+	private Server twitchServer;
 
 	private TMIClient client;
 	private TwitchChatProvider chatProvider;
@@ -72,6 +75,11 @@ public class TwitchImplementation implements BotImplementation {
 	}
 
 	@Override
+	public void registerBindings(Bindings bindings) {
+		bindings.put("JTwitchAPI", new TwitchBinding());
+	}
+
+	@Override
 	public ChatProvider getChatProvider() {
 		return chatProvider;
 	}
@@ -89,20 +97,29 @@ public class TwitchImplementation implements BotImplementation {
 				BalyBot.getBotProperties().saveToFile();
 			}
 
-			if(ServerManager.findServer(TWITCH_HOST) == null) {
+			twitchServer = ServerManager.findServer(TWITCH_HOST);
+			if(twitchServer == null) {
 				try {
 					int id = Database.addNewServer(TWITCH_HOST, getId());
-					Server server = new Server(id, this, TWITCH_HOST);
-					ServerManager.addServer(server);
+					twitchServer = new Server(id, this, TWITCH_HOST);
+					ServerManager.addServer(twitchServer);
 				} catch (SQLException e) {
 					log.error("Failed to store Twitch server: {}; unable to start", e.getMessage());
 					return;
 				}
 			}
 
-			client = new TMIClient(username, token, Collections.emptyList(), listener);
+			if(!token.startsWith("oauth:")) {
+				token = "oauth:" + token;
+			}
+			client = new TMIClient(TMIClient.defaultBuilder().nick(username).password(token).debug(false).build(), listener);
 			if(!BalyBot.SIMULATED) {
 				client.connect();
+			}
+			for(Channel channel : ChannelManager.getChannels()) {
+				if(channel.getImplementation() == this) {
+					channels.put(channel.getName(), channel);
+				}
 			}
 			chatProvider = new TwitchChatProvider(client);
 		}
@@ -123,22 +140,25 @@ public class TwitchImplementation implements BotImplementation {
 
 	@Override
 	public boolean handleCommandLine(String cmd) {
-		if (cmd.startsWith("join ")) {
-			joinChannel(cmd.substring(6));
+		if (cmd.startsWith("twitch.join ")) {
+			joinChannel(cmd.substring(12));
 			return true;
-		} else if(cmd.startsWith("part ")) {
-			partChannel(cmd.substring(6));
+		} else if(cmd.startsWith("twitch.part ")) {
+			partChannel(cmd.substring(12));
 			return true;
 		}
 		return false;
 	}
 
 	public void joinChannel(String channelName) {
+		if(!channelName.startsWith("#")) {
+			channelName = "#" + channelName;
+		}
 		if(!channels.containsKey(channelName)) {
 			log.info("Joining channel " + channelName + "...");
 			try {
-				int id = Database.addNewChannel(channelName);
-				Channel channel = new Channel(id, ServerManager.findServer(TWITCH_HOST), channelName);
+				int id = Database.addNewChannel(channelName, twitchServer.getId());
+				Channel channel = new Channel(id, twitchServer, channelName);
 				channels.put(channelName, channel);
 				ChannelManager.addChannel(channel);
 

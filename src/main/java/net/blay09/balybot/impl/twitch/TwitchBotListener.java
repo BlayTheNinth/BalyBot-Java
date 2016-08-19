@@ -6,7 +6,8 @@ import net.blay09.balybot.command.BotCommand;
 import net.blay09.balybot.command.CommandHandler;
 import net.blay09.balybot.impl.api.Channel;
 import net.blay09.balybot.impl.api.User;
-import net.blay09.balybot.script.EventType;
+import net.blay09.balybot.impl.base.script.DefaultEvents;
+import net.blay09.balybot.impl.twitch.script.TwitchEvents;
 import net.blay09.balybot.script.ScriptManager;
 import net.blay09.javatmi.TMIAdapter;
 import net.blay09.javatmi.TMIClient;
@@ -34,7 +35,7 @@ public class TwitchBotListener extends TMIAdapter {
 		log.info(twitchUser.getDisplayName() + ": " + message);
 		Channel channel = TwitchImplementation.getChannel(channelName);
 		User user = TwitchImplementation.createUserFrom(twitchUser);
-        ScriptManager.getInstance().publishEvent(EventType.CHANNEL_CHAT, channel, user, message);
+        ScriptManager.getInstance().publishEvent(DefaultEvents.CHANNEL_CHAT, channel, user, message);
         BotCommand command = CommandHandler.findCommand(channel, user, message);
         if (command != null) {
             Matcher matcher = command.getPattern().matcher(message);
@@ -71,6 +72,6 @@ public class TwitchBotListener extends TMIAdapter {
 
     @Override
     public void onHosted(TMIClient client, String channel, String username, int viewers) {
-        ScriptManager.getInstance().publishEvent(EventType.CHANNEL_HOSTED, channel, username, viewers);
+        ScriptManager.getInstance().publishEvent(TwitchEvents.CHANNEL_HOSTED, channel, username, viewers);
     }
 }

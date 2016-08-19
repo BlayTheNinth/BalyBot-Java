@@ -158,4 +158,8 @@ public class BalyBot {
 	public BotImplementation getImplementation(String id) {
 		return implementations.get(id);
 	}
+
+	public Collection<BotImplementation> getImplementations() {
+		return implementations.values();
+	}
 }

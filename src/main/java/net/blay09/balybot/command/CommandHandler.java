@@ -1,5 +1,6 @@
 package net.blay09.balybot.command;
 
+import lombok.extern.log4j.Log4j2;
 import net.blay09.balybot.BalyBot;
 import net.blay09.balybot.ChannelManager;
 import net.blay09.balybot.impl.api.Channel;
@@ -10,6 +11,7 @@ import net.blay09.balybot.impl.twitch.kraken.TwitchAPI;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Log4j2
 public class CommandHandler {
 
     private static final Pattern varPattern = Pattern.compile("\\{(?:([^\\?]+)(\\?))?([^\\}\\?]+)(\\?)?([^\\}]+)?\\}");
@@ -101,7 +103,7 @@ public class CommandHandler {
                                 continue;
                             }
                         } catch (Throwable e) {
-                            System.err.println("Condition failed at command " + command.getName() + ": " + command.getCondition() + " (" + e.getMessage() + ")");
+                            log.error("Condition errored at command {}: {} ({})", command.getName(), command.getCondition(), e.getMessage());
                             continue;
                         }
                     }

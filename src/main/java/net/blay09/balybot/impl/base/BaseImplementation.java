@@ -7,6 +7,14 @@ import net.blay09.balybot.impl.ExpressionLibrary;
 import net.blay09.balybot.impl.UserLevelRegistry;
 import net.blay09.balybot.impl.api.ChatProvider;
 import net.blay09.balybot.impl.api.BotImplementation;
+import net.blay09.balybot.impl.base.script.BalyBotBinding;
+import net.blay09.balybot.impl.base.script.DateBinding;
+import net.blay09.balybot.impl.base.script.ErrorBinding;
+import net.blay09.balybot.impl.base.script.StringBinding;
+import net.blay09.balybot.impl.base.script.StringExpressions;
+import net.blay09.balybot.impl.base.script.SystemBinding;
+
+import javax.script.Bindings;
 
 public class BaseImplementation implements BotImplementation {
 
@@ -62,6 +70,15 @@ public class BaseImplementation implements BotImplementation {
 		library.registerGlobalStaticClass(Math.class);
 		library.registerGlobalStaticClass(StringExpressions.class);
 		library.markStateDependent("random");
+	}
+
+	@Override
+	public void registerBindings(Bindings bindings) {
+		bindings.put("JSystem", new SystemBinding());
+		bindings.put("JString", new StringBinding());
+		bindings.put("JDate", new DateBinding());
+		bindings.put("JError", new ErrorBinding());
+		bindings.put("JBalyBot", new BalyBotBinding());
 	}
 
 	@Override

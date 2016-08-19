@@ -50,7 +50,7 @@ public class Database {
 				"PRIMARY KEY(`channel_fk`, `name`)");
 
 		addNewServer = connection.prepareStatement("INSERT INTO `servers` (`host`, `implementation`) VALUES(?,?)", Statement.RETURN_GENERATED_KEYS);
-		addNewChannel = connection.prepareStatement("INSERT INTO `channels` (`name`) VALUES (?)", Statement.RETURN_GENERATED_KEYS);
+		addNewChannel = connection.prepareStatement("INSERT INTO `channels` (`name`, `server_fk`) VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS);
 		setChannelActive = connection.prepareStatement("UPDATE `channels` SET `is_active` = ? WHERE `id` = ?");
 		setChannelConfig = connection.prepareStatement("REPLACE INTO `channel_config` (`channel_fk`, `name`, `value`) VALUES (?, ?, ?)");
 		activateModule = connection.prepareStatement("REPLACE INTO `active_modules` (`channel_fk`, `module_id`) VALUES(?, ?)");
@@ -108,8 +108,9 @@ public class Database {
 		return 0;
 	}
 
-	public static int addNewChannel(String channelName) throws SQLException {
+	public static int addNewChannel(String channelName, int serverFK) throws SQLException {
 		addNewChannel.setString(1, channelName);
+		addNewChannel.setInt(2, serverFK);
 		addNewChannel.execute();
 		ResultSet rs = addNewChannel.getGeneratedKeys();
 		if(rs.next()) {

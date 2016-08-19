@@ -1,4 +1,4 @@
-package net.blay09.balybot.impl.base;
+package net.blay09.balybot.impl.base.script;
 
 @SuppressWarnings("unused")
 public class StringExpressions {

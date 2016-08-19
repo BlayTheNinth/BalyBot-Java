@@ -1,4 +1,4 @@
-package net.blay09.balybot.script.binding;
+package net.blay09.balybot.impl.base.script;
 
 import net.blay09.balybot.command.BotCommand;
 

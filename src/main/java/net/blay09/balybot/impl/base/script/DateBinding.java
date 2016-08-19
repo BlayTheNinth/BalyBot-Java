@@ -1,4 +1,4 @@
-package net.blay09.balybot.script.binding;
+package net.blay09.balybot.impl.base.script;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

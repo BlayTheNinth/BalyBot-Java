@@ -32,6 +32,9 @@ public class TwitchAPI {
     private static final Map<Channel, StreamData> streamDataCache = Maps.newHashMap();
 
     public static String getUsername(String token) {
+        if(token.startsWith("oauth:") && token.length() > 6) {
+            token = token.substring(6);
+        }
         try {
             URI uri = new URIBuilder()
                     .setScheme("https")

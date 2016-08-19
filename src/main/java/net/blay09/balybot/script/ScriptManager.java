@@ -6,10 +6,10 @@ import com.google.common.collect.Multimap;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import jdk.nashorn.internal.runtime.ECMAException;
 import lombok.extern.log4j.Log4j2;
-import net.blay09.balybot.impl.twitch.script.TwitchBinding;
+import net.blay09.balybot.BalyBot;
+import net.blay09.balybot.impl.api.BotImplementation;
 import net.blay09.balybot.module.Module;
 import net.blay09.balybot.module.ModuleDef;
-import net.blay09.balybot.script.binding.*;
 
 import javax.script.*;
 import java.io.File;
@@ -54,12 +54,9 @@ public class ScriptManager {
 
     private void loadBindings(ScriptEngine engine) {
         Bindings globalBindings = engine.createBindings();
-        globalBindings.put("JSystem", new SystemBinding());
-        globalBindings.put("JString", new StringBinding());
-        globalBindings.put("JDate", new DateBinding());
-        globalBindings.put("JTwitchAPI", new TwitchBinding());
-        globalBindings.put("JError", new ErrorBinding());
-        globalBindings.put("JBalyBot", new BalyBotBinding());
+		for(BotImplementation impl : BalyBot.getInstance().getImplementations()) {
+			impl.registerBindings(globalBindings);
+		}
         engine.setBindings(globalBindings, ScriptContext.GLOBAL_SCOPE);
     }
 

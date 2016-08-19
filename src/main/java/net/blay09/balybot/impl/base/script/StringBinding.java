@@ -1,4 +1,4 @@
-package net.blay09.balybot.script.binding;
+package net.blay09.balybot.impl.base.script;
 
 import org.apache.commons.lang3.StringUtils;
 
