@@ -20,9 +20,9 @@ public class TwitchBotListener extends TMIAdapter {
 
     @Override
     public void onConnected(TMIClient client) {
-		for(Channel channel : ChannelManager.getChannels()) {
-			client.join(channel.getName());
-		}
+		ChannelManager.getChannels().stream()
+				.filter(channel -> channel.getImplementation().getClass() == TwitchImplementation.class)
+				.forEach(channel -> client.join(channel.getName()));
     }
 
 	@Override

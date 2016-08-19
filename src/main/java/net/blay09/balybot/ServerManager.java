@@ -7,6 +7,7 @@ import net.blay09.balybot.impl.api.Server;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collection;
 import java.util.Map;
 
 public class ServerManager {
@@ -42,5 +43,9 @@ public class ServerManager {
 
 	public static Server getServer(int id) {
 		return servers.get(id);
+	}
+
+	public static Collection<Server> getServers() {
+		return servers.values();
 	}
 }

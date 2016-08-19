@@ -14,6 +14,7 @@ targetCompatibility = 1.8
 
 repositories {
     mavenCentral()
+    jcenter()
     maven {
         url 'http://blay09.net:8081/artifactory/jenkins-maven/'
     }
@@ -41,8 +42,9 @@ dependencies {
     // GNU Java Expressions Library
     compile 'hosted-api:jel:2.1.1'                   
     
-    compile 'net.blay09.lib:JavaTMI:0.1.28'
-    compile 'net.blay09.lib:JavaIRC:0.0.20'
+    compile 'net.blay09.lib:JavaTMI:0.1.28' // Twitch Implementation
+    compile 'net.blay09.lib:JavaIRC:0.0.20' // IRC Implementation
+    compile 'net.dv8tion:JDA:2.2.1_355'     // Discord Implementation
 }
 
 task wrapper(type: Wrapper) {

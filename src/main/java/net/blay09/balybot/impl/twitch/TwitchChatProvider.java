@@ -13,13 +13,13 @@ public class TwitchChatProvider implements ChatProvider {
 	}
 
 	@Override
-	public void sendMessage(Channel channel, String password) {
-		tmiClient.send(channel.getName(), password);
+	public void sendMessage(Channel channel, String message) {
+		tmiClient.send(channel.getName(), message);
 	}
 
 	@Override
-	public void sendDirectMessage(String user, String password) {
-		tmiClient.getTwitchCommands().whisper(user, password);
+	public void sendDirectMessage(String user, String message) {
+		tmiClient.getTwitchCommands().whisper(user, message);
 	}
 
 	@Override

@@ -157,4 +157,5 @@ public class ChannelManager {
 	public static Collection<Channel> getChannels() {
 		return channels.values();
 	}
+
 }

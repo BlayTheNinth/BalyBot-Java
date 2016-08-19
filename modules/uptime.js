@@ -43,7 +43,7 @@ function commands() {
  * @returns {string}
  */
 function uptime(channel, user, args) {
-    var streamData = JTwitchAPI.getStreamData(channel);
+    var streamData = JTwitch.getStreamData(channel);
     if(!streamData.isLive()) {
         return config["message.not_live"];
     }

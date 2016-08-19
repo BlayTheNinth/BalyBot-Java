@@ -7,6 +7,7 @@ import net.blay09.balybot.impl.ExpressionLibrary;
 import net.blay09.balybot.impl.api.BotImplementation;
 import net.blay09.balybot.impl.base.BaseImplementation;
 import net.blay09.balybot.impl.UserLevelRegistry;
+import net.blay09.balybot.impl.discord.DiscordImplementation;
 import net.blay09.balybot.impl.twitch.TwitchImplementation;
 import net.blay09.balybot.module.ModuleDef;
 import net.blay09.balybot.module.commands.CommandsModule;
@@ -69,7 +70,7 @@ public class BalyBot {
 		log.info("Registering bot implementations...");
 		registerImplementation(new BaseImplementation());
 		registerImplementation(new TwitchImplementation());
-//		implementations.put("discord", new DiscordServerType());
+		registerImplementation(new DiscordImplementation());
 
 		log.info("Loading properties...");
 		if(botProperties.loadFromFile()) {
