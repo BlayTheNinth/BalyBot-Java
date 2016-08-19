@@ -121,7 +121,7 @@ public class SetRegexCommand extends BotCommand {
 		CustomBotRegexCommand newCommand = new CustomBotRegexCommand(pattern, pattern, commandMessage, userLevel.getLevel(), condition, whisperTo);
 		module.registerCommand(newCommand);
 		try {
-			((CommandsModule) module.getDefinition()).dbInsertCommand(newCommand, channel.getId());
+			((CommandsModule) module.getDefinition()).addNewCommand(newCommand, channel);
 		} catch (SQLException e) {
 			log.error("Could not save command to database: " + e.getMessage());
 			log.error("Changes will be lost upon reload.");

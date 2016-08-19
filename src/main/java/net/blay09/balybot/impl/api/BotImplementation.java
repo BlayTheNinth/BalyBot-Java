@@ -27,5 +27,6 @@ public interface BotImplementation {
 	default boolean isChannelOwner(Channel channel, User user) {
 		return false;
 	}
+	default boolean areChannelsShared() { return false; }
 
 }

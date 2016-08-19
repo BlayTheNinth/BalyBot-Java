@@ -56,7 +56,7 @@ public class SetUserLevelCommand extends BotCommand {
         if(foundCommand != null) {
             foundCommand.setUserLevel(userLevel);
 			try {
-				((CommandsModule) module.getDefinition()).dbReplaceCommand(foundCommand, channel.getId());
+				((CommandsModule) module.getDefinition()).setCommand(foundCommand, channel);
 			} catch (SQLException e) {
 				log.error("Could not save command to database: " + e.getMessage());
 				log.error("Changes will be lost upon reload.");

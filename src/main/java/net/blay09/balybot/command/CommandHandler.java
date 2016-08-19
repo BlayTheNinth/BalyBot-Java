@@ -103,7 +103,7 @@ public class CommandHandler {
                                 continue;
                             }
                         } catch (Throwable e) {
-                            log.error("Condition errored at command {}: {} ({})", command.getName(), command.getCondition(), e.getMessage());
+                            log.error("Condition error-ed at command {}: {} ({})", command.getName(), command.getCondition(), e.getMessage());
                             continue;
                         }
                     }

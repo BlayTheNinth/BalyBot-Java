@@ -47,7 +47,7 @@ public class UnsetCommand extends BotCommand {
         if(foundCommand != null) {
 			module.unregisterCommand(foundCommand);
 			try {
-				((CommandsModule) module.getDefinition()).dbDeleteCommand(foundCommand);
+				((CommandsModule) module.getDefinition()).deleteCommand(foundCommand);
 			} catch (SQLException e) {
 				log.error("Could not delete command from database: " + e.getMessage());
 				log.error("Changes will be lost upon reload.");

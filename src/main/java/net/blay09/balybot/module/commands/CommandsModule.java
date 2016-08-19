@@ -4,6 +4,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import net.blay09.balybot.Database;
 import net.blay09.balybot.command.BotCommand;
+import net.blay09.balybot.impl.api.Channel;
 import net.blay09.balybot.module.Module;
 import net.blay09.balybot.module.ModuleDef;
 
@@ -25,6 +26,7 @@ public class CommandsModule extends ModuleDef {
 
 		try {
 			Database.createTable("commands", true,
+					"`server_fk` INTEGER",
 					"`channel_fk` INTEGER",
 					"`name` VARCHAR(32)",
 					"`pattern` VARCHAR(128)",
@@ -33,8 +35,8 @@ public class CommandsModule extends ModuleDef {
 					"`condition` TEXT",
 					"`whisper_to` VARCHAR(32)");
 
-			insertCommand = Database.prepareStatement("INSERT INTO `commands` (`channel_fk`, `name`, `pattern`, `message`, `level`, `condition`, `whisper_to`) VALUES (?, ?, ?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
-			replaceCommand = Database.prepareStatement("REPLACE INTO `commands` (`id`, `channel_fk`, `name`, `pattern`, `message`, `level`, `condition`, `whisper_to`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+			insertCommand = Database.prepareStatement("INSERT INTO `commands` (`server_fk`, `channel_fk`, `name`, `pattern`, `message`, `level`, `condition`, `whisper_to`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
+			replaceCommand = Database.prepareStatement("REPLACE INTO `commands` (`id`, `server_fk`, `channel_fk`, `name`, `pattern`, `message`, `level`, `condition`, `whisper_to`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
 			deleteCommand = Database.prepareStatement("DELETE FROM `commands` WHERE `id` = ?");
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
@@ -61,7 +63,7 @@ public class CommandsModule extends ModuleDef {
 
 		try {
 			Statement stmt = Database.createStatement();
-			ResultSet rs = stmt.executeQuery("SELECT * FROM `commands` WHERE `channel_fk` = " + module.getChannel().getId());
+			ResultSet rs = stmt.executeQuery("SELECT * FROM `commands` WHERE `channel_fk` = " + module.getChannel().getId() + " OR `server_fk` = " + module.getChannel().getServer().getId());
 			while(rs.next()) {
 				commands.add(new CustomBotRegexCommand(rs.getString("name"), rs.getString("pattern"), rs.getString("message"), rs.getInt("level"), rs.getString("condition"), rs.getString("whisper_to")));
 			}
@@ -74,35 +76,39 @@ public class CommandsModule extends ModuleDef {
 		return commands;
 	}
 
-	public int dbInsertCommand(CustomBotRegexCommand command, int channelId) throws SQLException {
-		insertCommand.setInt(1, channelId);
-		insertCommand.setString(2, command.getName());
-		insertCommand.setString(3, command.getPattern().pattern());
-		insertCommand.setString(4, command.getCommandMessage());
-		insertCommand.setInt(5, command.getUserLevelValue());
-		insertCommand.setString(6, command.getCondition());
-		insertCommand.setString(7, command.getWhisperTo());
+	public int addNewCommand(CustomBotRegexCommand command, Channel channel) throws SQLException {
+		boolean channelsShared = channel.getImplementation().areChannelsShared();
+		insertCommand.setInt(1, channelsShared ? channel.getServer().getId() : 0);
+		insertCommand.setInt(2, !channelsShared ? channel.getId() : 0);
+		insertCommand.setString(3, command.getName());
+		insertCommand.setString(4, command.getPattern().pattern());
+		insertCommand.setString(5, command.getCommandMessage());
+		insertCommand.setInt(6, command.getUserLevelValue());
+		insertCommand.setString(7, command.getCondition());
+		insertCommand.setString(8, command.getWhisperTo());
 		insertCommand.execute();
 		ResultSet rs = insertCommand.getGeneratedKeys();
-		if(rs.next()) {
+		if (rs.next()) {
 			return rs.getInt(1);
 		}
 		return 0;
 	}
 
-	public void dbReplaceCommand(CustomBotRegexCommand command, int channelId) throws SQLException {
+	public void setCommand(CustomBotRegexCommand command, Channel channel) throws SQLException {
+		boolean channelsShared = channel.getImplementation().areChannelsShared();
 		replaceCommand.setInt(1, command.getId());
-		replaceCommand.setInt(2, channelId);
-		replaceCommand.setString(3, command.getName());
-		replaceCommand.setString(4, command.getPattern().pattern());
-		replaceCommand.setString(5, command.getCommandMessage());
-		replaceCommand.setInt(6, command.getUserLevelValue());
-		replaceCommand.setString(7, command.getCondition());
-		replaceCommand.setString(8, command.getWhisperTo());
+		replaceCommand.setInt(2, channelsShared ? channel.getServer().getId() : 0);
+		replaceCommand.setInt(3, !channelsShared ? channel.getId() : 0);
+		replaceCommand.setString(4, command.getName());
+		replaceCommand.setString(5, command.getPattern().pattern());
+		replaceCommand.setString(6, command.getCommandMessage());
+		replaceCommand.setInt(7, command.getUserLevelValue());
+		replaceCommand.setString(8, command.getCondition());
+		replaceCommand.setString(9, command.getWhisperTo());
 		replaceCommand.execute();
 	}
 
-	public void dbDeleteCommand(CustomBotRegexCommand command) throws SQLException {
+	public void deleteCommand(CustomBotRegexCommand command) throws SQLException {
 		deleteCommand.setInt(1, command.getId());
 		deleteCommand.execute();
 	}

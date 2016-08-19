@@ -133,14 +133,14 @@ public class SetCommand extends BotCommand {
 		module.registerCommand(newCommand);
 		if(editCommand != null) {
 			try {
-				((CommandsModule) module.getDefinition()).dbReplaceCommand(newCommand, channel.getId());
+				((CommandsModule) module.getDefinition()).setCommand(newCommand, channel);
 			} catch (SQLException e) {
 				log.error("Could not save command to database: " + e.getMessage());
 				log.error("Changes will be lost upon reload.");
 			}
 		} else {
 			try {
-				((CommandsModule) module.getDefinition()).dbInsertCommand(newCommand, channel.getId());
+				((CommandsModule) module.getDefinition()).addNewCommand(newCommand, channel);
 			} catch (SQLException e) {
 				log.error("Could not save command to database: " + e.getMessage());
 				log.error("Changes will be lost upon reload.");

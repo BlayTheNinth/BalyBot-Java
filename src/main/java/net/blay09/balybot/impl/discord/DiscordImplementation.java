@@ -169,4 +169,9 @@ public class DiscordImplementation implements BotImplementation {
 	public static Server getServer(String id) {
 		return servers.get(id);
 	}
+
+	@Override
+	public boolean areChannelsShared() {
+		return true;
+	}
 }
