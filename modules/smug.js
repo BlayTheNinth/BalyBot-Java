@@ -237,7 +237,6 @@ var m_smugFaces = [
     "http://i.imgur.com/Y0dawg6.png",
     "http://i.imgur.com/IHu7ngj.png",
     "http://i.imgur.com/oAaCv1A.png",
-    "http://i.imgur.com/mgWLsRG.png",
     "http://i.imgur.com/dslFV1l.png",
     "http://i.imgur.com/ULkpcCy.png",
     "http://i.imgur.com/5kaLQB4.png",
