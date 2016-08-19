@@ -57,6 +57,12 @@ public class DiscordImplementation implements BotImplementation {
 				log.error("Discord implementation is enabled, but no token was provided; unable to start");
 				return;
 			}
+			ServerManager.getServers().stream()
+					.filter(server -> server.getImplementation() == this)
+					.forEach(server -> servers.put(server.getServerHost(), server));
+			ChannelManager.getChannels().stream()
+					.filter(channel -> channel.getImplementation() == this)
+					.forEach(channel -> channels.put(channel.getServer().getServerHost() + "/" + channel.getName(), channel));
 			try {
 				jda = new JDABuilder()
 						.setBotToken(token)
@@ -67,12 +73,6 @@ public class DiscordImplementation implements BotImplementation {
 				return;
 			}
 			chatProvider = new DiscordChatProvider(jda);
-			ServerManager.getServers().stream()
-					.filter(server -> server.getImplementation() == this)
-					.forEach(server -> servers.put(server.getServerHost(), server));
-			ChannelManager.getChannels().stream()
-					.filter(channel -> channel.getImplementation() == this)
-					.forEach(channel -> channels.put(channel.getServer().getServerHost() + "/" + channel.getName(), channel));
 		}
 	}
 
@@ -137,9 +137,9 @@ public class DiscordImplementation implements BotImplementation {
 				channels.put(fullName, channel);
 				ChannelManager.addChannel(channel);
 
-				ChannelManager.activateModule(channel, "manager");
-				ChannelManager.activateModule(channel, "commands");
-				ChannelManager.activateModule(channel, "test");
+				ServerManager.activateModule(server, "manager");
+				ServerManager.activateModule(server, "commands");
+				ServerManager.activateModule(server, "test");
 			} catch (SQLException e) {
 				log.error("Failed to join channel: {}", e);
 			}

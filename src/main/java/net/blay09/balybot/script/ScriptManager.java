@@ -7,9 +7,9 @@ import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import jdk.nashorn.internal.runtime.ECMAException;
 import lombok.extern.log4j.Log4j2;
 import net.blay09.balybot.BalyBot;
-import net.blay09.balybot.ChannelManager;
 import net.blay09.balybot.impl.api.BotImplementation;
 import net.blay09.balybot.module.Module;
+import net.blay09.balybot.module.ModuleContext;
 import net.blay09.balybot.module.ModuleDef;
 
 import javax.script.*;
@@ -61,8 +61,8 @@ public class ScriptManager {
         engine.setBindings(globalBindings, ScriptContext.GLOBAL_SCOPE);
     }
 
-    public ScriptEventHandler registerEventHandler(Module module, String eventType, ScriptObjectMirror callback) {
-		ScriptEventHandler handler = new ScriptEventHandler(module, eventType, callback);
+    public ScriptEventHandler registerEventHandler(Module module, ModuleContext context, String eventType, ScriptObjectMirror callback) {
+		ScriptEventHandler handler = new ScriptEventHandler(module, context, eventType, callback);
         callbacks.put(eventType, handler);
 		return handler;
     }
@@ -70,7 +70,7 @@ public class ScriptManager {
     public void publishEvent(String eventType, Object... args) {
         for(ScriptEventHandler handler : callbacks.get(eventType)) {
             setCurrentScript(handler.getModule());
-			handler.getModule().pushConfigVariable(handler.getCallback());
+			handler.getModule().pushConfigVariable(handler.getCallback(), handler.getContext().getChannel());
 			callSafely(handler.getCallback(), null, args);
         }
     }

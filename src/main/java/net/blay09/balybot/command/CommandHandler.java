@@ -3,6 +3,7 @@ package net.blay09.balybot.command;
 import lombok.extern.log4j.Log4j2;
 import net.blay09.balybot.BalyBot;
 import net.blay09.balybot.ChannelManager;
+import net.blay09.balybot.ServerManager;
 import net.blay09.balybot.impl.api.Channel;
 import net.blay09.balybot.impl.api.User;
 import net.blay09.balybot.module.Module;
@@ -86,29 +87,43 @@ public class CommandHandler {
     }
 
     public static BotCommand findCommand(Channel channel, User sender, String message) {
-        Matcher matcher = null;
         for (Module module : ChannelManager.getModules(channel)) {
-            for (BotCommand command : module.getCommands()) {
-                if (matcher == null) {
-                    matcher = command.getPattern().matcher(message);
-                } else {
-                    matcher.usePattern(command.getPattern());
-                    matcher.reset(message);
-                }
-                if(matcher.find()) {
-                    if (command.getCondition() != null) {
-                        try {
-                            Boolean obj = (Boolean) BalyBot.getExpressionLibrary().eval(channel, command.getCondition());
-                            if (obj == null || !obj) {
-                                continue;
-                            }
-                        } catch (Throwable e) {
-                            log.error("Condition error-ed at command {}: {} ({})", command.getName(), command.getCondition(), e.getMessage());
+            BotCommand command = findCommand(channel, sender, message, module);
+            if(command != null) {
+                return command;
+            }
+        }
+        for (Module module : ServerManager.getModules(channel.getServer())) {
+            BotCommand command = findCommand(channel, sender, message, module);
+            if(command != null) {
+                return command;
+            }
+        }
+        return null;
+    }
+
+    private static BotCommand findCommand(Channel channel, User sender, String message, Module module) {
+        Matcher matcher = null;
+        for (BotCommand command : module.getCommands()) {
+            if (matcher == null) {
+                matcher = command.getPattern().matcher(message);
+            } else {
+                matcher.usePattern(command.getPattern());
+                matcher.reset(message);
+            }
+            if(matcher.find()) {
+                if (command.getCondition() != null) {
+                    try {
+                        Boolean obj = (Boolean) BalyBot.getExpressionLibrary().eval(channel, command.getCondition());
+                        if (obj == null || !obj) {
                             continue;
                         }
+                    } catch (Throwable e) {
+                        log.error("Condition error-ed at command {}: {} ({})", command.getName(), command.getCondition(), e.getMessage());
+                        continue;
                     }
-                    return command;
                 }
+                return command;
             }
         }
         return null;

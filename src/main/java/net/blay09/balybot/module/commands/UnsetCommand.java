@@ -1,6 +1,7 @@
 package net.blay09.balybot.module.commands;
 
 import lombok.extern.log4j.Log4j2;
+import net.blay09.balybot.BalyBot;
 import net.blay09.balybot.impl.api.Channel;
 import net.blay09.balybot.impl.api.User;
 import net.blay09.balybot.impl.base.DefaultUserLevels;
@@ -15,13 +16,13 @@ public class UnsetCommand extends BotCommand {
     private final Module module;
 
     public UnsetCommand(Module module) {
-        super("unset", "^" + module.getPrefix() + "unset(?:\\s+(.*)|$)", DefaultUserLevels.CHANNEL_OWNER.getLevel());
+        super("unset", "^" + BalyBot.PREFIX + "unset(?:\\s+(.*)|$)", DefaultUserLevels.CHANNEL_OWNER.getLevel());
         this.module = module;
     }
 
     @Override
     public String getCommandSyntax() {
-        return module.getPrefix() + name + " <name|id>";
+        return BalyBot.PREFIX + name + " <name|id>";
     }
 
     @Override

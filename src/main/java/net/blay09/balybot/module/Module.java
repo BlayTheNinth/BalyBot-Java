@@ -5,6 +5,7 @@ import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import lombok.Getter;
 import net.blay09.balybot.command.BotCommand;
 import net.blay09.balybot.impl.api.Channel;
+import net.blay09.balybot.impl.api.Server;
 import net.blay09.balybot.script.ScriptModuleDef;
 
 import java.util.Collection;
@@ -14,22 +15,17 @@ import java.util.List;
 public class Module {
 
     private final List<BotCommand> commands = Lists.newArrayList();
+
     @Getter
     private final ModuleDef definition;
-    @Getter
-    private final Channel channel;
-    @Getter
-    private final String prefix;
 
-    public Module(ModuleDef definition, Channel channel) {
+    public Module(ModuleDef definition, ModuleContext context) {
         this.definition = definition;
-        this.channel = channel;
-        this.prefix = definition.getConfigEntry("prefix").getString(channel);
-        if(definition instanceof ScriptModuleDef) {
-            ((ScriptModuleDef) definition).createEventHandlers(this);
+        if (definition instanceof ScriptModuleDef) {
+            ((ScriptModuleDef) definition).createEventHandlers(this, context);
         }
-        commands.addAll(definition.createCommands(this));
-        if(definition.getCommandSorting() != null) {
+        commands.addAll(definition.createCommands(this, context));
+        if (definition.getCommandSorting() != null) {
             Collections.sort(commands, definition.getCommandSorting());
         }
     }
@@ -53,7 +49,7 @@ public class Module {
         }
 	}
 
-    public void pushConfigVariable(ScriptObjectMirror function) {
+    public void pushConfigVariable(ScriptObjectMirror function, Channel channel) {
         StringBuilder sb = new StringBuilder("{");
         for(ConfigEntry configEntry : definition.getConfigEntries()) {
             if(sb.length() > 1) {

@@ -19,13 +19,13 @@ public class SetCommand extends BotCommand {
 	private final Module module;
 
 	public SetCommand(Module module) {
-		super("set", "^" + module.getPrefix() + "set(?:\\s+(.*)|$)", DefaultUserLevels.CHANNEL_OWNER.getLevel());
+		super("set", "^" + BalyBot.PREFIX + "set(?:\\s+(.*)|$)", DefaultUserLevels.CHANNEL_OWNER.getLevel());
 		this.module = module;
 	}
 
 	@Override
 	public String getCommandSyntax() {
-		return module.getPrefix() + name + " [-ul userLevel] [-if condition] [-whisperto receiver] <name> <commandMessage>";
+		return BalyBot.PREFIX + name + " [-ul userLevel] [-if condition] [-whisperto receiver] <name> <commandMessage>";
 	}
 
     @Override

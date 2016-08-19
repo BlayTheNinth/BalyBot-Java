@@ -20,13 +20,13 @@ public class SetRegexCommand extends BotCommand {
     private final Module module;
 
     public SetRegexCommand(Module module) {
-        super("setregex", "^" + module.getPrefix() + "setregex(?:\\s+(.*)|$)", DefaultUserLevels.CHANNEL_OWNER.getLevel());
+        super("setregex", "^" + BalyBot.PREFIX + "setregex(?:\\s+(.*)|$)", DefaultUserLevels.CHANNEL_OWNER.getLevel());
         this.module = module;
     }
 
     @Override
     public String getCommandSyntax() {
-        return module.getPrefix() + name + " [-ul userLevel] [-if condition] [-whisperto receiver] <pattern> <commandMessage>";
+        return BalyBot.PREFIX + name + " [-ul userLevel] [-if condition] [-whisperto receiver] <pattern> <commandMessage>";
     }
 
     @Override

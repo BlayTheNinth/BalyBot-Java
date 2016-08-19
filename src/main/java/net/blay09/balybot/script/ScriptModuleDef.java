@@ -8,6 +8,7 @@ import net.blay09.balybot.impl.base.DefaultUserLevels;
 import net.blay09.balybot.command.BotCommand;
 import net.blay09.balybot.module.ConfigEntry;
 import net.blay09.balybot.module.Module;
+import net.blay09.balybot.module.ModuleContext;
 import net.blay09.balybot.module.ModuleDef;
 
 import javax.script.Invocable;
@@ -45,17 +46,18 @@ public class ScriptModuleDef extends ModuleDef {
         } catch (NoSuchMethodException ignored) {}
     }
 
-    public Collection<ScriptEventHandler> createEventHandlers(Module module) {
+    public Collection<ScriptEventHandler> createEventHandlers(Module module, ModuleContext context) {
         if(jsEvents == null) {
             return Collections.emptyList();
         }
 		List<ScriptEventHandler> eventHandlers = Lists.newArrayList();
         eventHandlers.addAll(jsEvents.entrySet().stream().map(
-                entry -> ScriptManager.getInstance().registerEventHandler(module, entry.getKey(), (ScriptObjectMirror) entry.getValue())).collect(Collectors.toList()));
+                entry -> ScriptManager.getInstance().registerEventHandler(module, context, entry.getKey(), (ScriptObjectMirror) entry.getValue())).collect(Collectors.toList()));
 		return eventHandlers;
     }
 
-    public Collection<BotCommand> createCommands(Module module) {
+    @Override
+    public Collection<BotCommand> createCommands(Module module, ModuleContext context) {
         if(jsCommands == null) {
             return Collections.emptyList();
         }
@@ -65,9 +67,9 @@ public class ScriptModuleDef extends ModuleDef {
             String commandName = (String) jsCommand.get("name");
             ConfigEntry userLevelConfig = getConfigEntry("userlevel." + commandName);
             if(userLevelConfig == null) {
-                userLevelConfig = addConfigEntry(new ConfigEntry(this, "userlevel." + commandName, "mod", "The minimum user level required to run the " + module.getPrefix() + commandName + " command."));
+                userLevelConfig = addConfigEntry(new ConfigEntry(this, "userlevel." + commandName, "mod", "The minimum user level required to run the " + BalyBot.PREFIX + commandName + " command."));
             }
-            UserLevel userLevel = BalyBot.getUserLevelRegistry().fromName(userLevelConfig.getString(module.getChannel()));
+            UserLevel userLevel = BalyBot.getUserLevelRegistry().fromName(userLevelConfig.getString(context.getChannel()));
             if(userLevel == null) {
                 userLevel = DefaultUserLevels.CHANNEL_OWNER;
             }

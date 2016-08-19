@@ -8,6 +8,7 @@ import com.google.common.collect.Table;
 import lombok.extern.log4j.Log4j2;
 import net.blay09.balybot.impl.api.Channel;
 import net.blay09.balybot.module.Module;
+import net.blay09.balybot.module.ModuleContext;
 import net.blay09.balybot.module.ModuleDef;
 
 import java.sql.ResultSet;
@@ -20,22 +21,37 @@ import java.util.Map;
 public class ChannelManager {
 
 	private static final Map<Integer, Channel> channels = Maps.newHashMap();
-
 	private static final Multimap<Channel, Module> activeModules = ArrayListMultimap.create();
 	private static final Table<Channel, String, String> channelConfig = HashBasedTable.create();
 
-	public static void addChannel(Channel channel) {
-		channels.put(channel.getId(), channel);
+	public static void loadModules() {
+		activeModules.clear();
+		try {
+			Statement stmt = Database.createStatement();
+			ResultSet rs = stmt.executeQuery("SELECT * FROM `channel_modules`");
+			while(rs.next()) {
+				Channel channel = getChannel(rs.getInt("channel_fk"));
+				String moduleId = rs.getString("module_id");
+				ModuleDef moduleDef = BalyBot.getInstance().getModuleDef(moduleId);
+				if(moduleDef != null) {
+					activeModules.put(channel, moduleDef.create(new ModuleContext(channel)));
+				} else {
+					log.warn("Channel " + channel + " tried to loadConfig " + moduleId + ", but it could not be found.");
+				}
+			}
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public static Module activateModule(Channel channel, String moduleId) {
 		log.info("Activating module " + moduleId + " for " + channel);
 		ModuleDef moduleDef = BalyBot.getInstance().getModuleDef(moduleId);
 		if(moduleDef != null) {
-			Module module = moduleDef.create(channel);
+			Module module = moduleDef.create(new ModuleContext(channel));
 			activeModules.put(channel, module);
 			try {
-				Database.activateModule(channel.getId(), moduleId);
+				Database.activateChannelModule(channel.getId(), moduleId);
 			} catch (SQLException e) {
 				log.error("Failed to update module status in database: " + e.getMessage());
 				log.error("The module will be deactivated upon reload.");
@@ -59,7 +75,7 @@ public class ChannelManager {
 		if(foundModule != null) {
 			activeModules.remove(channel, foundModule);
 			try {
-				Database.deactivateModule(channel.getId(), moduleId);
+				Database.deactivateChannelModule(channel.getId(), moduleId);
 			} catch (SQLException e) {
 				log.error("Failed to update module status in database: " + e.getMessage());
 				log.error("The module will be reactivated upon reload.");
@@ -86,24 +102,8 @@ public class ChannelManager {
 		}
 	}
 
-	public static void loadModules() {
-		activeModules.clear();
-		try {
-			Statement stmt = Database.createStatement();
-			ResultSet rs = stmt.executeQuery("SELECT * FROM `active_modules`");
-			while(rs.next()) {
-				Channel channel = getChannel(rs.getInt("channel_fk"));
-				String moduleId = rs.getString("module_id");
-				ModuleDef moduleDef = BalyBot.getInstance().getModuleDef(moduleId);
-				if(moduleDef != null) {
-					activeModules.put(channel, moduleDef.create(channel));
-				} else {
-					log.warn("Channel " + channel + " tried to loadConfig " + moduleId + ", but it could not be found.");
-				}
-			}
-		} catch (SQLException e) {
-			throw new RuntimeException(e);
-		}
+	public static void addChannel(Channel channel) {
+		channels.put(channel.getId(), channel);
 	}
 
 	private static Channel getChannel(int id) {

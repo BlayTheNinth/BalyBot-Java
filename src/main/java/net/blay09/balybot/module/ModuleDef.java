@@ -3,7 +3,6 @@ package net.blay09.balybot.module;
 import com.google.common.collect.Maps;
 import lombok.Getter;
 import net.blay09.balybot.command.BotCommand;
-import net.blay09.balybot.impl.api.Channel;
 
 import java.util.Collection;
 import java.util.Comparator;
@@ -22,12 +21,10 @@ public abstract class ModuleDef {
         this.id = id;
         this.name = name;
         this.description = description;
-
-        addConfigEntry(new ConfigEntry(this, "prefix", "!", "The prefix to use for commands of this module."));
     }
 
-    public Module create(Channel channel) {
-        return new Module(this, channel);
+    public Module create(ModuleContext context) {
+        return new Module(this, context);
     }
 
     protected ConfigEntry addConfigEntry(ConfigEntry entry) {
@@ -43,6 +40,6 @@ public abstract class ModuleDef {
         return config.values();
     }
 
-    public abstract Collection<BotCommand> createCommands(Module module);
+    public abstract Collection<BotCommand> createCommands(Module module, ModuleContext context);
 
 }

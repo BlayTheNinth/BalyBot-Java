@@ -6,6 +6,7 @@ import net.blay09.balybot.BalyBot;
 import net.blay09.balybot.BotProperties;
 import net.blay09.balybot.ChannelManager;
 import net.blay09.balybot.Database;
+import net.blay09.balybot.ServerManager;
 import net.blay09.balybot.impl.ExpressionLibrary;
 import net.blay09.balybot.impl.UserLevelRegistry;
 import net.blay09.balybot.impl.api.ChatProvider;
@@ -94,6 +95,7 @@ public class BaseImplementation implements BotImplementation {
 	public boolean handleCommandLine(String cmd) {
 		if(cmd.equals("reload-scripts")) {
 			BalyBot.getInstance().loadModules();
+			ServerManager.loadModules();
 			ChannelManager.loadModules();
 			log.info("Scripts reloaded.");
 		}

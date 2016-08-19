@@ -1,5 +1,6 @@
 package net.blay09.balybot.module.manager;
 
+import net.blay09.balybot.BalyBot;
 import net.blay09.balybot.ChannelManager;
 import net.blay09.balybot.impl.api.Channel;
 import net.blay09.balybot.impl.api.User;
@@ -13,13 +14,13 @@ public class ConfigCommand extends BotCommand {
     private final Module module;
 
     public ConfigCommand(Module module) {
-        super("cfg", "^" + module.getPrefix() + "cfg(?:\\s+(.*)|$)", DefaultUserLevels.CHANNEL_OWNER.getLevel());
+        super("cfg", "^" + BalyBot.PREFIX + "cfg(?:\\s+(.*)|$)", DefaultUserLevels.CHANNEL_OWNER.getLevel());
         this.module = module;
     }
 
     @Override
     public String getCommandSyntax() {
-        return module.getPrefix() + name + " [channel] <option> <value>";
+        return BalyBot.PREFIX + name + " [channel] <option> <value>";
     }
 
     @Override

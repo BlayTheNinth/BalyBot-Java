@@ -6,6 +6,7 @@ import net.blay09.balybot.Database;
 import net.blay09.balybot.command.BotCommand;
 import net.blay09.balybot.impl.api.Channel;
 import net.blay09.balybot.module.Module;
+import net.blay09.balybot.module.ModuleContext;
 import net.blay09.balybot.module.ModuleDef;
 
 import java.sql.PreparedStatement;
@@ -54,7 +55,7 @@ public class CommandsModule extends ModuleDef {
 	}
 
 	@Override
-	public Collection<BotCommand> createCommands(Module module) {
+	public Collection<BotCommand> createCommands(Module module, ModuleContext context) {
 		List<BotCommand> commands = Lists.newArrayList();
 		commands.add(new SetCommand(module));
 		commands.add(new SetRegexCommand(module));
@@ -63,7 +64,13 @@ public class CommandsModule extends ModuleDef {
 
 		try {
 			Statement stmt = Database.createStatement();
-			ResultSet rs = stmt.executeQuery("SELECT * FROM `commands` WHERE `channel_fk` = " + module.getChannel().getId() + " OR `server_fk` = " + module.getChannel().getServer().getId());
+			StringBuilder sb = new StringBuilder("SELECT * FROM `commands` WHERE ");
+			if(context.getChannel() != null) {
+				sb.append("`channel_fk` = ").append(context.getChannel().getId());
+			} else {
+				sb.append("`server_fk` = ").append(context.getServer().getId());
+			}
+			ResultSet rs = stmt.executeQuery(sb.toString());
 			while(rs.next()) {
 				commands.add(new CustomBotRegexCommand(rs.getString("name"), rs.getString("pattern"), rs.getString("message"), rs.getInt("level"), rs.getString("condition"), rs.getString("whisper_to")));
 			}

@@ -26,6 +26,7 @@ public class BalyBot {
 
     private static final String VERSION = "3.0.0";
 	public static boolean SIMULATED = false;
+	public static String PREFIX = "!"; // TODO temporary prefix for all, need to move to Channel
 
 	@Getter private static BalyBot instance;
 	public static void main(String[] args) {
@@ -111,6 +112,7 @@ public class BalyBot {
         ChannelManager.loadConfig();
 
         log.info("Initializing modules...");
+		ServerManager.loadModules();
 		ChannelManager.loadModules();
 	}
 

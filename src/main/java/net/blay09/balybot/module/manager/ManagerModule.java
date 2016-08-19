@@ -3,6 +3,7 @@ package net.blay09.balybot.module.manager;
 import com.google.common.collect.Lists;
 import net.blay09.balybot.command.BotCommand;
 import net.blay09.balybot.module.Module;
+import net.blay09.balybot.module.ModuleContext;
 import net.blay09.balybot.module.ModuleDef;
 
 import java.util.Collection;
@@ -15,7 +16,7 @@ public class ManagerModule extends ModuleDef {
     }
 
     @Override
-    public Collection<BotCommand> createCommands(Module module) {
+    public Collection<BotCommand> createCommands(Module module, ModuleContext context) {
         List<BotCommand> commands = Lists.newArrayList();
         commands.add(new ModuleCommand(module));
         commands.add(new ConfigCommand(module));

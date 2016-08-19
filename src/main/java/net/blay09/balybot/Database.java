@@ -18,8 +18,10 @@ public class Database {
 	private static PreparedStatement addNewServer;
 	private static PreparedStatement addNewChannel;
 	private static PreparedStatement setChannelActive;
-	private static PreparedStatement activateModule;
-	private static PreparedStatement deactivateModule;
+	private static PreparedStatement activateServerModule;
+	private static PreparedStatement deactivateServerModule;
+	private static PreparedStatement activateChannelModule;
+	private static PreparedStatement deactivateChannelModule;
 
     public static void connect() throws ClassNotFoundException, SQLException {
 		if(BaseImplementation.getDatabaseType() == Type.SQLITE) {
@@ -39,7 +41,11 @@ public class Database {
 				"`server_fk` INTEGER",
 				"`name` VARCHAR(64) NOT NULL",
 				"`is_active` BOOLEAN DEFAULT TRUE");
-		createTable("active_modules", false,
+		createTable("server_modules", false,
+				"`server_fk` INTEGER",
+				"`module_id` VARCHAR(64)",
+				"PRIMARY KEY(`server_fk`, `module_id`)");
+		createTable("channel_modules", false,
 				"`channel_fk` INTEGER",
 				"`module_id` VARCHAR(64)",
 				"PRIMARY KEY(`channel_fk`, `module_id`)");
@@ -53,8 +59,10 @@ public class Database {
 		addNewChannel = connection.prepareStatement("INSERT INTO `channels` (`name`, `server_fk`) VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS);
 		setChannelActive = connection.prepareStatement("UPDATE `channels` SET `is_active` = ? WHERE `id` = ?");
 		setChannelConfig = connection.prepareStatement("REPLACE INTO `channel_config` (`channel_fk`, `name`, `value`) VALUES (?, ?, ?)");
-		activateModule = connection.prepareStatement("REPLACE INTO `active_modules` (`channel_fk`, `module_id`) VALUES(?, ?)");
-		deactivateModule = connection.prepareStatement("DELETE FROM `active_modules` WHERE `channel_fk` = ? AND `module_id` = ?");
+		activateChannelModule = connection.prepareStatement("REPLACE INTO `channel_modules` (`channel_fk`, `module_id`) VALUES(?, ?)");
+		activateServerModule = connection.prepareStatement("REPLACE INTO `server_modules` (`server_fk`, `module_id`) VALUES(?, ?)");
+		deactivateChannelModule = connection.prepareStatement("DELETE FROM `channel_modules` WHERE `channel_fk` = ? AND `module_id` = ?");
+		deactivateServerModule = connection.prepareStatement("DELETE FROM `server_modules` WHERE `server_fk` = ? AND `module_id` = ?");
     }
 
 	public static void createTable(String tableName, boolean withId, String... fields) throws SQLException {
@@ -132,15 +140,27 @@ public class Database {
 		setChannelConfig.execute();
 	}
 
-	public static void activateModule(int channelId, String moduleId) throws SQLException {
-		activateModule.setInt(1, channelId);
-		activateModule.setString(2, moduleId);
-		activateModule.execute();
+	public static void activateChannelModule(int channelId, String moduleId) throws SQLException {
+		activateChannelModule.setInt(1, channelId);
+		activateChannelModule.setString(2, moduleId);
+		activateChannelModule.execute();
 	}
 
-	public static void deactivateModule(int channelId, String moduleId) throws SQLException {
-		deactivateModule.setInt(1, channelId);
-		deactivateModule.setString(2, moduleId);
-		deactivateModule.execute();
+	public static void activateServerModule(int serverId, String moduleId) throws SQLException {
+		activateServerModule.setInt(1, serverId);
+		activateServerModule.setString(2, moduleId);
+		activateServerModule.execute();
+	}
+
+	public static void deactivateChannelModule(int channelId, String moduleId) throws SQLException {
+		deactivateChannelModule.setInt(1, channelId);
+		deactivateChannelModule.setString(2, moduleId);
+		deactivateChannelModule.execute();
+	}
+
+	public static void deactivateServerModule(int serverId, String moduleId) throws SQLException {
+		deactivateServerModule.setInt(1, serverId);
+		deactivateServerModule.setString(2, moduleId);
+		deactivateServerModule.execute();
 	}
 }

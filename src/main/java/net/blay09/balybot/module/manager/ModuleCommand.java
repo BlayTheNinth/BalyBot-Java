@@ -14,13 +14,13 @@ public class ModuleCommand extends BotCommand {
     private final Module module;
 
     public ModuleCommand(Module module) {
-        super("module", "^" + module.getPrefix() + "module(?:\\s+(.*)|$)", DefaultUserLevels.CHANNEL_OWNER.getLevel());
+        super("module", "^" + BalyBot.PREFIX + "module(?:\\s+(.*)|$)", DefaultUserLevels.CHANNEL_OWNER.getLevel());
         this.module = module;
     }
 
     @Override
     public String getCommandSyntax() {
-        return module.getPrefix() + name + " <name> (on|off) [prefix] OR " + module.getPrefix() + name + " list [active]";
+        return BalyBot.PREFIX + name + " <name> (on|off) [prefix] OR " + BalyBot.PREFIX + name + " list [active]";
     }
 
     @Override

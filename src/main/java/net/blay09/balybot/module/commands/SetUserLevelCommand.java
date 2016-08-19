@@ -18,13 +18,13 @@ public class SetUserLevelCommand extends BotCommand {
     private final Module module;
 
     public SetUserLevelCommand(Module module) {
-        super("setul", "^" + module.getPrefix() + "setul(?:\\s+(.*)|$)", DefaultUserLevels.CHANNEL_OWNER.getLevel());
+        super("setul", "^" + BalyBot.PREFIX + "setul(?:\\s+(.*)|$)", DefaultUserLevels.CHANNEL_OWNER.getLevel());
         this.module = module;
     }
 
 	@Override
 	public String getCommandSyntax() {
-		return module.getPrefix() + name + " <name|id> <userlevel>";
+		return BalyBot.PREFIX + name + " <name|id> <userlevel>";
 	}
 
     @Override
