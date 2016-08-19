@@ -87,6 +87,7 @@ public class ChannelManager {
 	}
 
 	public static void loadModules() {
+		activeModules.clear();
 		try {
 			Statement stmt = Database.createStatement();
 			ResultSet rs = stmt.executeQuery("SELECT * FROM `active_modules`");

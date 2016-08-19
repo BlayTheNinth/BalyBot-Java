@@ -10,7 +10,7 @@ function configure() {
     return [
         {
             name: "message",
-            value: "BalyBot is working fine, no worries, no worries~",
+            value: "BalyBot best bot.",
             desc: "The message to display when the !test command is run."
         },
         {

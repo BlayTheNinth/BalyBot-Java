@@ -6,8 +6,8 @@ import net.blay09.balybot.impl.twitch.kraken.TwitchAPI;
 
 public class TwitchBinding {
 
-    public void timeout(Channel channel, String username, int time) {
-        channel.getChatProvider().sendMessage(channel, "/timeout " + username + " " + time);
+    public void timeout(Channel channel, String username, int time, String reason) {
+        channel.getChatProvider().sendMessage(channel, "/timeout " + username + " " + time + " " + reason);
     }
 
     public StreamData getStreamData(Channel channel) {

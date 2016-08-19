@@ -14,9 +14,9 @@ function configure() {
             desc: "The minimum amount of viewers from the host to trigger the message."
         },
         {
-            name: "message.hosted",
-            value: "Guys, guys!! {CHANNEL} is hosting us! Quick, hug them!",
-            desc: "The message displayed when this channel is hosted."
+            name: "message",
+            value: "Guys, guys!! {CHANNEL} is hosting us for {VIEWERS} viewers! Quick, hug them!",
+            desc: "The message displayed when this channel is hosted. {CHANNEL} will be replaced by the hosting channel name, {VIEWERS} by the amount of viewers coming from the host."
         }
     ];
 }
@@ -34,6 +34,6 @@ function events() {
  */
 function onChannelHosted(channel, username, viewers) {
     if(viewers >= config["min_viewers"]) {
-        JBalyBot.message(channel, config["message.hosted"].replace("{CHANNEL}", username).replace("{VIEWERS}", viewers));
+        JBalyBot.message(channel, config["message"].replace("{CHANNEL}", username).replace("{VIEWERS}", viewers));
     }
 }

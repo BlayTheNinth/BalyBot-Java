@@ -7,6 +7,7 @@ import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import jdk.nashorn.internal.runtime.ECMAException;
 import lombok.extern.log4j.Log4j2;
 import net.blay09.balybot.BalyBot;
+import net.blay09.balybot.ChannelManager;
 import net.blay09.balybot.impl.api.BotImplementation;
 import net.blay09.balybot.module.Module;
 import net.blay09.balybot.module.ModuleDef;

@@ -76,7 +76,7 @@ public class TwitchImplementation implements BotImplementation {
 
 	@Override
 	public void registerBindings(Bindings bindings) {
-		bindings.put("JTwitchAPI", new TwitchBinding());
+		bindings.put("JTwitch", new TwitchBinding());
 	}
 
 	@Override
@@ -188,4 +188,15 @@ public class TwitchImplementation implements BotImplementation {
 			}
 		}
 	}
+
+	@Override
+	public boolean isSuperUser(Channel channel, User user) {
+		return user.getNick().toLowerCase().equals(username.toLowerCase());
+	}
+
+	@Override
+	public boolean isChannelOwner(Channel channel, User user) {
+		return user.getNick().toLowerCase().equals(channel.getName().toLowerCase().substring(1));
+	}
+
 }

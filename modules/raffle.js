@@ -35,7 +35,8 @@ function events() {
 /**
  * @type {{prototype, users: {number}, searchText: string}}
  */
-var Raffle = {};
+function Raffle() {
+}
 Raffle.prototype = {
     searchText: "",
     users: {}
@@ -44,34 +45,38 @@ Raffle.prototype = {
 /**
  * @type {{raffle : Raffle}}
  */
-var CURRENT_RAFFLE = {};
+var m_currentRaffle = {};
 
 /**
- * @param channel : JString
+ * @param channel : JChannel
  * @param user : JUser
  * @param message : JString
  */
 function onChannelChat(channel, user, message) {
-    var currentRaffle = CURRENT_RAFFLE[channel];
-    if(currentRaffle == null || message != currentRaffle.searchText) {
+    var currentRaffle = m_currentRaffle[channel];
+    if (currentRaffle == null || message != currentRaffle.searchText) {
         return;
     }
-    currentRaffle.users[user]++;
-    if(currentRaffle.users[user] > config["max_allowed_entries"]) {
+    if (currentRaffle.users[user.getNick()] == undefined) {
+        currentRaffle.users[user.getNick()] = 1;
+    } else {
+        currentRaffle.users[user.getNick()]++;
+    }
+    if (currentRaffle.users[user.getNick()] > config["max_allowed_entries"]) {
         JBalyBot.message(channel, config["message.too_many_entries"].replace("{NICK}", user.getNick()));
-        JBalyBot.timeout(user.getNick(), config["too_many_entries_timeout"]);
-        delete currentRaffle.users[user];
+        JTwitch.timeout(channel, user.getNick(), config["too_many_entries_timeout"], "I clearly said 'Don't spam it'");
+        delete currentRaffle.users[user.getNick()];
     }
 }
 
 /**
- * @param channel : JString
+ * @param channel : JChannel
  * @param user : JUser
  * @param args : [JString]
  * @returns {string}
  */
 function raffle(channel, user, args) {
-    if(args.length < 1) {
+    if (args.length < 1) {
         return JError.notEnoughParameters(this);
     }
     var currentRaffle;
@@ -81,30 +86,33 @@ function raffle(channel, user, args) {
                 return JError.notEnoughParameters(this);
             }
             var description = "Raffle started";
-            if(args.length > 2) {
+            if (args.length > 2) {
                 description = args[2];
             }
-            currentRaffle = Object.create(Raffle);
+            currentRaffle = new Raffle();
             currentRaffle.searchText = args[1];
-            CURRENT_RAFFLE[channel] = currentRaffle;
+            m_currentRaffle[channel] = currentRaffle;
             return description + " - type '" + currentRaffle.searchText + "' to enter for a chance to win. Don't spam it!";
         case "draw":
-            currentRaffle = CURRENT_RAFFLE[channel];
-            if(currentRaffle != null) {
+            currentRaffle = m_currentRaffle[channel];
+            if (currentRaffle != null) {
                 var validUsers = [];
-                for(var key in currentRaffle.users) {
-                    if(currentRaffle.users.hasOwnProperty(key)) {
-                        if(currentRaffle.users[key] > 0) {
+                for (var key in currentRaffle.users) {
+                    if (currentRaffle.users.hasOwnProperty(key)) {
+                        if (currentRaffle.users[key] > 0) {
                             validUsers.push(key);
                         }
                     }
                 }
-                var winner = validUsers[Math.floor(Math.random() * (validUsers.length + 1))];
+                if (validUsers.length == 0) {
+                    return "No one entered ... awkward ...";
+                }
+                var winner = validUsers[Math.floor(Math.random() * validUsers.length)];
                 return "Lucky!! Congratulations, " + winner + "! You won the thingie.";
             }
             return "There was no raffle running, silly!";
         case "stop":
-            delete CURRENT_RAFFLE[channel];
+            delete m_currentRaffle[channel];
             return "Raffle entries have been cleared.";
         default:
             return JError.invalidParameters(this);

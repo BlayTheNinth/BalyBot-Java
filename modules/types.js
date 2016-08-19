@@ -1,5 +1,5 @@
 /**
- * This file is not meant to be included. It simply aids IntelliJ's code analysis and provides documentation.
+ * This file is not meant to be included. It simply aids IntelliJ's code analysis and provides basic documentation.
  */
 
 var JError = {
@@ -39,31 +39,34 @@ var JDate = {
 
 var JBalyBot = {
     /**
-     * @param channelName : object
+     * @param channel : object
      * @param text : string
      */
-    message: function(channelName, text){},
+    message: function(channel, text){},
+
     /**
-     * @param channelName : string
-     * @param userName : string
-     * @param seconds : number
-     */
-    timeout: function(channelName, userName, seconds){},
-    /**
-     * @param channelName : string
+     * @param channel : string
      * @param user : JUser
      * @param userLevel : number
      * @returns {boolean}
      */
-    passesUserLevel: function(channelName, user, userLevel){return false;}
+    passesUserLevel: function(channel, user, userLevel){return false;}
 };
 
-var JTwitchAPI = {
+var JTwitch = {
     /**
-     * @param channelName
+     * @param channel : JChannel
+     * @param userName : string
+     * @param seconds : number
+     * @param reason : string
+     */
+    timeout: function(channel, userName, seconds, reason){},
+
+    /**
+     * @param channel
      * @returns {JStreamData}
      */
-    getStreamData: function(channelName){return Object.create(JStreamData);}
+    getStreamData: function(channel){return Object.create(JStreamData);}
 };
 
 var JString = {
@@ -95,6 +98,10 @@ JUser.prototype = {
      * @returns {string}
      */
     getNick: function(){return "";}
+};
+var JChannel = {};
+JChannel.prototype = {
+    
 };
 
 var JStreamData = {};

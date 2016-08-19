@@ -1,7 +1,10 @@
 package net.blay09.balybot.impl.base;
 
 import lombok.Getter;
+import lombok.extern.log4j.Log4j2;
+import net.blay09.balybot.BalyBot;
 import net.blay09.balybot.BotProperties;
+import net.blay09.balybot.ChannelManager;
 import net.blay09.balybot.Database;
 import net.blay09.balybot.impl.ExpressionLibrary;
 import net.blay09.balybot.impl.UserLevelRegistry;
@@ -16,6 +19,7 @@ import net.blay09.balybot.impl.base.script.SystemBinding;
 
 import javax.script.Bindings;
 
+@Log4j2
 public class BaseImplementation implements BotImplementation {
 
 	public static final int COMMAND_COOLDOWN_DEFAULT = 30;
@@ -88,6 +92,11 @@ public class BaseImplementation implements BotImplementation {
 
 	@Override
 	public boolean handleCommandLine(String cmd) {
+		if(cmd.equals("reload-scripts")) {
+			BalyBot.getInstance().loadModules();
+			ChannelManager.loadModules();
+			log.info("Scripts reloaded.");
+		}
 		return false;
 	}
 

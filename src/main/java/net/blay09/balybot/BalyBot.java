@@ -96,16 +96,7 @@ public class BalyBot {
 			throw new RuntimeException(e);
 		}
 
-		log.info("Loading manager module...");
-        ManagerModule managerModule = new ManagerModule();
-        availableModules.put(managerModule.getId(), managerModule);
-		CommandsModule commandsModule = new CommandsModule();
-		availableModules.put(commandsModule.getId(), commandsModule);
-
-        log.info("Scanning for script modules...");
-        for(ModuleDef moduleDef : ScriptManager.getInstance().loadModules()) {
-            availableModules.put(moduleDef.getId(), moduleDef);
-        }
+		loadModules();
 
 		log.info("Loading servers...");
 		ServerManager.loadServers();
@@ -113,10 +104,6 @@ public class BalyBot {
 		log.info("Loading channels...");
 		ChannelManager.loadChannels();
     }
-
-	private void registerImplementation(BotImplementation impl) {
-		implementations.put(impl.getId(), impl);
-	}
 
 	private void init() {
         log.info("Loading channel configurations...");
@@ -137,8 +124,32 @@ public class BalyBot {
 		log.info("BalyBot is now running.");
     }
 
+	private void handleCommandLine(String cmd) {
+		for(BotImplementation impl : implementations.values()) {
+			impl.handleCommandLine(cmd);
+		}
+	}
+
 	public void stop() {
 		implementations.values().forEach(BotImplementation::stop);
+	}
+
+	private void registerImplementation(BotImplementation impl) {
+		implementations.put(impl.getId(), impl);
+	}
+
+	public void loadModules() {
+		availableModules.clear();
+		log.info("Loading manager module...");
+		ManagerModule managerModule = new ManagerModule();
+		availableModules.put(managerModule.getId(), managerModule);
+		CommandsModule commandsModule = new CommandsModule();
+		availableModules.put(commandsModule.getId(), commandsModule);
+
+		log.info("Scanning for script modules...");
+		for(ModuleDef moduleDef : ScriptManager.getInstance().loadModules()) {
+			availableModules.put(moduleDef.getId(), moduleDef);
+		}
 	}
 
     public Collection<ModuleDef> getAvailableModules() {
@@ -147,12 +158,6 @@ public class BalyBot {
 
 	public ModuleDef getModuleDef(String moduleId) {
 		return availableModules.get(moduleId);
-	}
-
-	private void handleCommandLine(String cmd) {
-		for(BotImplementation impl : implementations.values()) {
-			impl.handleCommandLine(cmd);
-		}
 	}
 
 	public BotImplementation getImplementation(String id) {
