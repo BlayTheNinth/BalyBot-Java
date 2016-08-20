@@ -7,6 +7,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
 import lombok.extern.log4j.Log4j2;
 import net.blay09.balybot.impl.api.Channel;
+import net.blay09.balybot.impl.api.Server;
 import net.blay09.balybot.module.Module;
 import net.blay09.balybot.module.ModuleContext;
 import net.blay09.balybot.module.ModuleDef;
@@ -21,6 +22,7 @@ import java.util.Map;
 public class ChannelManager {
 
 	private static final Map<Integer, Channel> channels = Maps.newHashMap();
+	private static final Multimap<Server, Channel> channelsByServer = ArrayListMultimap.create();
 	private static final Multimap<Channel, Module> activeModules = ArrayListMultimap.create();
 	private static final Table<Channel, String, String> channelConfig = HashBasedTable.create();
 
@@ -94,8 +96,7 @@ public class ChannelManager {
 			Statement stmt = Database.createStatement();
 			ResultSet rs = stmt.executeQuery("SELECT * FROM `channels`");
 			while(rs.next()) {
-				Channel channel = new Channel(rs.getInt("id"), ServerManager.getServer(rs.getInt("server_fk")), rs.getString("name"));
-				channels.put(channel.getId(), channel);
+				addChannel(new Channel(rs.getInt("id"), ServerManager.getServer(rs.getInt("server_fk")), rs.getString("name")));
 			}
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
@@ -104,6 +105,7 @@ public class ChannelManager {
 
 	public static void addChannel(Channel channel) {
 		channels.put(channel.getId(), channel);
+		channelsByServer.put(channel.getServer(), channel);
 	}
 
 	private static Channel getChannel(int id) {
@@ -156,6 +158,10 @@ public class ChannelManager {
 
 	public static Collection<Channel> getChannels() {
 		return channels.values();
+	}
+
+	public static Collection<Channel> getChannelsByServer(Server server) {
+		return channelsByServer.get(server);
 	}
 
 }

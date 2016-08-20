@@ -1,10 +1,8 @@
 package net.blay09.balybot;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Table;
 import lombok.extern.log4j.Log4j2;
 import net.blay09.balybot.impl.api.BotImplementation;
 import net.blay09.balybot.impl.api.Server;

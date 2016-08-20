@@ -98,6 +98,9 @@ public class BaseImplementation implements BotImplementation {
 			ServerManager.loadModules();
 			ChannelManager.loadModules();
 			log.info("Scripts reloaded.");
+		} else if(cmd.equals("export-data")) {
+			DataExport.exportToJson();
+			log.info("Export complete.");
 		}
 		return false;
 	}
