@@ -45,7 +45,7 @@ var JBalyBot = {
     message: function(channel, text){},
 
     /**
-     * @param channel : string
+     * @param channel : JChannel
      * @param user : JUser
      * @param userLevel : number
      * @returns {boolean}

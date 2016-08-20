@@ -62,7 +62,7 @@ var LINK_PATTERN = /((?:ftp|https?):\/\/)?([A-Za-z0-9\.-]+)\.([A-Za-z]{2,6})([\/
 var m_permissions = {};
 
 /**
- * @param channel : string
+ * @param channel : JChannel
  * @param user : JUser
  * @param message : string
  */
