@@ -4,6 +4,7 @@ import lombok.extern.log4j.Log4j2;
 import net.blay09.balybot.BalyBot;
 import net.blay09.balybot.ChannelManager;
 import net.blay09.balybot.ServerManager;
+import net.blay09.balybot.impl.UserLevelRegistry;
 import net.blay09.balybot.impl.api.Channel;
 import net.blay09.balybot.impl.api.User;
 import net.blay09.balybot.module.Module;
@@ -105,6 +106,9 @@ public class CommandHandler {
     private static BotCommand findCommand(Channel channel, User sender, String message, Module module) {
         Matcher matcher = null;
         for (BotCommand command : module.getCommands()) {
+            if(command.getUserLevelValue() < BalyBot.getUserLevelRegistry().getUserLevel(channel, sender).getLevel()) {
+                continue;
+            }
             if (matcher == null) {
                 matcher = command.getPattern().matcher(message);
             } else {

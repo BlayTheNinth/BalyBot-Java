@@ -111,7 +111,7 @@ function onChannelChat(channel, user, message) {
 }
 
 /**
- * @param channel : JString
+ * @param channel : JChannel
  * @param user : JUser
  * @param args : [JString]
  * @returns {string}

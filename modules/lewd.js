@@ -54,7 +54,6 @@ var m_lewdFaces = [
     "http://blay09.net/bot/lewd/f39.jpg",
     "http://blay09.net/bot/lewd/Kscx9g5.png",
     "http://blay09.net/bot/lewd/piilUQc.jpg",
-    "http://blay09.net/bot/lewd/RZFy6NB.jpg",
     "http://blay09.net/bot/lewd/zAp2LzJ.png",
     "http://blay09.net/bot/lewd/003.gif",
     "http://blay09.net/bot/lewd/1405745376585.jpg",
