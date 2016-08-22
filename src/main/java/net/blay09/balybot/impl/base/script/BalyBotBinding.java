@@ -12,11 +12,11 @@ public class BalyBotBinding {
     }
 
     public int getUserLevel(Channel channel, User user) {
-        return BalyBot.getUserLevelRegistry().getUserLevel(channel, user).getLevel();
+        return BalyBot.getUserLevelRegistry(channel.getImplementation()).getUserLevel(channel, user).getLevel();
     }
 
     public boolean passesUserLevel(Channel channel, User user, String userLevel) {
-        UserLevel other = BalyBot.getUserLevelRegistry().fromName(userLevel);
-        return other != null && BalyBot.getUserLevelRegistry().getUserLevel(channel, user).getLevel() >= other.getLevel();
+        UserLevel other = BalyBot.getUserLevelRegistry(channel.getImplementation()).fromName(userLevel);
+        return other != null && BalyBot.getUserLevelRegistry(channel.getImplementation()).getUserLevel(channel, user).getLevel() >= other.getLevel();
     }
 }

@@ -69,7 +69,7 @@ public class ScriptModuleDef extends ModuleDef {
             if(userLevelConfig == null) {
                 userLevelConfig = addConfigEntry(new ConfigEntry(this, "userlevel." + commandName, "mod", "The minimum user level required to run the " + BalyBot.PREFIX + commandName + " command."));
             }
-            UserLevel userLevel = BalyBot.getUserLevelRegistry().fromName(userLevelConfig.getString(context.getChannel()));
+            UserLevel userLevel = BalyBot.getUserLevelRegistry(context.getImplementation()).fromName(userLevelConfig.getString(context.getChannel()));
             if(userLevel == null) {
                 userLevel = DefaultUserLevels.CHANNEL_OWNER;
             }

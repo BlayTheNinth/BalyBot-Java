@@ -44,9 +44,9 @@ public class SetCommand extends BotCommand {
                 if (i >= args.length) {
                     return "Not enough parameters for set command. Syntax: " + getCommandSyntax();
                 }
-                userLevel = BalyBot.getUserLevelRegistry().fromName(args[i]);
+                userLevel = BalyBot.getUserLevelRegistry(channel.getImplementation()).fromName(args[i]);
                 if (userLevel == null) {
-                    return "Invalid user level '" + args[1] + "'. Valid are: " + StringUtils.join(BalyBot.getUserLevelRegistry().getValidLevels(), ", ");
+                    return "Invalid user level '" + args[1] + "'. Valid are: " + StringUtils.join(BalyBot.getUserLevelRegistry(channel.getImplementation()).getValidLevels(), ", ");
                 }
             } else if(args[i].equals("-whisperto")) {
                 i++;
@@ -113,7 +113,7 @@ public class SetCommand extends BotCommand {
 					return "Command " + command.getName() + " can not be edited.";
 				}
 				if(userLevel == null) {
-					userLevel = command.getUserLevel();
+					userLevel = command.getUserLevel(channel.getImplementation());
 				}
 				if(Objects.equal(condition, command.getCondition())) {
 					editCommand = (CustomBotRegexCommand) command;

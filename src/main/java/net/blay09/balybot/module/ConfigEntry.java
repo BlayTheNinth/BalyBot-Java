@@ -27,9 +27,9 @@ public class ConfigEntry {
     }
 
     public UserLevel getUserLevel(Channel channel) {
-        UserLevel userLevel = BalyBot.getUserLevelRegistry().fromName(ChannelManager.getChannelString(channel, module.getId() + "." + name, defaultVal));
+        UserLevel userLevel = BalyBot.getUserLevelRegistry(channel.getImplementation()).fromName(ChannelManager.getChannelString(channel, module.getId() + "." + name, defaultVal));
         if(userLevel == null) {
-            userLevel = BalyBot.getUserLevelRegistry().fromName(defaultVal);
+            userLevel = BalyBot.getUserLevelRegistry(channel.getImplementation()).fromName(defaultVal);
         }
         return userLevel;
     }

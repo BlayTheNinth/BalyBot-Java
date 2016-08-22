@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import net.blay09.balybot.impl.ExpressionLibrary;
 import net.blay09.balybot.impl.api.BotImplementation;
+import net.blay09.balybot.impl.api.UserLevel;
 import net.blay09.balybot.impl.base.BaseImplementation;
 import net.blay09.balybot.impl.UserLevelRegistry;
 import net.blay09.balybot.impl.discord.DiscordImplementation;
@@ -55,9 +56,9 @@ public class BalyBot {
 
 	@Getter private static final BotProperties botProperties = new BotProperties();
 	@Getter private static final ExpressionLibrary expressionLibrary = new ExpressionLibrary();
-	@Getter private static final UserLevelRegistry userLevelRegistry = new UserLevelRegistry();
 
 	private final Map<String, BotImplementation> implementations = Maps.newHashMap();
+	private final Map<BotImplementation, UserLevelRegistry> userLevelRegistries = Maps.newHashMap();
     private final Map<String, ModuleDef> availableModules = Maps.newHashMap();
 
     public void start() {
@@ -120,6 +121,8 @@ public class BalyBot {
 		log.info("Initializing bot implementations...");
 
 		for(BotImplementation impl : implementations.values()) {
+			UserLevelRegistry userLevelRegistry = new UserLevelRegistry();
+			userLevelRegistries.put(impl, userLevelRegistry);
 			impl.registerUserLevels(userLevelRegistry);
 			impl.start();
 		}
@@ -169,5 +172,9 @@ public class BalyBot {
 
 	public Collection<BotImplementation> getImplementations() {
 		return implementations.values();
+	}
+
+	public static UserLevelRegistry getUserLevelRegistry(BotImplementation implementation) {
+		return instance.userLevelRegistries.get(implementation);
 	}
 }

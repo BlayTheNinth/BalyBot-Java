@@ -47,7 +47,7 @@ public class SetRegexCommand extends BotCommand {
                     if (i >= args.length) {
                         return "Not enough parameters for setregex command. Syntax: " + getCommandSyntax();
                     }
-                    userLevel = BalyBot.getUserLevelRegistry().fromName(args[i]);
+                    userLevel = BalyBot.getUserLevelRegistry(channel.getImplementation()).fromName(args[i]);
                     if (userLevel == null) {
                         return "Invalid user level '" + args[1] + "'. Valid are: all, turbo, reg, sub, mod, broadcaster, owner";
                     }

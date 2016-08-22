@@ -66,7 +66,7 @@ public class DataExport {
 					jsonCommand.addProperty("whisper_to", command.getWhisperTo());
 					jsonCommand.addProperty("condition", command.getCondition());
 					jsonCommand.addProperty("syntax", command.getCommandSyntax());
-					jsonCommand.addProperty("userlevel_name", command.getUserLevel().getName());
+					jsonCommand.addProperty("userlevel_name", command.getUserLevel(server.getImplementation()).getName());
 					jsonCommand.addProperty("userlevel", command.getUserLevelValue());
 					jsonCommand.addProperty("message", command instanceof SimpleMessageBotCommand ? ((SimpleMessageBotCommand) command).getCommandMessage() : "");
 					jsonCommand.addProperty("module", module.getId());
@@ -96,7 +96,7 @@ public class DataExport {
 						jsonCommand.addProperty("whisper_to", command.getWhisperTo());
 						jsonCommand.addProperty("condition", command.getCondition());
 						jsonCommand.addProperty("syntax", command.getCommandSyntax());
-						jsonCommand.addProperty("userlevel_name", command.getUserLevel().getName());
+						jsonCommand.addProperty("userlevel_name", command.getUserLevel(server.getImplementation()).getName());
 						jsonCommand.addProperty("userlevel", command.getUserLevelValue());
 						jsonCommand.addProperty("message", command instanceof SimpleMessageBotCommand ? ((SimpleMessageBotCommand) command).getCommandMessage() : "");
 						jsonCommand.addProperty("module", module.getId());

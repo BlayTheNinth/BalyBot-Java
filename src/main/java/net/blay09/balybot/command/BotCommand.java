@@ -2,6 +2,7 @@ package net.blay09.balybot.command;
 
 import lombok.Getter;
 import net.blay09.balybot.BalyBot;
+import net.blay09.balybot.impl.api.BotImplementation;
 import net.blay09.balybot.impl.api.Channel;
 import net.blay09.balybot.impl.api.User;
 import net.blay09.balybot.impl.api.UserLevel;
@@ -45,8 +46,8 @@ public abstract class BotCommand {
         this.minUserLevel = minUserLevel.getLevel();
     }
 
-    public UserLevel getUserLevel() {
-        return BalyBot.getUserLevelRegistry().getMinimumUserLevel(minUserLevel);
+    public UserLevel getUserLevel(BotImplementation impl) {
+        return BalyBot.getUserLevelRegistry(impl).getMinimumUserLevel(minUserLevel);
     }
 
     public String getCommandSyntax() {

@@ -1,6 +1,7 @@
 package net.blay09.balybot.module;
 
 import lombok.Data;
+import net.blay09.balybot.impl.api.BotImplementation;
 import net.blay09.balybot.impl.api.Channel;
 import net.blay09.balybot.impl.api.Server;
 
@@ -16,5 +17,9 @@ public class ModuleContext {
 	public ModuleContext(Channel channel) {
 		this.server = channel.getServer();
 		this.channel = channel;
+	}
+
+	public BotImplementation getImplementation() {
+		return server.getImplementation();
 	}
 }

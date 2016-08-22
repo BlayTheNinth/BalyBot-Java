@@ -106,7 +106,7 @@ public class CommandHandler {
     private static BotCommand findCommand(Channel channel, User sender, String message, Module module) {
         Matcher matcher = null;
         for (BotCommand command : module.getCommands()) {
-            if(command.getUserLevelValue() < BalyBot.getUserLevelRegistry().getUserLevel(channel, sender).getLevel()) {
+            if(command.getUserLevelValue() < BalyBot.getUserLevelRegistry(channel.getImplementation()).getUserLevel(channel, sender).getLevel()) {
                 continue;
             }
             if (matcher == null) {

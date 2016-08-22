@@ -48,9 +48,9 @@ public class SetUserLevelCommand extends BotCommand {
 			}
 		}
 
-        UserLevel userLevel = BalyBot.getUserLevelRegistry().fromName(args[1]);
+        UserLevel userLevel = BalyBot.getUserLevelRegistry(channel.getImplementation()).fromName(args[1]);
         if(userLevel == null) {
-            return "Invalid user level '" + args[1] + "'. Valid are: " + StringUtils.join(BalyBot.getUserLevelRegistry().getValidLevels(), ", ");
+            return "Invalid user level '" + args[1] + "'. Valid are: " + StringUtils.join(BalyBot.getUserLevelRegistry(channel.getImplementation()).getValidLevels(), ", ");
         }
 
         if(foundCommand != null) {
