@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class UserLevelRegistry {
 
-	private static final Map<String, UserLevel> userLevelMap = Maps.newHashMap();
+	private final Map<String, UserLevel> userLevelMap = Maps.newHashMap();
 
 	public void register(UserLevel userLevel) {
 		userLevelMap.put(userLevel.getName().toLowerCase(), userLevel);
