@@ -58,7 +58,7 @@ public class BalyBot {
 	@Getter private static final ExpressionLibrary expressionLibrary = new ExpressionLibrary();
 
 	private final Map<String, BotImplementation> implementations = Maps.newHashMap();
-	private final Map<BotImplementation, UserLevelRegistry> userLevelRegistries = Maps.newHashMap();
+	private final Map<String, UserLevelRegistry> userLevelRegistries = Maps.newHashMap();
     private final Map<String, ModuleDef> availableModules = Maps.newHashMap();
 
     public void start() {
@@ -122,7 +122,7 @@ public class BalyBot {
 
 		for(BotImplementation impl : implementations.values()) {
 			UserLevelRegistry userLevelRegistry = new UserLevelRegistry();
-			userLevelRegistries.put(impl, userLevelRegistry);
+			userLevelRegistries.put(impl.getId(), userLevelRegistry);
 			impl.registerUserLevels(userLevelRegistry);
 			impl.start();
 		}
@@ -175,6 +175,6 @@ public class BalyBot {
 	}
 
 	public static UserLevelRegistry getUserLevelRegistry(BotImplementation implementation) {
-		return instance.userLevelRegistries.get(implementation);
+		return instance.userLevelRegistries.get(implementation.getId());
 	}
 }
