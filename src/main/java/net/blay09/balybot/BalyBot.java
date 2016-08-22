@@ -87,6 +87,10 @@ public class BalyBot {
 		}
 		botProperties.saveToFile();
 
+		for(BotImplementation impl : implementations.values()) {
+			userLevelRegistries.put(impl.getId(), new UserLevelRegistry());
+		}
+
 		log.info("Initializing expression library...");
 		for(BotImplementation impl : implementations.values()) {
 			impl.registerExpressions(expressionLibrary);
@@ -121,9 +125,7 @@ public class BalyBot {
 		log.info("Initializing bot implementations...");
 
 		for(BotImplementation impl : implementations.values()) {
-			UserLevelRegistry userLevelRegistry = new UserLevelRegistry();
-			userLevelRegistries.put(impl.getId(), userLevelRegistry);
-			impl.registerUserLevels(userLevelRegistry);
+			impl.registerUserLevels(getUserLevelRegistry(impl));
 			impl.start();
 		}
 
