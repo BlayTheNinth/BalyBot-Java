@@ -221,7 +221,6 @@ var m_smugFaces = [
     "http://blay09.net/bot/smug/z9b28zI.jpg",
     "http://blay09.net/bot/smug/aCwFSAW.png",
     "http://blay09.net/bot/smug/FWXzoWp.jpg",
-    "http://blay09.net/bot/smug/ks5Sx85.png",
     "http://blay09.net/bot/smug/PAWj8tL.jpg",
     "http://blay09.net/bot/smug/ULkpcCy.png",
     "http://blay09.net/bot/smug/ZadImIr.jpg",

@@ -27,7 +27,6 @@ function commands() {
 }
 
 var m_lewdFaces = [
-    "http://blay09.net/bot/lewd/001.gif",
     "http://blay09.net/bot/lewd/01QllrK.png",
     "http://blay09.net/bot/lewd/193.png",
     "http://blay09.net/bot/lewd/4bf.jpg",
@@ -67,7 +66,6 @@ var m_lewdFaces = [
     "http://blay09.net/bot/lewd/fe8.png",
     "http://blay09.net/bot/lewd/ipKr8zG.gif",
     "http://blay09.net/bot/lewd/L0xyKWD.png",
-    "http://blay09.net/bot/lewd/Q4FKsUq.gif",
     "http://blay09.net/bot/lewd/SyRFPmy.gif"
 ];
 
