@@ -33,6 +33,11 @@ public class ScriptManager {
     }
 
     private final Multimap<String, ScriptEventHandler> callbacks = ArrayListMultimap.create();
+	private final ScriptTimerHandler timerHandler = new ScriptTimerHandler();
+
+	public void start() {
+		timerHandler.start();
+	}
 
     public Collection<ModuleDef> loadModules() {
         List<ModuleDef> modules = Lists.newArrayList();
@@ -94,5 +99,13 @@ public class ScriptManager {
 
 	public Module getCurrentScript() {
 		return currentScript;
+	}
+
+	public void stop() {
+		timerHandler.stop();
+	}
+
+	public ScriptTimerHandler getTimerHandler() {
+		return timerHandler;
 	}
 }

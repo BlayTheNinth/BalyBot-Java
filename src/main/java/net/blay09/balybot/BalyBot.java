@@ -129,6 +129,8 @@ public class BalyBot {
 			impl.start();
 		}
 
+		ScriptManager.getInstance().start();
+
 		log.info("BalyBot is now running.");
     }
 
@@ -140,6 +142,7 @@ public class BalyBot {
 
 	public void stop() {
 		implementations.values().forEach(BotImplementation::stop);
+		ScriptManager.getInstance().stop();
 	}
 
 	private void registerImplementation(BotImplementation impl) {
