@@ -8,6 +8,11 @@ function module() {
 
 function configure() {
     return [
+        {
+            name: "userlevel.token",
+            value: "broadcaster",
+            desc: "The minimum userlevel required to run the !token command."
+        }
     ];
 }
 
