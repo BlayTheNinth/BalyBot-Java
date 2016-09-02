@@ -10,7 +10,7 @@ function configure() {
     return [
         {
             name: "userlevel.raffle",
-            value: "mod",
+            value: "moderator",
             desc: "The minimum userlevel required to run the !raffle command."
         }
     ];

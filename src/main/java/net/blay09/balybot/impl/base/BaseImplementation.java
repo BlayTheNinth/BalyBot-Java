@@ -67,8 +67,7 @@ public class BaseImplementation implements BotImplementation {
 
 	@Override
 	public void registerUserLevels(UserLevelRegistry registry) {
-		registry.register(DefaultUserLevels.SUPER_USER);
-		registry.register(DefaultUserLevels.ALL);
+		DefaultUserLevels.registerAll(registry);
 	}
 
 	@Override

@@ -10,7 +10,7 @@ function configure() {
     return [
         {
             name: "userlevel.token",
-            value: "broadcaster",
+            value: "channel_owner",
             desc: "The minimum userlevel required to run the !token command."
         }
     ];

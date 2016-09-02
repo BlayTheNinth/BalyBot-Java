@@ -25,7 +25,7 @@ function configure() {
         },
         {
             name: "userlevel.badlink",
-            value: "mod",
+            value: "moderator",
             desc: "The userlevel required to run the !badlink command."
         }
     ];

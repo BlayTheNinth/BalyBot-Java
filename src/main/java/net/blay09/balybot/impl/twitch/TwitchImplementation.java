@@ -62,8 +62,6 @@ public class TwitchImplementation implements BotImplementation {
 
 	@Override
 	public void registerUserLevels(UserLevelRegistry registry) {
-		registry.register(TwitchUserLevels.BROADCASTER);
-		registry.register(TwitchUserLevels.MOD);
 		registry.register(TwitchUserLevels.SUB);
 		registry.register(TwitchUserLevels.TURBO);
 	}
@@ -199,4 +197,8 @@ public class TwitchImplementation implements BotImplementation {
 		return user.getNick().toLowerCase().equals(channel.getName().toLowerCase().substring(1));
 	}
 
+	@Override
+	public boolean isModerator(Channel channel, User user) {
+		return ((TwitchUser) user.getBackend()).isMod();
+	}
 }

@@ -38,6 +38,8 @@ public class DiscordBotListener extends ListenerAdapter {
 		impl.joinServer(event.getGuild().getId());
 	}
 
+
+
 	@Override
 	public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
 		Channel channel = DiscordImplementation.getChannel(event.getGuild(), event.getChannel());

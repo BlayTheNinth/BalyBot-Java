@@ -13,6 +13,7 @@ import net.blay09.balybot.impl.api.Server;
 import net.blay09.balybot.impl.api.User;
 import net.dv8tion.jda.JDA;
 import net.dv8tion.jda.JDABuilder;
+import net.dv8tion.jda.Permission;
 import net.dv8tion.jda.entities.Guild;
 import net.dv8tion.jda.entities.TextChannel;
 import net.dv8tion.jda.events.message.guild.GuildMessageReceivedEvent;
@@ -20,6 +21,7 @@ import net.dv8tion.jda.events.message.guild.GuildMessageReceivedEvent;
 import javax.security.auth.login.LoginException;
 import java.sql.SQLException;
 import java.util.Map;
+import java.util.Optional;
 
 @Log4j2
 public class DiscordImplementation implements BotImplementation {
@@ -174,5 +176,24 @@ public class DiscordImplementation implements BotImplementation {
 	@Override
 	public boolean areChannelsShared() {
 		return true;
+	}
+
+	@Override
+	public boolean isSuperUser(Channel channel, User user) {
+		return false;
+	}
+
+	@Override
+	public boolean isChannelOwner(Channel channel, User user) {
+		Guild guild = jda.getGuildById(channel.getServer().getServerHost());
+		Optional<TextChannel> textChannel = guild.getTextChannels().stream().filter(c -> c.getName().equals(channel.getName())).findFirst();
+		return textChannel.isPresent() && textChannel.get().checkPermission((net.dv8tion.jda.entities.User) user.getBackend(), Permission.ADMINISTRATOR);
+	}
+
+	@Override
+	public boolean isModerator(Channel channel, User user) {
+		Guild guild = jda.getGuildById(channel.getServer().getServerHost());
+		Optional<TextChannel> textChannel = guild.getTextChannels().stream().filter(c -> c.getName().equals(channel.getName())).findFirst();
+		return textChannel.isPresent() && textChannel.get().checkPermission((net.dv8tion.jda.entities.User) user.getBackend(), Permission.MESSAGE_MANAGE);
 	}
 }

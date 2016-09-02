@@ -8,6 +8,7 @@ import net.blay09.balybot.impl.api.BotImplementation;
 import net.blay09.balybot.impl.api.UserLevel;
 import net.blay09.balybot.impl.base.BaseImplementation;
 import net.blay09.balybot.impl.UserLevelRegistry;
+import net.blay09.balybot.impl.base.DefaultUserLevels;
 import net.blay09.balybot.impl.discord.DiscordImplementation;
 import net.blay09.balybot.impl.twitch.TwitchImplementation;
 import net.blay09.balybot.module.ModuleDef;
@@ -125,7 +126,9 @@ public class BalyBot {
 		log.info("Initializing bot implementations...");
 
 		for(BotImplementation impl : implementations.values()) {
-			impl.registerUserLevels(getUserLevelRegistry(impl));
+			UserLevelRegistry userLevelRegistry = getUserLevelRegistry(impl);
+			DefaultUserLevels.registerAll(userLevelRegistry);
+			impl.registerUserLevels(userLevelRegistry);
 			impl.start();
 		}
 

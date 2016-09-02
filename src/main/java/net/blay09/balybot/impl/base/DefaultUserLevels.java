@@ -1,5 +1,6 @@
 package net.blay09.balybot.impl.base;
 
+import net.blay09.balybot.impl.UserLevelRegistry;
 import net.blay09.balybot.impl.api.Channel;
 import net.blay09.balybot.impl.api.User;
 import net.blay09.balybot.impl.api.UserLevel;
@@ -20,6 +21,13 @@ public class DefaultUserLevels {
 		}
 	};
 
+	public static final UserLevel MODERATOR = new UserLevel("moderator", 300) {
+		@Override
+		public boolean passes(Channel channel, User user) {
+			return channel.getImplementation().isModerator(channel, user);
+		}
+	};
+
 	public static final UserLevel ALL = new UserLevel("all", 0) {
 		@Override
 		public boolean passes(Channel channel, User user) {
@@ -27,4 +35,10 @@ public class DefaultUserLevels {
 		}
 	};
 
+	public static void registerAll(UserLevelRegistry registry) {
+		registry.register(SUPER_USER);
+		registry.register(CHANNEL_OWNER);
+		registry.register(MODERATOR);
+		registry.register(ALL);
+	}
 }
