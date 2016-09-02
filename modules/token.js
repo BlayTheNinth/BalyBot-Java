@@ -47,7 +47,7 @@ function token(channel, user, args) {
         token = create_token();
         rs = JDatabase.executeQuery("SELECT channel_fk FROM api_tokens WHERE token = '" + token + "' LIMIT 1;");
     }
-    JDatabase.execute("REPLACE INTO api_tokens (channel_fk, token) VALUES (" + channel.getId() + ", " + token + ")");
+    JDatabase.execute("REPLACE INTO api_tokens (channel_fk, token) VALUES (" + channel.getId() + ", '" + token + "')");
     JBalyBot.whisper(channel, user.getNick(), "Your new BalyBot API token is: " + token);
     return user.getNick() + ": You've been whispered a new API token. Make sure you are able to receive whispers from this bot account! Also, do not share the API token on stream.";
 }
