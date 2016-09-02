@@ -37,7 +37,7 @@ function commands() {
  * @returns {string}
  */
 function song(channel, user, args) {
-    var rs = JDatabase.executeQuery("SELECT song FROM channel_songs WHERE = " + channel.getId() + " LIMIT 1;");
+    var rs = JDatabase.executeQuery("SELECT song FROM channel_songs WHERE channel_fk = " + channel.getId() + " LIMIT 1;");
     if(rs.next()) {
         var song = rs.getString("song");
         rs.close();
