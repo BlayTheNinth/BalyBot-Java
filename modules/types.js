@@ -65,7 +65,13 @@ JResultSet.prototype = {
     /**
      * @returns {boolean}
      */
-    next: function(){return false;}
+    next: function(){return false;},
+
+    /**
+     * @param fieldName : string
+     * @returns {string}
+     */
+    getString: function(fieldName) {return "";}
 };
 
 var JBalyBot = {
