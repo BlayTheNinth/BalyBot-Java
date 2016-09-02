@@ -28,7 +28,7 @@ public class TwitchUserLevels {
 		}
 	};
 
-	public static final UserLevel TURBO = new UserLevel("sub", 100) {
+	public static final UserLevel TURBO = new UserLevel("turbo", 100) {
 		@Override
 		public boolean passes(Channel channel, User user) {
 			return ((TwitchUser) user.getBackend()).isTurbo();
