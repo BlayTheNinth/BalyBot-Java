@@ -49,7 +49,11 @@ public class ScriptManager {
                     ScriptEngine engine = factory.getEngineByName("JavaScript");
                     loadBindings(engine);
                     engine.eval(new FileReader(file));
-                    modules.add(ScriptModuleDef.fromScript((Invocable) engine));
+					ModuleDef moduleDef = ScriptModuleDef.fromScript((Invocable) engine);
+					try {
+						((Invocable) engine).invokeFunction("preInit");
+					} catch (NoSuchMethodException ignored) {}
+                    modules.add(moduleDef);
                 } catch (ScriptException | FileNotFoundException | NoSuchMethodException e) {
                     log.error(e);
                 }

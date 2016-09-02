@@ -37,12 +37,50 @@ var JDate = {
     getTimeZoneName: function(timeZone){return "";}
 };
 
+var JDatabase = {
+    /**
+     * @param sql : string
+     */
+    execute: function(sql){},
+
+    /**
+     * @param sql : string
+     * @returns {JResultSet}
+     */
+    executeQuery: function(sql){return null;},
+
+    /**
+     * @param tableName : string
+     * @param withId : boolean
+     * @param fieldArr : string[]
+     */
+    createTable: function(tableName, withId, fieldArr) {
+
+    }
+};
+
+var JResultSet = {
+};
+JResultSet.prototype = {
+    /**
+     * @returns {boolean}
+     */
+    next: function(){return false;}
+};
+
 var JBalyBot = {
     /**
-     * @param channel : object
+     * @param channel : JChannel
      * @param text : string
      */
     message: function(channel, text){},
+
+    /**
+     * @param channel : JChannel
+     * @param user : string
+     * @param text : string
+     */
+    whisper: function(channel, user, text) {},
 
     /**
      * @param channel : JChannel
@@ -99,9 +137,13 @@ JUser.prototype = {
      */
     getNick: function(){return "";}
 };
+
 var JChannel = {};
 JChannel.prototype = {
-    
+    /**
+     * @returns {number}
+     */
+    getId: function(){return 0;}
 };
 
 var JStreamData = {};

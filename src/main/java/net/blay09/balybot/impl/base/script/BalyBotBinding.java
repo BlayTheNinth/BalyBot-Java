@@ -11,6 +11,10 @@ public class BalyBotBinding {
         channel.getChatProvider().sendMessage(channel, message);
     }
 
+    public void whisper(Channel channel, String targetUser, String message) {
+        channel.getChatProvider().sendDirectMessage(targetUser, message);
+    }
+
     public int getUserLevel(Channel channel, User user) {
         return BalyBot.getUserLevelRegistry(channel.getImplementation()).getUserLevel(channel, user).getLevel();
     }

@@ -12,6 +12,7 @@ import net.blay09.balybot.impl.UserLevelRegistry;
 import net.blay09.balybot.impl.api.ChatProvider;
 import net.blay09.balybot.impl.api.BotImplementation;
 import net.blay09.balybot.impl.base.script.BalyBotBinding;
+import net.blay09.balybot.impl.base.script.DatabaseBinding;
 import net.blay09.balybot.impl.base.script.DateBinding;
 import net.blay09.balybot.impl.base.script.ErrorBinding;
 import net.blay09.balybot.impl.base.script.StringBinding;
@@ -84,6 +85,7 @@ public class BaseImplementation implements BotImplementation {
 		bindings.put("JDate", new DateBinding());
 		bindings.put("JError", new ErrorBinding());
 		bindings.put("JBalyBot", new BalyBotBinding());
+		bindings.put("JDatabase", new DatabaseBinding());
 	}
 
 	@Override
