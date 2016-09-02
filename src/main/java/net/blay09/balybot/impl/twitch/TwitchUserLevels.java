@@ -10,7 +10,7 @@ public class TwitchUserLevels {
 	public static final UserLevel BROADCASTER = new UserLevel("broadcaster", 400) {
 		@Override
 		public boolean passes(Channel channel, User user) {
-			return user.getNick().toLowerCase().equals(channel.getName());
+			return ("#" + user.getNick().toLowerCase()).equals(channel.getName());
 		}
 	};
 
