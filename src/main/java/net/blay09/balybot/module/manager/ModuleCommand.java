@@ -2,6 +2,7 @@ package net.blay09.balybot.module.manager;
 
 import net.blay09.balybot.BalyBot;
 import net.blay09.balybot.ChannelManager;
+import net.blay09.balybot.ServerManager;
 import net.blay09.balybot.impl.api.Channel;
 import net.blay09.balybot.impl.api.User;
 import net.blay09.balybot.impl.base.DefaultUserLevels;
@@ -33,6 +34,12 @@ public class ModuleCommand extends BotCommand {
 			if(args.length > 1) {
 				if(args[1].equals("active")) {
 					StringBuilder sb = new StringBuilder();
+					for(Module module : ServerManager.getModules(channel.getServer())) {
+						if(sb.length() > 0) {
+							sb.append(", ");
+						}
+						sb.append(module.getId()).append(" (server)");
+					}
 					for(Module module : ChannelManager.getModules(channel)) {
 						if(sb.length() > 0) {
 							sb.append(", ");
@@ -62,10 +69,18 @@ public class ModuleCommand extends BotCommand {
 		switch (state) {
 			case "on":
 				ChannelManager.setChannelString(channel, moduleId + ".prefix", prefix);
-				ChannelManager.activateModule(channel, moduleId);
+				if(channel.getImplementation().areChannelsShared()) {
+					ServerManager.activateModule(channel.getServer(), moduleId);
+				} else {
+					ChannelManager.activateModule(channel, moduleId);
+				}
 				return "Module activated: " + moduleId;
 			case "off":
-				ChannelManager.deactivateModule(channel, moduleId);
+				if(channel.getImplementation().areChannelsShared()) {
+					ServerManager.deactivateModule(channel.getServer(), moduleId);
+				} else {
+					ChannelManager.deactivateModule(channel, moduleId);
+				}
 				return "Module deactivated: " + moduleId;
 			default:
 				return "Invalid parameters for module command. Syntax: " + getCommandSyntax();
