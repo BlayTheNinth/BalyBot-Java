@@ -29,7 +29,7 @@ public class Database {
 			connection = DriverManager.getConnection("jdbc:sqlite:" + BaseImplementation.getDatabaseName());
 		} else if(BaseImplementation.getDatabaseType() == Type.MYSQL) {
 			Class.forName("com.mysql.cj.jdbc.Driver");
-			connection = DriverManager.getConnection("jdbc:mysql://" + BaseImplementation.getDatabaseHost() + "/" + BaseImplementation.getDatabaseName() + "?user=" + BaseImplementation.getDatabaseUser() + "&password=" + BaseImplementation.getDatabasePassword() + "&useSSL=false&serverTimezone=UTC&autoReconnect=true");
+			connection = DriverManager.getConnection("jdbc:mysql://" + BaseImplementation.getDatabaseHost() + "/" + BaseImplementation.getDatabaseName() + "?user=" + BaseImplementation.getDatabaseUser() + "&password=" + BaseImplementation.getDatabasePassword() + "&useSSL=false&serverTimezone=UTC&autoReconnect=true&characterEncoding=utf8");
 		} else {
 			throw new RuntimeException("Unknown database type specified, aborting");
 		}
