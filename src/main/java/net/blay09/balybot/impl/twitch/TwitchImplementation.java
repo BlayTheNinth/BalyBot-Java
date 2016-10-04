@@ -31,7 +31,7 @@ public class TwitchImplementation implements BotImplementation {
 	public static final String TWITCH_HOST = "irc.twitch.tv";
 
 	private static final Map<String, Channel> channels = Maps.newHashMap();
-	private final TwitchBotListener listener = new TwitchBotListener();
+	private final TwitchBotListener listener = new TwitchBotListener(this);
 
 	private boolean isEnabled;
 	private String username;
@@ -41,6 +41,8 @@ public class TwitchImplementation implements BotImplementation {
 
 	private TMIClient client;
 	private TwitchChatProvider chatProvider;
+
+	private boolean isStopped;
 
 	@Override
 	public String getId() {
@@ -110,22 +112,33 @@ public class TwitchImplementation implements BotImplementation {
 			if(!token.startsWith("oauth:")) {
 				token = "oauth:" + token;
 			}
-			client = new TMIClient(TMIClient.defaultBuilder().nick(username).password(token).debug(false).build(), listener);
-			if(!BalyBot.SIMULATED) {
-				client.connect();
-			}
+			reconnect();
 			for(Channel channel : ChannelManager.getChannels()) {
 				if(channel.getImplementation() == this) {
 					channels.put(channel.getName(), channel);
 				}
 			}
-			chatProvider = new TwitchChatProvider(client);
 		}
+	}
+
+	public void reconnect() {
+		if(isStopped) {
+			return;
+		}
+		if(client != null) {
+			client.disconnect();
+		}
+		client = new TMIClient(TMIClient.defaultBuilder().nick(username).password(token).debug(false).build(), listener);
+		if(!BalyBot.SIMULATED) {
+			client.connect();
+		}
+		chatProvider = new TwitchChatProvider(client);
 	}
 
 	@Override
 	public void stop() {
 		client.disconnect();
+		isStopped = true;
 	}
 
 	public static User createUserFrom(TwitchUser twitchUser) {

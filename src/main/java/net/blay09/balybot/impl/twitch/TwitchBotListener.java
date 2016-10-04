@@ -1,6 +1,7 @@
 package net.blay09.balybot.impl.twitch;
 
 import lombok.extern.log4j.Log4j2;
+import net.blay09.balybot.BalyBot;
 import net.blay09.balybot.ChannelManager;
 import net.blay09.balybot.command.BotCommand;
 import net.blay09.balybot.command.CommandHandler;
@@ -18,7 +19,13 @@ import java.util.regex.Matcher;
 @Log4j2
 public class TwitchBotListener extends TMIAdapter {
 
-    @Override
+	private final TwitchImplementation impl;
+
+	public TwitchBotListener(TwitchImplementation impl) {
+		this.impl = impl;
+	}
+
+	@Override
     public void onConnected(TMIClient client) {
 		ChannelManager.getChannels().stream()
 				.filter(channel -> channel.getImplementation().getClass() == TwitchImplementation.class)
@@ -74,4 +81,10 @@ public class TwitchBotListener extends TMIAdapter {
     public void onHosted(TMIClient client, String channel, String username, int viewers) {
         ScriptManager.getInstance().publishEvent(TwitchEvents.CHANNEL_HOSTED, channel, username, viewers);
     }
+
+	@Override
+	public void onDisconnected(TMIClient client) {
+		impl.reconnect();
+	}
+
 }
