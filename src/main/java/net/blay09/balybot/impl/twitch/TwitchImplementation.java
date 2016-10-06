@@ -157,6 +157,9 @@ public class TwitchImplementation implements BotImplementation {
 		} else if(cmd.startsWith("twitch.part ")) {
 			partChannel(cmd.substring(12));
 			return true;
+		} else if(cmd.startsWith("twitch.dc")) {
+			client.send("#blay09", "/disconnect");
+			return true;
 		}
 		return false;
 	}
