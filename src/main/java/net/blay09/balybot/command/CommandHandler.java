@@ -106,10 +106,8 @@ public class CommandHandler {
     private static BotCommand findCommand(Channel channel, User sender, String message, Module module) {
         Matcher matcher = null;
         for (BotCommand command : module.getCommands()) {
-            if(!sender.getNick().equals("blay09")) { // TODO TEMPORARY TEST CODE UNTIL THERE'S BETTER PERMISSION HANDLING & WEB PANEL
-                if (command.getUserLevelValue() > BalyBot.getUserLevelRegistry(channel.getImplementation()).getUserLevel(channel, sender).getLevel()) {
-                    continue;
-                }
+            if (command.getUserLevelValue() > BalyBot.getUserLevelRegistry(channel.getImplementation()).getUserLevel(channel, sender).getLevel()) {
+                continue;
             }
             if (matcher == null) {
                 matcher = command.getPattern().matcher(message);

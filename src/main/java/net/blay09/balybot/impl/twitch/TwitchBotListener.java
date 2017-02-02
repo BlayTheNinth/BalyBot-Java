@@ -1,7 +1,6 @@
 package net.blay09.balybot.impl.twitch;
 
 import lombok.extern.log4j.Log4j2;
-import net.blay09.balybot.BalyBot;
 import net.blay09.balybot.ChannelManager;
 import net.blay09.balybot.command.BotCommand;
 import net.blay09.balybot.command.CommandHandler;
@@ -12,6 +11,7 @@ import net.blay09.balybot.impl.twitch.script.TwitchEvents;
 import net.blay09.balybot.script.ScriptManager;
 import net.blay09.javatmi.TMIAdapter;
 import net.blay09.javatmi.TMIClient;
+import net.blay09.javatmi.TwitchMessage;
 import net.blay09.javatmi.TwitchUser;
 
 import java.util.regex.Matcher;
@@ -38,14 +38,14 @@ public class TwitchBotListener extends TMIAdapter {
 	}
 
 	@Override
-    public void onChatMessage(TMIClient client, String channelName, TwitchUser twitchUser, String message) {
-		log.info(twitchUser.getDisplayName() + ": " + message);
+	public void onChatMessage(TMIClient client, String channelName, TwitchUser twitchUser, TwitchMessage message) {
+		log.info(twitchUser.getDisplayName() + ": " + message.getMessage());
 		Channel channel = TwitchImplementation.getChannel(channelName);
 		User user = TwitchImplementation.createUserFrom(twitchUser);
         ScriptManager.getInstance().publishEvent(DefaultEvents.CHANNEL_CHAT, channel, user, message);
-        BotCommand command = CommandHandler.findCommand(channel, user, message);
+        BotCommand command = CommandHandler.findCommand(channel, user, message.getMessage());
         if (command != null) {
-            Matcher matcher = command.getPattern().matcher(message);
+            Matcher matcher = command.getPattern().matcher(message.getMessage());
             if (matcher.find()) {
                 String[] args;
                 if (matcher.groupCount() > 0 && matcher.group(1) != null && matcher.group(1).trim().length() > 0) {
@@ -53,7 +53,7 @@ public class TwitchBotListener extends TMIAdapter {
                 } else {
                     args = new String[0];
                 }
-                String result = command.execute(channel, user, message, args, 0, false);
+                String result = command.execute(channel, user, message.getMessage(), args, 0, false);
                 if (result != null) {
                     if (result.startsWith("/") || result.startsWith(".")) {
                         if (!result.startsWith("/me") && !result.startsWith(".me")) {
@@ -61,7 +61,7 @@ public class TwitchBotListener extends TMIAdapter {
                         }
                     }
                     if (command.getWhisperTo() != null) {
-						String whisperTarget = CommandHandler.resolveVariables(command.getWhisperTo(), command, channel, user, message, args, 0);
+						String whisperTarget = CommandHandler.resolveVariables(command.getWhisperTo(), command, channel, user, message.getMessage(), args, 0);
 						if(whisperTarget.contains("{") || whisperTarget.contains("}")) {
 							whisperTarget = user.getDisplayName();
 						}
