@@ -164,4 +164,9 @@ public class ChannelManager {
 		return channelsByServer.get(server);
 	}
 
+	public static void postInitModules() {
+		for(Module module : activeModules.values()) {
+			module.registerCommands();
+		}
+	}
 }

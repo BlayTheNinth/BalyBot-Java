@@ -126,4 +126,10 @@ public class ServerManager {
 	public static Collection<Server> getServers() {
 		return servers.values();
 	}
+
+	public static void postInitModules() {
+		for(Module module : activeModules.values()) {
+			module.registerCommands();
+		}
+	}
 }

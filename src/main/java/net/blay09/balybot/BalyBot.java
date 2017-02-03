@@ -132,6 +132,9 @@ public class BalyBot {
 			impl.start();
 		}
 
+		ServerManager.postInitModules();
+		ChannelManager.postInitModules();
+
 		ScriptManager.getInstance().start();
 
 		log.info("BalyBot is now running.");

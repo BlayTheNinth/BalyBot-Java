@@ -19,14 +19,13 @@ public class Module {
     @Getter
     private final ModuleDef definition;
 
+    private final ModuleContext context;
+
     public Module(ModuleDef definition, ModuleContext context) {
         this.definition = definition;
+        this.context = context;
         if (definition instanceof ScriptModuleDef) {
             ((ScriptModuleDef) definition).createEventHandlers(this, context);
-        }
-        commands.addAll(definition.createCommands(this, context));
-        if (definition.getCommandSorting() != null) {
-            Collections.sort(commands, definition.getCommandSorting());
         }
     }
 
@@ -38,6 +37,13 @@ public class Module {
         return commands;
     }
 
+    public void registerCommands() {
+        commands.addAll(definition.createCommands(this, context));
+        if (definition.getCommandSorting() != null) {
+            commands.sort(definition.getCommandSorting());
+        }
+    }
+
 	public void unregisterCommand(BotCommand command) {
 		commands.remove(command);
 	}
@@ -45,7 +51,7 @@ public class Module {
 	public void registerCommand(BotCommand command) {
 		commands.add(command);
         if(definition.getCommandSorting() != null) {
-            Collections.sort(commands, definition.getCommandSorting());
+            commands.sort(definition.getCommandSorting());
         }
 	}
 

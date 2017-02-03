@@ -39,7 +39,7 @@ public class TwitchBotListener extends TMIAdapter {
 
 	@Override
 	public void onChatMessage(TMIClient client, String channelName, TwitchUser twitchUser, TwitchMessage message) {
-		log.info(twitchUser.getDisplayName() + ": " + message.getMessage());
+		log.info("[{}] {}: {}", channelName, twitchUser.getDisplayName(), message.getMessage());
 		Channel channel = TwitchImplementation.getChannel(channelName);
 		User user = TwitchImplementation.createUserFrom(twitchUser);
         ScriptManager.getInstance().publishEvent(DefaultEvents.CHANNEL_CHAT, channel, user, message);
