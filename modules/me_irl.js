@@ -10,7 +10,7 @@ function configure() {
     return [
         {
             name: "message",
-            value: "fuck_you_irl.",
+            value: "fuck_you_irl",
             desc: "im serious"
         }
     ];
